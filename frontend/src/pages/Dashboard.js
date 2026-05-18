@@ -56,7 +56,7 @@ const Dashboard = () => {
                         <ul style={styles.list}>
                             {cards.map((card, index) => (
                                 <li key={index} style={styles.listItem}>
-                                    https://amt-nfc-system-q1zi.vercel.app/activate/{card.shortCode}
+                                   https://amt-nfc-system.onrender.com/{card.shortCode}
                                 </li>
                             ))}
                         </ul>
