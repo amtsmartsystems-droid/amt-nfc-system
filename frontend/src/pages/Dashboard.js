@@ -14,8 +14,7 @@ const Dashboard = () => {
             const token = localStorage.getItem('token');
             
             // إرسال الطلب للخادم
-            const res = await axios.post('https://amt-nfc-system.onrender.com/api/cards/generate', 
-                { count: Number(count) },
+            const res = await axios.post('https://amt-nfc-system.onrender.com/api/cards/generate',
                 { headers: { Authorization: `Bearer ${token}` } }
             );
             
@@ -56,7 +55,7 @@ const Dashboard = () => {
                         <ul style={styles.list}>
                             {cards.map((card, index) => (
                                 <li key={index} style={styles.listItem}>
-                                    https://amt-nfc-system.onrender.com/{card.shortCode}
+                                    https://amt-nfc-system-q1zi.vercel.app/activate/${card.shortCode}
                                 </li>
                             ))}
                         </ul>
