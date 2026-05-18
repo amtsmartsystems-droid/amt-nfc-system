@@ -15,7 +15,7 @@ const ActivateCard = () => {
         e.preventDefault();
         try {
             // 1. تسجيل حساب جديد للعميل في النظام
-            const authRes = await axios.post('https://amt-nfc-system.onrender.com', {
+            const authRes = await axios.post('https://amt-nfc-system.onrender.com/api/auth/register', {
                 name,
                 email,
                 password,
