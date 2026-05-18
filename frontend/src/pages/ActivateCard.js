@@ -15,7 +15,7 @@ const ActivateCard = () => {
         e.preventDefault();
         try {
             // 1. تسجيل حساب جديد للعميل في النظام
-            const authRes = await axios.post('http://localhost:5000/api/auth/register', {
+            const authRes = await axios.post('https://amt-nfc-system.onrender.com', {
                 name,
                 email,
                 password,
@@ -25,7 +25,7 @@ const ActivateCard = () => {
             const token = authRes.data.token;
 
             // 2. تفعيل البطاقة وربطها بحسابه والرابط الذي أدخله
-            await axios.post('http://localhost:5000/api/cards/activate', 
+            await axios.post('https://amt-nfc-system.onrender.com/api/cards/activate', 
                 { shortCode, destinationUrl },
                 { headers: { Authorization: `Bearer ${token}` } }
             );
