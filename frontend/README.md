@@ -9,7 +9,7 @@ In the project directory, you can run:
 ### `npm start`
 
 Runs the app in the development mode.\
-Open [res.redirect(`https://amt-nfc-system-q1zi.vercel.app/activate/${shortCode}`);](res.redirect(`https://amt-nfc-system-q1zi.vercel.app/activate/${shortCode}`);) to view it in your browser.
+Open [res.redirect(`https://amt-nfc-system-q1zi.vercel.app/activate/${shortCode}`);(`https://amt-nfc-system-q1zi.vercel.app/activate/${shortCode}`);](res.redirect(`https://amt-nfc-system-q1zi.vercel.app/activate/${shortCode}`);(`https://amt-nfc-system-q1zi.vercel.app/activate/${shortCode}`);) to view it in your browser.
 
 The page will reload when you make changes.\
 You may also see any lint errors in the console.
