@@ -51,7 +51,6 @@ const THEMES = [
   { id:"cafe",          label:"مقهى منيمل",       icon:"Coffee"          },
   { id:"cafe1",         label:"كافيه رايق ☕",     icon:"Bean"            },
   { id:"gastro",        label:"غاسترو بار 🍺",    icon:"UtensilsCrossed" },
-  { id:"business_card", label:"بطاقة AMT 💼",     icon:"CreditCard"      },
 ];
 
 // ─────────────────────────────────────────────────────────────────────
@@ -113,11 +112,9 @@ function PageContent() {
 
   const up = (key, val) => setSiteData(p => ({...p, [key]: val}));
 
-  // Switch theme — also swap color defaults and set cardType
+  // Switch theme — also swap color defaults
   const switchTheme = (id) => {
     setTheme(id);
-    // business_card has its own cardType; all others are 'restaurant'
-    setCardType(id === 'business_card' ? 'business_card' : 'restaurant');
     if (DEFAULT_COLORS[id]) setSiteColors(DEFAULT_COLORS[id]);
   };
 
@@ -408,6 +405,32 @@ function PageContent() {
                   تحميل
                 </button>
               </div>
+
+              {/* NEW: Card Type Selector */}
+              <div className="mt-4 mb-2">
+                <Label>نوع البطاقة (Card Type)</Label>
+                <div className="flex p-1 bg-black/40 rounded-xl border border-white/5 mt-1.5">
+                  <button
+                    onClick={() => {
+                        setCardType('restaurant');
+                        if (theme === 'business_card') setTheme('restaurant');
+                    }}
+                    className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-[11px] font-bold transition-all ${cardType === 'restaurant' ? 'bg-yellow-400/20 text-yellow-400 shadow-sm' : 'text-slate-500 hover:text-white'}`}
+                  >
+                    🍔 منيو مطعم
+                  </button>
+                  <button
+                    onClick={() => {
+                        setCardType('business_card');
+                        setTheme('business_card');
+                    }}
+                    className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-[11px] font-bold transition-all ${cardType === 'business_card' ? 'bg-yellow-400/20 text-yellow-400 shadow-sm' : 'text-slate-500 hover:text-white'}`}
+                  >
+                    💳 بطاقة أعمال
+                  </button>
+                </div>
+              </div>
+
               <button
                 onClick={handleSavePublish}
                 disabled={saving || (isSuspended && currentUserRole !== 'Super_Admin')}
@@ -436,19 +459,21 @@ function PageContent() {
             </div>
 
             {/* Theme Switcher */}
-            <div className="grid grid-cols-2 gap-2">
-              {THEMES.map(th => {
-                const Ic = LucideIcons[th.icon]||LucideIcons.Layout;
-                const active = theme === th.id;
-                return (
-                  <button key={th.id} onClick={()=>switchTheme(th.id)}
-                    className={`flex items-center justify-center gap-2 py-2.5 rounded-xl text-[12px] font-bold border transition-all ${active?"border-yellow-400/50 bg-yellow-400/10 text-yellow-400":"border-white/8 bg-white/3 text-slate-500 hover:text-slate-300 hover:border-white/15"}`}>
-                    <Ic size={14} /> {th.label}
-                    {active && <span className="text-[9px] text-yellow-400/70">✓</span>}
-                  </button>
-                );
-              })}
-            </div>
+            {cardType === 'restaurant' && (
+              <div className="grid grid-cols-2 gap-2 mt-4">
+                {THEMES.map(th => {
+                  const Ic = LucideIcons[th.icon]||LucideIcons.Layout;
+                  const active = theme === th.id;
+                  return (
+                    <button key={th.id} onClick={()=>switchTheme(th.id)}
+                      className={`flex items-center justify-center gap-2 py-2.5 rounded-xl text-[12px] font-bold border transition-all ${active?"border-yellow-400/50 bg-yellow-400/10 text-yellow-400":"border-white/8 bg-white/3 text-slate-500 hover:text-slate-300 hover:border-white/15"}`}>
+                      <Ic size={14} /> {th.label}
+                      {active && <span className="text-[9px] text-yellow-400/70">✓</span>}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
           </div>
 
           {/* Tab Nav */}
