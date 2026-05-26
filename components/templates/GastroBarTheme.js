@@ -178,16 +178,7 @@ export default function GastroBarTheme({ cardId, siteData, siteColors, lang = "e
       </section>
 
 
-      {/* ══════════════════════════════════════════
-          ABOUT SECTION
-      ══════════════════════════════════════════ */}
-      <section className="px-5 pt-6 pb-8" style={{ borderTop:`1px solid rgba(255,255,255,0.06)` }}>
-        <STitle>{t(`${name} — THIS IS`, `${name} — هذا هو`)}</STitle>
-        <FeatureItem text={t("A gastropub dedicated to craft beers and cider. A huge selection of styles and exclusive varieties.", "غاستروبار متخصص في البيرة الحرفية. تشكيلة ضخمة من الأنواع الحصرية.")} />
-        <FeatureItem text={t("A variety of snacks and main courses lets you have a bite or enjoy dinner with company.", "تنوع في المقبلات والأطباق الرئيسية يتيح لك تناول وجبة خفيفة أو عشاء مع الأصحاب.")} />
-        <FeatureItem text={t("Tastings and gastro-dinners with craft beer and cider producers.", "جلسات تذوق وعشاء غاسترونومي مع منتجي البيرة الحرفية والسيدر.")} />
-        <FeatureItem text={t("A warm atmosphere for those who appreciate good drinks with friends.", "أجواء دافئة لمن يقدّر المشروبات الجيدة برفقة الأصدقاء.")} />
-      </section>
+
 
       {/* ══════════════════════════════════════════
           FOOD SECTION — photo + menu button
