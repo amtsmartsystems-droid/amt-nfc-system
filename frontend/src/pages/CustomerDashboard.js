@@ -13,7 +13,7 @@ const CustomerDashboard = () => {
             try {
                 const token = localStorage.getItem('token');
                 // طلب جلب البطاقات الخاصة بهذا المستخدم فقط من السيرفر
-                const res = await axios.get('https://amt-nfc-system.onrender.com/api/cards/my-cards', {
+                const res = await axios.get('/api/cards/my-cards', {
                     headers: { Authorization: `Bearer ${token}` }
                 });
                 
@@ -35,7 +35,7 @@ const CustomerDashboard = () => {
         e.preventDefault();
         try {
             const token = localStorage.getItem('token');
-            await axios.put(`https://amt-nfc-system.onrender.com/api/cards/${card._id}`, 
+            await axios.put(`/api/cards/${card._id}`, 
                 { destinationUrl: newUrl },
                 { headers: { Authorization: `Bearer ${token}` } }
             );

@@ -1,0 +1,962 @@
+/* ============================================================
+   Al-Ha Tasty — Restaurant Landing Page
+   Mobile-First | Dark & Gold Theme | Matches Provided Design
+   ============================================================ */
+
+/* ---- Custom Properties ------------------------------------ */
+:root {
+    /* Brand Colors */
+    --gold:          #D4A830;
+    --gold-light:    #E8D097;
+    --gold-muted:    rgba(212, 168, 48, 0.15);
+
+    /* Buttons & UI */
+    --dark-btn:      #1E1E1E;
+    --dark-hover:    #2E2E2E;
+    --dark-active:   #111111;
+
+    /* Backgrounds */
+    --bg-body:       #F2F2F2;
+    --bg-white:      #FFFFFF;
+    --bg-location:   #F5E6B2;
+
+    /* Text */
+    --text-dark:     #1A1A1A;
+    --text-mid:      #555555;
+    --text-light:    #888888;
+
+    /* Radius */
+    --r-btn:         14px;
+    --r-card:        16px;
+
+    /* Shadows */
+    --sh-btn:        0 4px 14px rgba(0, 0, 0, 0.28);
+    --sh-btn-hover:  0 8px 22px rgba(0, 0, 0, 0.38);
+    --sh-card:       0 4px 18px rgba(0, 0, 0, 0.13);
+
+    /* Fonts */
+    --f-heading:     'Oswald', sans-serif;
+    --f-body:        'Cairo', sans-serif;
+}
+
+/* ---- Reset ------------------------------------------------ */
+*, *::before, *::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+    font-family: var(--f-body);
+    background: var(--bg-body);
+    color: var(--text-dark);
+    min-height: 100vh;
+}
+
+/* ---- Page Container --------------------------------------- */
+.page-container {
+    max-width: 480px;
+    margin: 0 auto;
+    background: var(--bg-white);
+    min-height: 100vh;
+    box-shadow: 0 0 48px rgba(0, 0, 0, 0.18);
+    overflow: hidden;
+}
+
+
+/* ============================================================
+   HERO SECTION
+   ============================================================ */
+
+.hero {
+    position: relative;
+    width: 100%;
+    min-height: 68vh;
+    background-image:
+        url('https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=800&auto=format&q=80');
+    background-size: cover;
+    background-position: center 40%;
+    background-repeat: no-repeat;
+    display: flex;
+    align-items: flex-end;
+    padding-bottom: 52px;
+}
+
+/* Gradient overlay — darker at bottom for legibility */
+.hero__overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        to bottom,
+        rgba(0, 0, 0, 0.20)  0%,
+        rgba(0, 0, 0, 0.45) 50%,
+        rgba(0, 0, 0, 0.72) 100%
+    );
+}
+
+.hero__content {
+    position: relative;
+    z-index: 2;
+    padding: 0 22px;
+    width: 100%;
+}
+
+/* Restaurant name */
+.hero__title {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 10px;
+}
+
+.hero__line1,
+.hero__line2 {
+    font-family: var(--f-heading);
+    font-size: clamp(56px, 16vw, 72px);
+    font-weight: 700;
+    color: var(--gold);
+    letter-spacing: -1px;
+    line-height: 1.05;
+    text-shadow: 0 3px 12px rgba(0, 0, 0, 0.5);
+    display: block;
+}
+
+/* "Tasty" is slightly indented right — matching screenshot */
+.hero__line2 {
+    padding-left: 28px;
+}
+
+.hero__subtitle {
+    font-family: var(--f-body);
+    font-size: 14px;
+    font-weight: 400;
+    color: rgba(255, 255, 255, 0.90);
+    line-height: 1.6;
+    margin-bottom: 26px;
+    text-shadow: 0 1px 5px rgba(0, 0, 0, 0.55);
+}
+
+/* "Order Now" button — beige/cream gold */
+.btn-order {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 13px 38px;
+    background: var(--gold-light);
+    color: var(--text-dark);
+    font-family: var(--f-heading);
+    font-size: 17px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    border-radius: var(--r-btn);
+    text-decoration: none;
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.28);
+    transition: all 0.25s ease;
+    cursor: pointer;
+    border: none;
+}
+
+.btn-order:hover {
+    background: #f0d980;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.34);
+}
+
+.btn-order:active {
+    transform: translateY(0);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.28);
+}
+
+
+/* ============================================================
+   BODY PATTERN — White bg with very subtle food-outline pattern
+   ============================================================ */
+
+.body-pattern {
+    background-color: var(--bg-white);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='90' height='90' viewBox='0 0 90 90'%3E%3C!-- Burger bun top arc --%3E%3Cellipse cx='45' cy='22' rx='18' ry='10' fill='none' stroke='%23000' stroke-width='1.4' stroke-opacity='0.032'/%3E%3C!-- Burger body --%3E%3Crect x='27' y='28' width='36' height='7' rx='2' fill='none' stroke='%23000' stroke-width='1.4' stroke-opacity='0.032'/%3E%3C!-- Burger bun bottom --%3E%3Cellipse cx='45' cy='38' rx='18' ry='5' fill='none' stroke='%23000' stroke-width='1.4' stroke-opacity='0.032'/%3E%3C!-- Fork --%3E%3Cline x1='16' y1='60' x2='16' y2='80' stroke='%23000' stroke-width='1.4' stroke-opacity='0.032'/%3E%3Cline x1='13' y1='60' x2='13' y2='68' stroke='%23000' stroke-width='1.2' stroke-opacity='0.028'/%3E%3Cline x1='19' y1='60' x2='19' y2='68' stroke='%23000' stroke-width='1.2' stroke-opacity='0.028'/%3E%3C!-- Star / spice --%3E%3Ccircle cx='74' cy='70' r='4' fill='none' stroke='%23000' stroke-width='1.2' stroke-opacity='0.028'/%3E%3C/svg%3E");
+    background-repeat: repeat;
+    background-size: 90px 90px;
+}
+
+
+/* ============================================================
+   SECTION COMMON
+   ============================================================ */
+
+.section {
+    padding: 28px 20px;
+    border-bottom: 1px solid #ebebeb;
+}
+
+.section-title {
+    font-family: var(--f-heading);
+    font-size: 30px;
+    font-weight: 700;
+    color: var(--text-dark);
+    letter-spacing: 1.5px;
+    margin-bottom: 10px;
+}
+
+.section-title--centered {
+    text-align: center;
+}
+
+.section-desc {
+    font-family: var(--f-body);
+    font-size: 14px;
+    font-weight: 400;
+    color: var(--text-mid);
+    line-height: 1.70;
+    margin-bottom: 22px;
+}
+
+
+/* ============================================================
+   FOOD PREVIEW CARD
+   ============================================================ */
+
+.food-card {
+    position: relative;
+    border-radius: var(--r-card);
+    overflow: hidden;
+    margin-bottom: 18px;
+    box-shadow: var(--sh-card);
+    aspect-ratio: 16 / 9;
+    background: #e0e0e0;
+}
+
+.food-card__img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.45s ease;
+}
+
+.food-card:hover .food-card__img {
+    transform: scale(1.05);
+}
+
+.food-card__badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: var(--gold);
+    color: #fff;
+    font-family: var(--f-heading);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    padding: 3px 10px;
+    border-radius: 6px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+
+/* ============================================================
+   DARK ACTION BUTTONS  (reusable system)
+   ============================================================ */
+
+.dark-btn {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: 15px 20px;
+    background: var(--dark-btn);
+    color: #ffffff;
+    font-family: var(--f-heading);
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: 1.2px;
+    border: none;
+    border-radius: var(--r-btn);
+    text-decoration: none;
+    cursor: pointer;
+    box-shadow: var(--sh-btn);
+    transition: background 0.22s ease, transform 0.22s ease, box-shadow 0.22s ease;
+    margin-bottom: 12px;
+    overflow: visible;
+    -webkit-user-select: none;
+    user-select: none;
+    gap: 0;
+}
+
+.dark-btn:last-child { margin-bottom: 0; }
+
+.dark-btn:hover {
+    background: var(--dark-hover);
+    transform: translateY(-2px);
+    box-shadow: var(--sh-btn-hover);
+}
+
+.dark-btn:active {
+    background: var(--dark-active);
+    transform: translateY(0);
+    box-shadow: var(--sh-btn);
+}
+
+/* ── Icon (positioned absolute on the left) ── */
+.dark-btn__icon {
+    position: absolute;
+    left: 18px;
+    font-size: 18px;
+    line-height: 1;
+    color: #fff;
+    flex-shrink: 0;
+    transition: color 0.2s;
+}
+
+.dark-btn__icon--gold { color: var(--gold); }
+
+/* ── Label (stays centered) ── */
+.dark-btn__label {
+    /* inherits centered flex position from parent */
+}
+
+.dark-btn__label--gold { color: var(--gold); }
+
+/* ── Gold accent variant ── */
+.dark-btn--gold-accent {
+    border: 1.5px solid rgba(212, 168, 48, 0.25);
+}
+
+.dark-btn--gold-accent:hover {
+    border-color: rgba(212, 168, 48, 0.55);
+}
+
+/* ── Directions variant ── */
+.dark-btn--directions {
+    /* same dark style, labels handled via modifiers */
+}
+
+/* ── Icon-only (half width: Telegram / WhatsApp) ── */
+.dark-btn--icon-only {
+    width: 100%;
+    font-size: 22px;
+    padding: 14px;
+}
+
+/* ── Notification badge (top-right red circle) ── */
+.notif-dot {
+    position: absolute;
+    top: -9px;
+    right: -9px;
+    width: 22px;
+    height: 22px;
+    background: #fff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #E53935;
+    font-size: 15px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.22);
+    z-index: 3;
+    pointer-events: none;
+}
+
+.notif-dot--sm {
+    width: 20px;
+    height: 20px;
+    font-size: 13px;
+    top: -8px;
+    right: -8px;
+}
+
+
+/* ── Duo-button row (Telegram + WhatsApp) ── */
+.btn-duo {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.btn-duo .dark-btn {
+    flex: 1;
+    margin-bottom: 0;
+}
+
+
+/* ============================================================
+   LOCATION SECTION  (beige/amber background)
+   ============================================================ */
+
+.location-section {
+    background: var(--bg-location);
+    padding: 28px 20px 36px;
+}
+
+/* Map iframe wrapper */
+.map-wrapper {
+    border-radius: var(--r-card);
+    overflow: hidden;
+    margin-bottom: 18px;
+    box-shadow: var(--sh-card);
+    border: 3px solid rgba(255, 255, 255, 0.70);
+}
+
+.map-wrapper iframe {
+    display: block;
+    width: 100%;
+    height: 200px;
+}
+
+/* Address text */
+.location-address {
+    font-family: var(--f-body);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-mid);
+    text-align: center;
+    margin-top: 14px;
+    margin-bottom: 22px;
+}
+
+/* Social icons row */
+.social-row {
+    display: flex;
+    justify-content: center;
+    gap: 14px;
+}
+
+.social-icon-btn {
+    width: 50px;
+    height: 50px;
+    background: var(--dark-btn);
+    color: #fff;
+    font-size: 21px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    box-shadow: var(--sh-btn);
+    transition: background 0.22s, transform 0.22s, box-shadow 0.22s;
+}
+
+.social-icon-btn:hover {
+    background: var(--dark-hover);
+    transform: translateY(-3px) scale(1.08);
+    box-shadow: var(--sh-btn-hover);
+}
+
+.social-icon-btn:active {
+    transform: scale(0.96);
+}
+
+
+/* ============================================================
+   FEEDBACK MODAL
+   ============================================================ */
+
+.modal {
+    display: flex;
+    position: fixed;
+    inset: 0;
+    z-index: 9000;
+    justify-content: center;
+    align-items: flex-end;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.30s ease;
+}
+
+.modal--open {
+    pointer-events: all;
+    opacity: 1;
+}
+
+/* Blurred semi-transparent backdrop */
+.modal__backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(10, 10, 15, 0.62);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+}
+
+/* Card slides up from bottom */
+.modal__card {
+    position: relative;
+    z-index: 1;
+    background: #fff;
+    border-radius: 26px 26px 0 0;
+    padding: 28px 22px 42px;
+    width: 100%;
+    max-width: 480px;
+    text-align: center;
+    box-shadow: 0 -10px 44px rgba(0, 0, 0, 0.24);
+    transform: translateY(100%);
+    transition: transform 0.40s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Drag handle pill */
+.modal__card::before {
+    content: '';
+    display: block;
+    width: 40px;
+    height: 4px;
+    background: #DDDDDD;
+    border-radius: 99px;
+    margin: 0 auto 22px;
+}
+
+.modal--open .modal__card {
+    transform: translateY(0);
+}
+
+/* Close button */
+.modal__close {
+    position: absolute;
+    top: 18px;
+    right: 18px;
+    width: 34px;
+    height: 34px;
+    background: #F0F0F0;
+    border: none;
+    border-radius: 50%;
+    color: #555;
+    font-size: 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s, transform 0.2s;
+}
+
+.modal__close:hover {
+    background: #E2E2E2;
+    color: #111;
+    transform: rotate(90deg);
+}
+
+/* Gold star icon on top of modal */
+.modal__icon-wrap {
+    width: 58px;
+    height: 58px;
+    background: linear-gradient(135deg, var(--gold) 0%, #a07018 100%);
+    color: #fff;
+    font-size: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 14px;
+    box-shadow: 0 5px 18px rgba(212, 168, 48, 0.42);
+}
+
+.modal__title {
+    font-family: var(--f-heading);
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text-dark);
+    letter-spacing: 0.5px;
+    margin-bottom: 6px;
+}
+
+.modal__subtitle {
+    font-family: var(--f-body);
+    font-size: 13px;
+    color: var(--text-light);
+    margin-bottom: 20px;
+}
+
+/* ---- Stars ---- */
+.stars-row {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 8px;
+    direction: ltr;
+}
+
+.star {
+    font-size: 34px;
+    color: #DDDDDD;
+    cursor: pointer;
+    outline: none;
+    transition: color 0.18s ease, transform 0.18s ease;
+}
+
+.star:hover,
+.star--lit {
+    color: var(--gold);
+}
+
+.star:hover {
+    transform: scale(1.18);
+}
+
+.star--lit {
+    animation: starPop 0.22s ease;
+}
+
+@keyframes starPop {
+    0%   { transform: scale(1); }
+    50%  { transform: scale(1.28); }
+    100% { transform: scale(1); }
+}
+
+.stars-hint {
+    font-family: var(--f-body);
+    font-size: 13px;
+    color: var(--text-light);
+    height: 20px;
+    margin-bottom: 18px;
+    transition: color 0.2s;
+}
+
+/* Feedback textarea */
+.feedback-input {
+    width: 100%;
+    padding: 13px 15px;
+    border: 1.5px solid #E0E0E0;
+    border-radius: 12px;
+    font-family: var(--f-body);
+    font-size: 14px;
+    color: var(--text-dark);
+    background: #F7F7F7;
+    resize: none;
+    outline: none;
+    line-height: 1.6;
+    margin-bottom: 16px;
+    transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+}
+
+.feedback-input:focus {
+    border-color: var(--dark-btn);
+    background: #fff;
+    box-shadow: 0 0 0 3px rgba(30, 30, 30, 0.08);
+}
+
+.feedback-input::placeholder {
+    color: #aaa;
+}
+
+/* Submit button inside modal inherits .dark-btn */
+#submit-feedback-btn {
+    margin-bottom: 0;
+}
+
+
+/* ============================================================
+   TOAST NOTIFICATION
+   ============================================================ */
+
+.toast {
+    position: fixed;
+    bottom: 28px;
+    left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: var(--dark-btn);
+    color: #fff;
+    padding: 13px 22px;
+    border-radius: 50px;
+    font-family: var(--f-body);
+    font-size: 14px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    white-space: nowrap;
+    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.32);
+    z-index: 9999;
+    opacity: 0;
+    pointer-events: none;
+    transition: transform 0.40s cubic-bezier(0.4, 0, 0.2, 1),
+                opacity   0.40s ease;
+}
+
+.toast--show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+
+.toast i {
+    color: var(--gold);
+    font-size: 19px;
+}
+
+
+/* ============================================================
+   RESPONSIVE — tablets & small desktops
+   ============================================================ */
+
+@media (min-width: 481px) {
+    .page-container {
+        margin: 28px auto;
+        min-height: auto;
+        border-radius: 22px;
+    }
+
+    /* Modal becomes a centered dialog, not a bottom sheet */
+    .modal {
+        align-items: center;
+        padding: 24px;
+    }
+
+    .modal__card {
+        border-radius: 24px;
+        max-width: 420px;
+        transform: scale(0.88) translateY(0);
+    }
+
+    .modal--open .modal__card {
+        transform: scale(1) translateY(0);
+    }
+
+    .modal__card::before { display: none; }
+}
+
+@media (min-width: 640px) {
+    body { padding: 0 16px; }
+}
+
+/* ============================================================
+   SETTINGS FAB BUTTON
+   ============================================================ */
+
+.settings-fab {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: var(--gold);
+    color: #fff;
+    border: none;
+    border-radius: 50%;
+    width: 56px;
+    height: 56px;
+    font-size: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 16px rgba(212, 168, 48, 0.4);
+    cursor: pointer;
+    z-index: 8000;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.settings-fab:hover {
+    transform: scale(1.08) rotate(15deg);
+    box-shadow: 0 6px 24px rgba(212, 168, 48, 0.6);
+}
+
+.settings-fab__label {
+    display: none;
+}
+
+/* ============================================================
+   SETTINGS DRAWER
+   ============================================================ */
+
+.settings-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    z-index: 9000;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s;
+}
+
+.settings-overlay--show {
+    opacity: 1;
+    pointer-events: all;
+}
+
+.settings-drawer {
+    position: fixed;
+    top: 0;
+    right: -100%;
+    width: 100%;
+    max-width: 400px;
+    height: 100vh;
+    background: var(--bg-white);
+    z-index: 9001;
+    box-shadow: -10px 0 30px rgba(0,0,0,0.2);
+    display: flex;
+    flex-direction: column;
+    transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.settings-drawer--open {
+    right: 0;
+}
+
+/* Header */
+.settings-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 24px;
+    background: var(--dark-btn);
+    color: #fff;
+}
+
+.settings-header__title {
+    font-size: 18px;
+    font-family: var(--f-heading);
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.settings-header__title i {
+    color: var(--gold);
+}
+
+.settings-close-btn {
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 20px;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.settings-close-btn:hover {
+    transform: rotate(90deg) scale(1.1);
+    color: var(--gold);
+}
+
+/* Body */
+.settings-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 24px;
+    background: #FAFAFA;
+}
+
+/* Sections */
+.settings-section {
+    background: #fff;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    border: 1px solid #EBEBEB;
+}
+
+.settings-section__header {
+    font-family: var(--f-heading);
+    font-weight: 700;
+    font-size: 16px;
+    color: var(--dark-btn);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 8px;
+}
+
+.settings-section__header i {
+    color: var(--gold);
+}
+
+/* Form Fields */
+.field-label {
+    display: block;
+    font-family: var(--f-body);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-mid);
+    margin-bottom: 6px;
+}
+
+.field-input {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1.5px solid #DDD;
+    border-radius: 8px;
+    font-family: var(--f-body);
+    font-size: 14px;
+    color: var(--text-dark);
+    margin-bottom: 14px;
+    transition: border-color 0.2s;
+    background: #FAFAFA;
+}
+
+.field-input:focus {
+    outline: none;
+    border-color: var(--gold);
+    background: #fff;
+}
+
+.field-textarea {
+    resize: vertical;
+    min-height: 70px;
+}
+
+.field-hint {
+    font-size: 11px;
+    color: var(--text-light);
+    margin-top: -10px;
+    margin-bottom: 14px;
+    line-height: 1.4;
+}
+
+/* Footer (Save/Reset Buttons) */
+.settings-footer {
+    padding: 20px 24px;
+    background: #fff;
+    border-top: 1px solid #EBEBEB;
+    display: flex;
+    gap: 12px;
+}
+
+.settings-save-btn {
+    flex: 2;
+    background: var(--dark-btn);
+    color: #fff;
+    border: none;
+    padding: 14px;
+    border-radius: 10px;
+    font-family: var(--f-heading);
+    font-weight: 600;
+    font-size: 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: background 0.2s;
+}
+
+.settings-save-btn:hover {
+    background: var(--dark-hover);
+}
+
+.settings-save-btn i {
+    color: var(--gold);
+}
+
+.settings-reset-btn {
+    flex: 1;
+    background: #F0F0F0;
+    color: var(--text-dark);
+    border: none;
+    padding: 14px;
+    border-radius: 10px;
+    font-family: var(--f-heading);
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: background 0.2s;
+}
+
+.settings-reset-btn:hover {
+    background: #E2E2E2;
+}
+

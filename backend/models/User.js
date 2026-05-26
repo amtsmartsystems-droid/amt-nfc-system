@@ -1,25 +1,45 @@
 const mongoose = require('mongoose');
 
-// تعريف مخطط بيانات المستخدم
+/**
+ * UserSchema — Multi-Tenant
+ * ─────────────────────────
+ * role: 'Super_Admin' → full access to all cards
+ * role: 'Restaurant_Owner' → access only to their own tenantId
+ * tenantId → matches shortCode of their Card document
+ */
 const userSchema = new mongoose.Schema({
     name: {
-        type: String,
+        type:     String,
         required: true,
+        trim:     true,
     },
     email: {
-        type: String,
+        type:     String,
         required: true,
-        unique: true, // يمنع تكرار الإيميل
+        unique:   true,
+        lowercase: true,
+        trim:     true,
     },
     password: {
-        type: String,
+        type:     String,   // bcrypt hash
         required: true,
     },
     role: {
-        type: String,
-        enum: ['Admin', 'Client'], // تحديد الأدوار المسموحة فقط
-        default: 'Client',
-    }
-}, { timestamps: true }); // لتسجيل وقت الإنشاء والتحديث تلقائياً
+        type:    String,
+        enum:    ['Super_Admin', 'Restaurant_Owner'],
+        default: 'Restaurant_Owner',
+    },
+    // tenantId = shortCode of the card this owner manages
+    tenantId: {
+        type:    String,
+        default: null,
+        index:   true,
+    },
+    isActive: {
+        type:    Boolean,
+        default: true,
+    },
+}, { timestamps: true });
 
-module.exports = mongoose.model('User', userSchema);
+// Prevent duplicate model warning in serverless
+module.exports = mongoose.models.User || mongoose.model('User', userSchema);

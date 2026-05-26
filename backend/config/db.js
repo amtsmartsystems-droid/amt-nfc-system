@@ -1,16 +1,40 @@
 // استدعاء مكتبة mongoose للتعامل مع MongoDB
 const mongoose = require('mongoose');
 
+// التخزين المؤقت لاتصال قاعدة البيانات في بيئة Serverless
+let cached = global.mongoose;
+
+if (!cached) {
+    cached = global.mongoose = { conn: null, promise: null };
+}
+
 // دالة للاتصال بقاعدة البيانات
 const connectDB = async () => {
+    if (cached.conn) {
+        console.log('Using cached MongoDB connection');
+        return cached.conn;
+    }
+
+    if (!cached.promise) {
+        const opts = {
+            bufferCommands: false,
+        };
+
+        cached.promise = mongoose.connect(process.env.MONGO_URI, opts).then((mongoose) => {
+            console.log(`MongoDB Connected: ${mongoose.connection.host}`);
+            return mongoose;
+        });
+    }
+
     try {
-        // جلب رابط الاتصال من ملف المتغيرات البيئية
-        const conn = await mongoose.connect(process.env.MONGO_URI);
-        console.log(`MongoDB Connected: ${conn.connection.host}`);
+        cached.conn = await cached.promise;
     } catch (error) {
+        cached.promise = null;
         console.error(`Error connecting to MongoDB: ${error.message}`);
         process.exit(1); // إيقاف الخادم في حال فشل الاتصال
     }
+
+    return cached.conn;
 };
 
 module.exports = connectDB;
