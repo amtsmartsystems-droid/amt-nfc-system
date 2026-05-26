@@ -106,9 +106,6 @@ function PageContent() {
       if(d.authenticated) setCurrentUserRole(d.role);
     }).catch(() => {});
   }, []);
-  }, []);
-
-
   const showToast = (msg, ok=true) => {
     setToast({msg,ok}); setTimeout(()=>setToast({msg:"",ok:true}), 3500);
   };
