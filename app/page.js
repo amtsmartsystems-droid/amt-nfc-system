@@ -106,8 +106,8 @@ function PageContent() {
       if(d.authenticated) setCurrentUserRole(d.role);
     }).catch(() => {});
   }, []);
-  
-  const isAdminView = mounted && searchParams.get("admin") === "true";
+  }, []);
+
 
   const showToast = (msg, ok=true) => {
     setToast({msg,ok}); setTimeout(()=>setToast({msg:"",ok:true}), 3500);
@@ -250,11 +250,53 @@ function PageContent() {
     }
   };
 
-  if (!mounted) return (
-    <div className="min-h-screen bg-slate-950 flex items-center justify-center">
-      <LucideIcons.Loader2 size={28} className="animate-spin text-slate-600" />
-    </div>
-  );
+  if (!mounted) return null;
+
+  if (!isAuthenticated && currentUserRole !== 'Super_Admin' && currentUserRole !== 'Restaurant_Owner') {
+    return (
+      <div className="min-h-screen bg-[#0A0A0A] flex flex-col items-center justify-center p-4 font-[Cairo,sans-serif]" dir="rtl">
+        <div className="w-full max-w-sm p-8 rounded-3xl bg-white/5 border border-white/10 backdrop-blur-xl shadow-2xl relative overflow-hidden">
+          {/* Subtle glow effect */}
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-32 bg-yellow-400/10 blur-[50px] -z-10" />
+          
+          <div className="text-center mb-8">
+            <div className="w-16 h-16 bg-gradient-to-tr from-yellow-500 to-yellow-300 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-yellow-500/20">
+              <LucideIcons.ShieldCheck size={32} className="text-black" />
+            </div>
+            <h1 className="text-2xl font-black text-white mb-2">تسجيل الدخول</h1>
+            <p className="text-sm text-slate-400">نظام إدارة المطاعم الذكي</p>
+          </div>
+
+          <form onSubmit={handleLogin} className="flex flex-col gap-4 relative z-10">
+            <div>
+              <input
+                type="password"
+                value={password}
+                onChange={e => setPassword(e.target.value)}
+                placeholder="كلمة مرور المدير العام..."
+                className="w-full px-4 py-3.5 rounded-xl text-sm text-white bg-black/40 border border-white/10 outline-none focus:border-yellow-400/50 focus:bg-black/60 transition-all placeholder:text-slate-600 text-center font-mono tracking-widest shadow-inner"
+                dir="ltr"
+              />
+            </div>
+            <button
+              type="submit"
+              className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl font-bold text-[13px] bg-gradient-to-r from-yellow-500 to-yellow-400 hover:from-yellow-400 hover:to-yellow-300 text-black transition-all shadow-[0_0_20px_rgba(234,179,8,0.2)] hover:shadow-[0_0_25px_rgba(234,179,8,0.4)] hover:-translate-y-0.5 active:translate-y-0"
+            >
+              دخول للوحة التحكم <LucideIcons.ArrowLeft size={16} />
+            </button>
+          </form>
+        </div>
+        
+        <p className="text-slate-600 text-[11px] mt-8 flex items-center gap-1.5 font-medium">
+          <LucideIcons.Lock size={12} /> محمي بتشفير متقدم (JWT + AES)
+        </p>
+      </div>
+    );
+  }
+
+  // ── ADMIN PANEL ──
+  const THEME_COMPONENTS = { restaurant: RestaurantTheme, cafe: CafeTheme, cafe1: CafeTheme1, gastro: GastroBarTheme };
+  const PreviewTheme = THEME_COMPONENTS[theme];
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -274,29 +316,6 @@ function PageContent() {
   };
 
   // ── Admin split-screen layout ──
-  if (isAdminView) {
-    if (!isAuthenticated) {
-      return (
-        <div className="min-h-screen bg-[#07090E] flex flex-col items-center justify-center p-5" dir="rtl">
-          <div className="bg-[#0c0f16] p-8 rounded-3xl border border-white/10 shadow-2xl w-full max-w-sm">
-            <div className="w-12 h-12 bg-yellow-400/10 text-yellow-400 rounded-2xl flex items-center justify-center mx-auto mb-6">
-              <LucideIcons.Lock size={24} />
-            </div>
-            <h1 className="text-xl font-black text-center text-white mb-2">تسجيل الدخول للإدارة</h1>
-            <p className="text-xs text-slate-500 text-center mb-8">أدخل كلمة المرور للوصول إلى لوحة التحكم</p>
-            <form onSubmit={handleLogin} className="space-y-4">
-              <input type="password" value={password} onChange={e=>setPassword(e.target.value)} placeholder="كلمة المرور" dir="ltr"
-                className="w-full px-4 py-3 rounded-xl text-center text-white bg-white/5 border border-white/10 outline-none focus:border-yellow-400/40 transition-all placeholder:text-slate-600" />
-              <button type="submit" disabled={loading}
-                className="w-full py-3 rounded-xl font-black text-[#1C1C1C] bg-yellow-400 hover:bg-yellow-300 transition-all disabled:opacity-50">
-                {loading ? <LucideIcons.Loader2 size={16} className="animate-spin mx-auto" /> : "دخول"}
-              </button>
-            </form>
-          </div>
-        </div>
-      );
-    }
-
     return (
       <div className="flex h-screen w-screen overflow-hidden bg-[#07090E]" dir="rtl">
 
