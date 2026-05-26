@@ -305,26 +305,6 @@ function PageContent() {
     );
   }
 
-  // ── ADMIN PANEL ──
-  const THEME_COMPONENTS = { restaurant: RestaurantTheme, cafe: CafeTheme, cafe1: CafeTheme1, gastro: GastroBarTheme };
-  const PreviewTheme = THEME_COMPONENTS[theme];
-
-  const handleLogin = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    const res = await fetch('/api/admin-auth', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ password })
-    });
-    setLoading(false);
-    if (res.ok) {
-      setIsAuthenticated(true);
-      showToast("✅ تم تسجيل الدخول");
-    } else {
-      showToast("❌ كلمة المرور غير صحيحة", false);
-    }
-  };
 
   // ── Admin split-screen layout ──
     return (
