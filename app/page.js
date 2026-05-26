@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect, Suspense } from "react";
-import { useSearchParams } from "next/navigation";
 import * as LucideIcons from "lucide-react";
 import RestaurantTheme  from "../components/templates/RestaurantTheme";
 import CafeTheme        from "../components/templates/CafeTheme";
@@ -69,7 +68,6 @@ const Label = ({ children }) => (
 // PageContent
 // ─────────────────────────────────────────────────────────────────────
 function PageContent() {
-  const searchParams = useSearchParams();
   const [mounted,    setMounted]    = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [password,   setPassword]   = useState("");
@@ -236,14 +234,30 @@ function PageContent() {
   const delEvent = id => { setSiteData(p=>({...p, events:(p.events||[]).filter(e=>e.id!==id)})); showToast("🗑️ تم حذف الفعالية"); };
   const updEvent = (id,f,v) => setSiteData(p=>({...p, events:(p.events||[]).map(e=>e.id===id?{...e,[f]:v}:e)}));
 
-  // ── Active Theme Renderer ──
-  const ThemeView = () => {
+  const renderTheme = () => {
     const props = { siteData, siteColors, lang };
     switch (theme) {
       case "cafe":   return <CafeTheme      {...props} />;
       case "cafe1":  return <CafeTheme1     {...props} />;
       case "gastro": return <GastroBarTheme {...props} />;
       default:       return <RestaurantTheme {...props} />;
+    }
+  };
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    const res = await fetch('/api/admin-auth', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password })
+    });
+    setLoading(false);
+    if (res.ok) {
+      setIsAuthenticated(true);
+      showToast("✅ تم تسجيل الدخول");
+    } else {
+      showToast("❌ كلمة المرور غير صحيحة", false);
     }
   };
 
@@ -328,7 +342,7 @@ function PageContent() {
               <div className="absolute top-3 left-1/2 -translate-x-1/2 w-20 h-5 bg-slate-800 rounded-full z-50" />
               {/* Scrollable content */}
               <div className="w-full h-full overflow-y-auto overflow-x-hidden pt-8" style={{ scrollbarWidth:"none" }}>
-                <ThemeView />
+                {renderTheme()}
               </div>
             </div>
             {/* Live badge */}
@@ -749,9 +763,5 @@ function PageContent() {
 }
 
 export default function Home() {
-  return (
-    <Suspense fallback={<div className="min-h-screen bg-slate-950 flex items-center justify-center"><LucideIcons.Loader2 size={24} className="animate-spin text-slate-700" /></div>}>
-      <PageContent />
-    </Suspense>
-  );
+  return <PageContent />;
 }
