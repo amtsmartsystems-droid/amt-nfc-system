@@ -173,7 +173,7 @@ export default function AMTBusinessCard() {
                         className="w-11 h-11 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110 active:scale-95"
                         style={{ background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.12)" }}
                     >
-                        <LucideIcons.Facebook size={18} color="#1877f2" />
+                        <LucideIcons.Globe size={18} color="#1877f2" />
                     </a>
                     <a
                         href="mailto:info@amt-tech.com"
