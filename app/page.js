@@ -6,6 +6,7 @@ import RestaurantTheme  from "../components/templates/RestaurantTheme";
 import CafeTheme        from "../components/templates/CafeTheme";
 import CafeTheme1       from "../components/templates/CafeTheme1";
 import GastroBarTheme   from "../components/templates/GastroBarTheme";
+import AMTBusinessCard  from "../components/templates/AMTBusinessCard";
 import { getIconForLink } from "../utils/icons";
 
 // ─────────────────────────────────────────────────────────────────────
@@ -46,10 +47,11 @@ const DEFAULT_COLORS = {
 };
 
 const THEMES = [
-  { id:"restaurant", label:"مطعم فاخر",       icon:"Utensils"        },
-  { id:"cafe",       label:"مقهى منيمل",      icon:"Coffee"          },
-  { id:"cafe1",      label:"كافيه رايق ☕",    icon:"Bean"            },
-  { id:"gastro",     label:"غاسترو بار 🍺",   icon:"UtensilsCrossed" },
+  { id:"restaurant",    label:"مطعم فاخر",        icon:"Utensils"        },
+  { id:"cafe",          label:"مقهى منيمل",       icon:"Coffee"          },
+  { id:"cafe1",         label:"كافيه رايق ☕",     icon:"Bean"            },
+  { id:"gastro",        label:"غاسترو بار 🍺",    icon:"UtensilsCrossed" },
+  { id:"business_card", label:"بطاقة AMT 💼",     icon:"CreditCard"      },
 ];
 
 // ─────────────────────────────────────────────────────────────────────
@@ -73,6 +75,7 @@ function PageContent() {
   const [password,   setPassword]   = useState("");
   const [siteData,   setSiteData]   = useState(DEFAULT);
   const [theme,      setTheme]      = useState("restaurant");
+  const [cardType,   setCardType]   = useState("restaurant");   // ← NEW: tracks cardType for DB
   const [siteColors, setSiteColors] = useState(DEFAULT_COLORS.restaurant);
   const [lang,       setLang]       = useState("en");
   const [adminTab,   setAdminTab]   = useState("links");
@@ -110,10 +113,12 @@ function PageContent() {
 
   const up = (key, val) => setSiteData(p => ({...p, [key]: val}));
 
-  // Switch theme — also swap color defaults
+  // Switch theme — also swap color defaults and set cardType
   const switchTheme = (id) => {
     setTheme(id);
-    setSiteColors(DEFAULT_COLORS[id]);
+    // business_card has its own cardType; all others are 'restaurant'
+    setCardType(id === 'business_card' ? 'business_card' : 'restaurant');
+    if (DEFAULT_COLORS[id]) setSiteColors(DEFAULT_COLORS[id]);
   };
 
   // ── AI Generate ──
@@ -167,7 +172,8 @@ function PageContent() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           siteData,
-          themeName: theme,
+          cardType,                                              // ← NEW
+          themeName: theme === 'business_card' ? 'business_card' : theme,
           primaryColor: siteColors.primary,
           background: siteColors.background,
           wifi: { ssid: wifi.ssid.trim(), password: wifi.password.trim() },
@@ -195,7 +201,17 @@ function PageContent() {
       setSubscriptionStatus(data.subscriptionStatus || 'active');
       setAllowEditing(data.allowEditing !== false);
       if (data.siteData) setSiteData(prev => ({ ...prev, ...data.siteData }));
-      if (data.themeName) setTheme(data.themeName);
+      // ── Restore cardType + theme ──
+      if (data.cardType) {
+        setCardType(data.cardType);
+        if (data.cardType === 'business_card') {
+          setTheme('business_card');
+        } else if (data.themeName) {
+          setTheme(data.themeName);
+        }
+      } else if (data.themeName) {
+        setTheme(data.themeName);
+      }
       if (data.primaryColor || data.background) {
         setSiteColors({
           primary:    data.primaryColor || siteColors.primary,
@@ -203,6 +219,7 @@ function PageContent() {
         });
       }
       if (data.wifi) setWifi(data.wifi);
+      showToast(`✅ تم تحميل بيانات البطاقة: ${cid}`);
     } catch {}
   };
 
@@ -236,6 +253,7 @@ function PageContent() {
 
   const renderTheme = () => {
     const props = { siteData, siteColors, lang };
+    if (theme === 'business_card') return <AMTBusinessCard />;
     switch (theme) {
       case "cafe":   return <CafeTheme      {...props} />;
       case "cafe1":  return <CafeTheme1     {...props} />;

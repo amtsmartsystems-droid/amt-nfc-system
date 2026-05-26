@@ -29,6 +29,11 @@ const cardSchema = new mongoose.Schema({
     },
 
     // ── SaaS Theme Fields ──────────────────────────────────────────
+    cardType: {
+        type:    String,
+        enum:    ['restaurant', 'business_card'],
+        default: 'restaurant',
+    },
     themeName: {
         type:    String,
         default: 'RestaurantTheme',

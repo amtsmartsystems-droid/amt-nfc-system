@@ -1,12 +1,13 @@
 "use client";
 
-import { useState, useRef } from 'react';
+import { useState } from 'react';
 import useSWR from 'swr';
 import { Globe, Wifi, Check, Copy } from 'lucide-react';
-import RestaurantTheme from '../../components/templates/RestaurantTheme';
-import CafeTheme from '../../components/templates/CafeTheme';
-import CafeTheme1 from '../../components/templates/CafeTheme1';
-import GastroBarTheme from '../../components/templates/GastroBarTheme';
+import RestaurantTheme  from '../../components/templates/RestaurantTheme';
+import CafeTheme        from '../../components/templates/CafeTheme';
+import CafeTheme1       from '../../components/templates/CafeTheme1';
+import GastroBarTheme   from '../../components/templates/GastroBarTheme';
+import AMTBusinessCard  from '../../components/templates/AMTBusinessCard';
 
 const fetcher = (url) => fetch(url).then((res) => res.json());
 
@@ -82,6 +83,17 @@ export default function ClientCardViewer({ initialCard, cardId }) {
         ),
     });
 
+    /* ════════════════════════════════════════════════════════════════
+       AMT BUSINESS CARD — full-bleed dark landing page
+       No white wrapper, no floating pill buttons (not needed here)
+    ════════════════════════════════════════════════════════════════ */
+    if (card.cardType === 'business_card') {
+        return <AMTBusinessCard />;
+    }
+
+    /* ════════════════════════════════════════════════════════════════
+       RESTAURANT / CAFE THEMES — normal wrapper with pill buttons
+    ════════════════════════════════════════════════════════════════ */
     return (
         <>
             {/* ════════ WI-FI TOAST (fixed, portal-like) ════════ */}
@@ -183,11 +195,40 @@ export default function ClientCardViewer({ initialCard, cardId }) {
                         )}
                     </div>
 
-                    {/* ── Theme Content ── */}
+                    {/* ── Restaurant / Cafe Theme Content ── */}
                     {card.themeName === 'cafe'   ? <CafeTheme      {...props} /> :
                      card.themeName === 'cafe1'  ? <CafeTheme1     {...props} /> :
                      card.themeName === 'gastro' ? <GastroBarTheme {...props} /> :
-                                                  <RestaurantTheme {...props} />}
+                                                   <RestaurantTheme {...props} />}
+
+                    {/* ── AMT Branding Footer ── */}
+                    <div style={{
+                        textAlign:  'center',
+                        padding:    '18px 16px 22px',
+                        borderTop:  '1px solid rgba(0,0,0,0.06)',
+                        background: 'rgba(0,0,0,0.02)',
+                    }}>
+                        <a
+                            href="/amt"
+                            style={{
+                                display:        'inline-flex',
+                                alignItems:     'center',
+                                gap:            5,
+                                fontSize:       11,
+                                fontWeight:     700,
+                                color:          'rgba(0,0,0,0.30)',
+                                textDecoration: 'none',
+                                fontFamily:     'Cairo,sans-serif',
+                                transition:     'color 0.2s',
+                                letterSpacing:  '0.02em',
+                            }}
+                            onMouseOver={e  => e.currentTarget.style.color = '#f5c518'}
+                            onMouseOut={e   => e.currentTarget.style.color = 'rgba(0,0,0,0.30)'}
+                        >
+                            <span>⚡</span>
+                            <span>Powered by AMT Smart</span>
+                        </a>
+                    </div>
                 </div>
             </div>
         </>

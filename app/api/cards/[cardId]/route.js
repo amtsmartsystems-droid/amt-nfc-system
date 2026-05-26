@@ -28,6 +28,7 @@ export async function GET(req, { params }) {
         if (card.isLocked) return NextResponse.json({ error: 'مقفلة', isLocked: true }, { status: 403 });
 
         return NextResponse.json({
+            cardType:           card.cardType   || 'restaurant',   // ← NEW
             themeName:          card.themeName,
             businessName:       card.businessName,
             primaryColor:       card.primaryColor,
@@ -104,6 +105,8 @@ export async function PUT(req, { params }) {
 
         const cleanSiteData = body.siteData ? sanitizeSiteData(body.siteData) : undefined;
         const cleanTheme    = body.themeName    ? sanitizeString(body.themeName,    50)  : undefined;
+        const cleanCardType = body.cardType && ['restaurant','business_card'].includes(body.cardType)
+            ? body.cardType : undefined;                                    // ← NEW
         const cleanPrimary  = body.primaryColor ? sanitizeColor(body.primaryColor)       : undefined;
         const cleanBg       = body.background   ? sanitizeColor(body.background)         : undefined;
         const cleanWifi     = body.wifi
@@ -115,6 +118,7 @@ export async function PUT(req, { params }) {
             // Create (Super_Admin only, already checked above)
             const newCard = new Card({
                 shortCode:    cardId,
+                cardType:     cleanCardType  || 'restaurant',          // ← NEW
                 themeName:    cleanTheme    || 'luxury',
                 businessName: cleanSiteData?.name || cleanSiteData?.nameAr || 'New Business',
                 primaryColor: cleanPrimary  || '#D4AF37',
@@ -129,6 +133,7 @@ export async function PUT(req, { params }) {
         }
 
         if (cleanTheme)              card.themeName    = cleanTheme;
+        if (cleanCardType)           card.cardType     = cleanCardType;   // ← NEW
         if (cleanPrimary)            card.primaryColor = cleanPrimary;
         if (cleanBg)                 card.background   = cleanBg;
         if (cleanWifi !== undefined) card.wifi         = cleanWifi;
