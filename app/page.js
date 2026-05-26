@@ -738,23 +738,14 @@ function PageContent() {
 
           </div>{/* end scroll area */}
         </div>{/* end right panel */}
+
+        {/* Toast */}
+        <div className={`fixed top-5 left-1/2 -translate-x-1/2 z-50 px-6 py-3 rounded-2xl text-sm font-bold shadow-2xl transition-all duration-300 pointer-events-none ${toast.msg?"opacity-100 translate-y-0":"opacity-0 -translate-y-3"}`}
+             style={{ background:toast.ok?"#1C1C1C":"#EF4444", color:"#fff", direction:"rtl" }}>
+          {toast.msg}
+        </div>
       </div>
     );
-  }
-
-  // ── VISITOR VIEW ──
-  return (
-    <div className="min-h-screen" style={{ background:"#F5F5F5" }}>
-      <div className="max-w-md mx-auto min-h-screen bg-white shadow-2xl">
-        <ThemeView />
-      </div>
-      {/* Toast */}
-      <div className={`fixed top-5 left-1/2 -translate-x-1/2 z-50 px-6 py-3 rounded-2xl text-sm font-bold shadow-2xl transition-all duration-300 pointer-events-none ${toast.msg?"opacity-100 translate-y-0":"opacity-0 -translate-y-3"}`}
-           style={{ background:toast.ok?"#1C1C1C":"#EF4444", color:"#fff", direction:"rtl" }}>
-        {toast.msg}
-      </div>
-    </div>
-  );
 }
 
 export default function Home() {
