@@ -26,14 +26,14 @@ export default function RestaurantTheme({ cardId, siteData, siteColors, lang = "
   const t  = (en, ar) => isAr && ar ? ar : en;
   const sd = siteData || {};
 
-  const name    = t(sd.name    || "MEATY STORY",            sd.nameAr);
-  const sub     = t(sd.subtitle|| "Fine burgers, bold flavors", sd.subtitleAr);
-  const about   = t(sd.about  || "We make food where every detail counts. Top-quality ingredients, precise methods, true flavors.", sd.aboutAr);
-  const prinT   = t(sd.principlesTitle    || "PRINCIPLES THAT DEFINE THE TASTE", sd.principlesTitleAr);
-  const prinSub = t(sd.principlesSubtitle || "Precision, consistency, and respect for your time.", sd.principlesSubtitleAr);
-  const contactT= t(sd.contactsTitle || "CONTACTS", sd.contactsTitleAr);
-  const address = sd.address || "123 Main Street, New York";
-  const hours   = sd.hours   || "10:00 AM — 11:00 PM";
+  const name    = t(sd.name || "", sd.nameAr || "");
+  const sub     = t(sd.subtitle || "", sd.subtitleAr || "");
+  const about   = t(sd.about || "", sd.aboutAr || "");
+  const prinT   = t(sd.principlesTitle || "", sd.principlesTitleAr || "");
+  const prinSub = t(sd.principlesSubtitle || "", sd.principlesSubtitleAr || "");
+  const contactT= t(sd.contactsTitle || "", sd.contactsTitleAr || "");
+  const address = sd.address || "";
+  const hours   = sd.hours || "";
   const links   = sd.links   || [];
   const principles = sd.principles || [
     { num:"I",   title:"HONEST PRESENTATION", titleAr:"تقديم صادق",   desc:"Exactly as served.",          descAr:"كما يُقدَّم تماماً." },

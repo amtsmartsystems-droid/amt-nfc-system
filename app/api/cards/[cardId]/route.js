@@ -160,6 +160,7 @@ export async function PUT(req, { params }) {
         if (cleanTableMapping !== undefined) card.tableMapping = cleanTableMapping;
         if (cleanSiteData) {
             card.siteData     = cleanSiteData;
+            card.markModified('siteData');
             card.businessName = cleanSiteData.name || cleanSiteData.nameAr || card.businessName;
             card.links        = cleanSiteData.links  || card.links;
             card.events       = cleanSiteData.events || card.events;
