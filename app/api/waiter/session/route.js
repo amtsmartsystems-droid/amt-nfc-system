@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { cookies } from 'next/headers';
 import jwt from 'jsonwebtoken';
 import connectDB from '../../../../backend/config/db';
 import Card from '../../../../backend/models/Card';
@@ -42,11 +43,25 @@ export async function POST(req) {
             card.tableRequests.push(tableReq);
             needsSave = true;
         } else {
+            // Check if this request is from the SAME browser session (e.g., page refresh)
+            let isSameSession = false;
+            const cookieStore = await cookies();
+            const sessionCookie = cookieStore.get('waiter_session');
+            if (sessionCookie?.value) {
+                try {
+                    const decoded = jwt.verify(sessionCookie.value, JWT_SECRET);
+                    if (decoded.sessionId === tableReq.sessionId) {
+                        isSameSession = true;
+                    }
+                } catch(e) {}
+            }
+
             const isExpired = tableReq.sessionExpiresAt && new Date(tableReq.sessionExpiresAt).getTime() < now;
             
-            // Dual Reset System: Override if idle or expired
-            // DO NOT override if 'closing' unless it's expired!
-            if (tableReq.status === 'idle' || isExpired) {
+            // DUAL RESET SYSTEM:
+            // 1. If it's a NEW phone (!isSameSession), OVERRIDE the lock immediately!
+            // 2. If it's the SAME phone, only override if it's idle or expired (DO NOT override 'closing').
+            if (!isSameSession || tableReq.status === 'idle' || isExpired) {
                 tableReq.status = 'active';
                 tableReq.sessionId = Math.random().toString(36).substring(2, 15);
                 tableReq.calls = [];
@@ -56,6 +71,8 @@ export async function POST(req) {
         }
 
         if (needsSave) {
+            // CRITICAL: Mark the array as modified so Mongoose saves the nested changes!
+            card.markModified('tableRequests');
             await card.save();
         }
 

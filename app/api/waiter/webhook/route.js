@@ -53,6 +53,7 @@ export async function POST(req) {
             card.tableRequests[existingIdx].calls = [];
             card.tableRequests[existingIdx].sessionExpiresAt = null;
         } else {
+            if (!card.tableRequests) card.tableRequests = [];
             card.tableRequests.push({ 
                 tableNumber, 
                 status: 'idle',
@@ -61,6 +62,9 @@ export async function POST(req) {
                 sessionExpiresAt: null 
             });
         }
+        
+        // CRITICAL: Mark the subdocument array as modified so the .save() actually commits to MongoDB
+        card.markModified('tableRequests');
         await card.save();
 
         // ── 2. Answer Callback Query to stop the spinning loading indicator ──
