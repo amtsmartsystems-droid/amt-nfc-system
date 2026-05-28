@@ -191,6 +191,16 @@ function PageContent() {
   };
 
   // ── Load Card Data (and check subscription status) ──
+  const normalizeTheme = (name) => {
+    if (!name) return 'restaurant';
+    const n = name.toLowerCase();
+    if (n === 'cafe' || n === 'cafetheme')         return 'cafe';
+    if (n === 'cafe1' || n === 'cafetheme1')       return 'cafe1';
+    if (n === 'gastro' || n === 'gastrobartheme')  return 'gastro';
+    if (n === 'business_card')                     return 'business_card';
+    return 'restaurant'; // covers 'restauranttheme', 'luxury', etc.
+  };
+
   const handleLoadCard = async (id) => {
     const cid = (id || targetCardId).trim();
     if (!cid) return;
@@ -201,16 +211,16 @@ function PageContent() {
       setSubscriptionStatus(data.subscriptionStatus || 'active');
       setAllowEditing(data.allowEditing !== false);
       if (data.siteData) setSiteData(prev => ({ ...prev, ...data.siteData }));
-      // ── Restore cardType + theme ──
+      // ── Restore cardType + theme (normalize old DB values) ──
       if (data.cardType) {
         setCardType(data.cardType);
         if (data.cardType === 'business_card') {
           setTheme('business_card');
-        } else if (data.themeName) {
-          setTheme(data.themeName);
+        } else {
+          setTheme(normalizeTheme(data.themeName));
         }
-      } else if (data.themeName) {
-        setTheme(data.themeName);
+      } else {
+        setTheme(normalizeTheme(data.themeName));
       }
       if (data.primaryColor || data.background) {
         setSiteColors({

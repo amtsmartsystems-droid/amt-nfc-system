@@ -323,10 +323,15 @@ export default function ClientCardViewer({ initialCard, cardId }) {
                     </div>
 
                     {/* ════════ Restaurant / Cafe Theme Content ════════ */}
-                    {card.themeName === 'cafe'   ? <CafeTheme      {...props} /> :
-                     card.themeName === 'cafe1'  ? <CafeTheme1     {...props} /> :
-                     card.themeName === 'gastro' ? <GastroBarTheme {...props} /> :
-                                                   <RestaurantTheme {...props} />}
+                    {(() => {
+                        // Normalize both old DB names (e.g. 'CafeTheme', 'luxury') and new ones ('cafe', 'restaurant')
+                        const tn = (card.themeName || '').toLowerCase();
+                        if (tn === 'cafe' || tn === 'cafetheme')          return <CafeTheme      {...props} />;
+                        if (tn === 'cafe1' || tn === 'cafetheme1')        return <CafeTheme1     {...props} />;
+                        if (tn === 'gastro' || tn === 'gastrobartheme')   return <GastroBarTheme {...props} />;
+                        // 'restaurant', 'restauranttheme', 'luxury', default
+                        return <RestaurantTheme {...props} />;
+                    })()}
 
                     {/* ════════ AMT Branding Footer ════════ */}
                     <div style={{
