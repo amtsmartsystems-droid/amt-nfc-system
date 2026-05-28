@@ -223,6 +223,7 @@ function PageContent() {
 
       if (data.telegramConfig) setTelegramConfig(data.telegramConfig);
       else setTelegramConfig({ botToken: '', chatId: '', isEnabled: false });
+
       showToast(`✅ تم تحميل بيانات البطاقة: ${cid}`);
     } catch {}
   };
@@ -628,31 +629,47 @@ function PageContent() {
             {/* ═══ TAB: LINKS MANAGER ═══ */}
             {adminTab==="links" && (
               <>
-                {/* ═══ SMART WAITER (Telegram) - TOP ═══ */}
-                <div className="rounded-2xl p-4 space-y-3 mb-4" style={{ background:"rgba(16,185,129,0.08)", border:"1.5px dashed rgba(16,185,129,0.5)" }}>
+                {/* ═══ SMART WAITER (Telegram) ═══ */}
+                <div className="rounded-2xl p-4 mb-4 space-y-4" style={{ background:"rgba(16,185,129,0.08)", border:"1.5px dashed rgba(16,185,129,0.5)" }}>
                   <div className="flex items-center justify-between">
                     <Label className="font-bold flex items-center gap-2 text-emerald-300 text-[12px]">
                       <LucideIcons.MessageCircle size={15} className="text-emerald-400" />
-                      🔔 الويتر البوت (Telegram)
+                      🔔 إعدادات نداء الويتر (Telegram)
                     </Label>
                     <label className="relative inline-flex items-center cursor-pointer">
                       <input type="checkbox" className="sr-only peer" checked={telegramConfig.isEnabled} onChange={(e) => setTelegramConfig(p => ({ ...p, isEnabled: e.target.checked }))} />
                       <div className="w-9 h-5 bg-white/10 peer-focus:outline-none rounded-full peer peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:right-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-500"></div>
                     </label>
                   </div>
-                  <div className="space-y-3 pt-3 border-t border-white/10">
-                    <div className="space-y-1.5">
-                      <Label className="text-[11px] text-slate-400">Bot Token</Label>
-                      <AdminInput value={telegramConfig.botToken} onChange={(v) => setTelegramConfig(p => ({ ...p, botToken: v }))} placeholder="123456:ABC-DEF..." dir="ltr" />
-                    </div>
-                    <div className="space-y-1.5">
-                      <Label className="text-[11px] text-slate-400">Chat ID (المجموعة)</Label>
-                      <AdminInput value={telegramConfig.chatId} onChange={(v) => setTelegramConfig(p => ({ ...p, chatId: v }))} placeholder="-100123456789" dir="ltr" />
-                    </div>
-                    {telegramConfig.isEnabled && (
-                      <p className="text-[10px] text-emerald-400/70">✅ مفعّل — يرى الزبون أزرار النداء عند إضافة ?table=5 للرابط</p>
-                    )}
-                  </div>
+                  
+                  {telegramConfig.isEnabled && (
+                    <>
+                      <p className="text-[10px] text-slate-400 mt-1 leading-relaxed">
+                        يتيح للزبون طلب الخدمات عبر مسح البطاقة وتحديد رقم الطاولة، وستصلك الإشعارات فوراً على تليغرام.
+                      </p>
+                      <div className="space-y-4 pt-4 border-t border-white/10 animate-in fade-in slide-in-from-top-2">
+                        <div className="space-y-2">
+                          <Label className="text-[11px] text-slate-400">Telegram Bot Token</Label>
+                          <AdminInput
+                            value={telegramConfig.botToken}
+                            onChange={(v) => setTelegramConfig(p => ({ ...p, botToken: v }))}
+                            placeholder="مثال: 123456:ABC-DEF1234ghIkl..."
+                            dir="ltr"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label className="text-[11px] text-slate-400">Chat ID (معرف المجموعة)</Label>
+                          <AdminInput
+                            value={telegramConfig.chatId}
+                            onChange={(v) => setTelegramConfig(p => ({ ...p, chatId: v }))}
+                            placeholder="مثال: -100123456789"
+                            dir="ltr"
+                          />
+                          <p className="text-[10px] text-slate-500 mt-1">تأكد من إضافة البوت إلى المجموعة وإعطائه صلاحية مسؤول.</p>
+                        </div>
+                      </div>
+                    </>
+                  )}
                 </div>
 
                 {/* Link List */}
@@ -740,49 +757,6 @@ function PageContent() {
                   <button onClick={addLink} className="w-full flex items-center justify-center gap-2 py-3 rounded-xl font-black text-[13px] text-[#1C1C1C] hover:brightness-110 active:scale-95 transition-all" style={{ background:"var(--primary-color,#EDD98A)" }}>
                     <LucideIcons.Plus size={15} /> إضافة الرابط
                   </button>
-                </div>
-
-                {/* ═══ SMART WAITER (Telegram) ═══ */}
-                <div className="rounded-2xl p-4 space-y-4 mt-6" style={{ background:"rgba(255,255,255,0.03)", border:"1px dashed rgba(16,185,129,0.3)" }}>
-                  <div className="flex items-center justify-between">
-                    <Label className="font-bold flex items-center gap-2 text-white text-[12px]">
-                      <LucideIcons.MessageCircle size={14} className={telegramConfig.isEnabled ? "text-emerald-400" : "text-slate-500"} />
-                      نظام النداء الذكي (الويتر البوت)
-                    </Label>
-                    <label className="relative inline-flex items-center cursor-pointer">
-                      <input type="checkbox" className="sr-only peer" checked={telegramConfig.isEnabled} onChange={(e) => setTelegramConfig(p => ({ ...p, isEnabled: e.target.checked }))} />
-                      <div className="w-9 h-5 bg-white/10 peer-focus:outline-none rounded-full peer peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:right-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-500"></div>
-                    </label>
-                  </div>
-                  
-                  {telegramConfig.isEnabled && (
-                    <>
-                      <p className="text-[10px] text-slate-400 mt-1 leading-relaxed">
-                        يتيح للزبون طلب الخدمات عبر مسح البطاقة وتحديد رقم الطاولة، وستصلك الإشعارات فوراً على تليغرام.
-                      </p>
-                      <div className="space-y-4 pt-4 border-t border-white/10 animate-in fade-in slide-in-from-top-2">
-                        <div className="space-y-2">
-                          <Label className="text-[11px] text-slate-400">Telegram Bot Token</Label>
-                          <AdminInput
-                            value={telegramConfig.botToken}
-                            onChange={(v) => setTelegramConfig(p => ({ ...p, botToken: v }))}
-                            placeholder="مثال: 123456:ABC-DEF1234ghIkl..."
-                            dir="ltr"
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <Label className="text-[11px] text-slate-400">Chat ID (معرف المجموعة)</Label>
-                          <AdminInput
-                            value={telegramConfig.chatId}
-                            onChange={(v) => setTelegramConfig(p => ({ ...p, chatId: v }))}
-                            placeholder="مثال: -100123456789"
-                            dir="ltr"
-                          />
-                          <p className="text-[10px] text-slate-500 mt-1">تأكد من إضافة البوت إلى المجموعة وإعطائه صلاحية مسؤول.</p>
-                        </div>
-                      </div>
-                    </>
-                  )}
                 </div>
               </>
             )}

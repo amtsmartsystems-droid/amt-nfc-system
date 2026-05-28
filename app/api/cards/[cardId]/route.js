@@ -45,6 +45,7 @@ export async function GET(req, { params }) {
             allowEditing:       card.allowEditing,
             telegramConfig:     card.telegramConfig || { botToken: '', chatId: '', isEnabled: false },
             isWaiterEnabled:    card.telegramConfig?.isEnabled === true,
+            tableMapping:       card.tableMapping || [],
         });
     } catch (error) {
         return NextResponse.json({ error: 'خطأ في الخادم' }, { status: 500 });
@@ -123,6 +124,12 @@ export async function PUT(req, { params }) {
                 isEnabled: Boolean(body.telegramConfig.isEnabled)
               }
             : undefined;
+        const cleanTableMapping = body.tableMapping !== undefined
+            ? (Array.isArray(body.tableMapping) ? body.tableMapping.map(t => ({
+                tagId: sanitizeString(t.tagId || '', 100),
+                tableName: sanitizeString(t.tableName || '', 100)
+              })).filter(t => t.tagId && t.tableName) : [])
+            : undefined;
 
         // ── 5. Save ────────────────────────────────────────────────
         if (!card) {
@@ -138,6 +145,7 @@ export async function PUT(req, { params }) {
                 links:        cleanSiteData?.links  || [],
                 events:       cleanSiteData?.events || [],
                 isLocked:     false,
+                tableMapping: cleanTableMapping || [],
             });
             await newCard.save();
             return NextResponse.json({ success: true, card: newCard });
@@ -149,6 +157,7 @@ export async function PUT(req, { params }) {
         if (cleanBg)                 card.background   = cleanBg;
         if (cleanWifi !== undefined) card.wifi         = cleanWifi;
         if (cleanTelegram !== undefined) card.telegramConfig = cleanTelegram;
+        if (cleanTableMapping !== undefined) card.tableMapping = cleanTableMapping;
         if (cleanSiteData) {
             card.siteData     = cleanSiteData;
             card.businessName = cleanSiteData.name || cleanSiteData.nameAr || card.businessName;

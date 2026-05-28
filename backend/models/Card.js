@@ -89,6 +89,25 @@ const cardSchema = new mongoose.Schema({
         },
         default: { botToken: '', chatId: '', isEnabled: false },
     },
+    tableMapping: {
+        type: [{
+            tagId: { type: String, required: true },
+            tableName: { type: String, required: true }
+        }],
+        default: [],
+    },
+
+    // ── Per-table session state (Server-Side Architecture) ─────────────
+    tableRequests: {
+        type: [{
+            tableNumber:     { type: String, required: true },
+            status:          { type: String, enum: ['idle', 'active', 'closing'], default: 'idle' },
+            sessionId:       { type: String, default: null },
+            calls:           { type: [Date], default: [] },
+            sessionExpiresAt:{ type: Date, default: null }
+        }],
+        default: [],
+    },
 
     // ── Subscription Gate ──────────────────────────────────────────
     /**
