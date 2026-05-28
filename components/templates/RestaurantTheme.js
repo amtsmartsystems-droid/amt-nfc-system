@@ -41,6 +41,11 @@ export default function RestaurantTheme({ cardId, siteData, siteColors, lang = "
     { num:"III", title:"ON-TIME DELIVERY",     titleAr:"توصيل في وقته",desc:"Always on schedule.",          descAr:"دائماً في موعده." },
   ];
 
+  const imgs = sd.images || {};
+  const hero1 = imgs.hero1 || "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?q=80&w=800&auto=format&fit=crop";
+  const about1 = imgs.about1 || "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?q=80&w=800&auto=format&fit=crop";
+  const chef1 = imgs.chef1 || "https://images.unsplash.com/photo-1614777735417-4040049e05d7?q=80&w=800&auto=format&fit=crop";
+
   // ── Dynamic Link Button ──
   const LinkBtn = ({ link, i }) => {
     const label = t(link.title, link.titleAr);
@@ -81,7 +86,7 @@ export default function RestaurantTheme({ cardId, siteData, siteColors, lang = "
 
       {/* ── HERO ── */}
       <section className="relative min-h-[500px] flex flex-col justify-end overflow-hidden">
-        <Image src="https://images.unsplash.com/photo-1568901346375-23c9450c58cd?q=80&w=800&auto=format&fit=crop"
+        <Image src={hero1}
              alt="hero" fill priority style={{ objectFit: 'cover' }} className="absolute inset-0" />
         <div className="absolute inset-0" style={{ background:"linear-gradient(180deg,rgba(0,0,0,.5) 0%,rgba(0,0,0,.15) 38%,rgba(0,0,0,.70) 100%)" }} />
         <div className="relative z-10 px-6 pb-6 pt-16">
@@ -108,7 +113,7 @@ export default function RestaurantTheme({ cardId, siteData, siteColors, lang = "
       {/* ── ABOUT + LINKS ── */}
       <section className="bg-white px-5 pt-9 pb-10 food-pattern">
         <div className="relative rounded-[20px] overflow-hidden mb-7 shadow-card h-[190px]">
-          <Image src="https://images.unsplash.com/photo-1555396273-367ea4eb4db5?q=80&w=800&auto=format&fit=crop"
+          <Image src={about1}
                alt="interior" fill style={{ objectFit: 'cover' }} />
           <button className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-deep hover:scale-110 transition-transform">
             <LucideIcons.ChevronRight size={18} color="#1C1C1C" />
@@ -138,7 +143,7 @@ export default function RestaurantTheme({ cardId, siteData, siteColors, lang = "
       {/* ── PRINCIPLES ── */}
       <section className="px-5 pt-9 pb-11" style={{ background:bgCream }}>
         <div className="relative rounded-[20px] overflow-hidden mb-7 shadow-card h-[190px]">
-          <Image src="https://images.unsplash.com/photo-1614777735417-4040049e05d7?q=80&w=800&auto=format&fit=crop"
+          <Image src={chef1}
                alt="chef" fill style={{ objectFit: 'cover' }} />
         </div>
         <STitle>{prinT}</STitle>

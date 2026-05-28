@@ -90,6 +90,8 @@ function PageContent() {
   const [saving,     setSaving]     = useState(false);
   const [publishedUrl, setPublishedUrl] = useState("");
   const [wifi,       setWifi]       = useState({ ssid: "", password: "" });
+  const [telegramConfig, setTelegramConfig] = useState({ botToken: "", chatId: "", isEnabled: false });
+  const [uploadingPdf, setUploadingPdf] = useState(false);
   // Subscription gate state
   const [subscriptionStatus, setSubscriptionStatus] = useState('active');
   const [allowEditing,       setAllowEditing]       = useState(true);
@@ -174,6 +176,7 @@ function PageContent() {
           primaryColor: siteColors.primary,
           background: siteColors.background,
           wifi: { ssid: wifi.ssid.trim(), password: wifi.password.trim() },
+          telegramConfig,
         })
       });
       const data = await res.json();
@@ -216,6 +219,10 @@ function PageContent() {
         });
       }
       if (data.wifi) setWifi(data.wifi);
+      else setWifi({ ssid: '', password: '' });
+
+      if (data.telegramConfig) setTelegramConfig(data.telegramConfig);
+      else setTelegramConfig({ botToken: '', chatId: '', isEnabled: false });
       showToast(`✅ تم تحميل بيانات البطاقة: ${cid}`);
     } catch {}
   };
@@ -237,6 +244,38 @@ function PageContent() {
     setSiteData(p=>({...p,links:a}));
   };
 
+  // ── File Upload (Vercel Blob) ──
+  const handlePdfUpload = async (file) => {
+    if (!file) return;
+    setUploadingPdf(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'فشل الرفع');
+      
+      setSiteData(p => {
+        const newLinks = [...p.links];
+        const dummyIndex = newLinks.findIndex(l => l.url === '#' && (l.title?.toLowerCase().includes('menu') || l.titleAr?.includes('قائمة')));
+        if (dummyIndex !== -1) {
+          newLinks[dummyIndex] = { ...newLinks[dummyIndex], url: data.url };
+        } else {
+          newLinks.unshift({ id: Date.now(), title: "Menu", titleAr: "المنيو", url: data.url });
+        }
+        return { ...p, links: newLinks };
+      });
+      showToast("✅ تم رفع المنيو وتحديث الرابط! (لا تنسَ الضغط على حفظ ونشر)");
+    } catch (e) {
+      showToast(`❌ خطأ: ${e.message}`, false);
+    } finally {
+      setUploadingPdf(false);
+    }
+  };
+
   // ── Events CRUD ──
   const addEvent = () => {
     const title = newEvent.title.trim() || newEvent.titleEn.trim();
@@ -247,6 +286,48 @@ function PageContent() {
   };
   const delEvent = id => { setSiteData(p=>({...p, events:(p.events||[]).filter(e=>e.id!==id)})); showToast("🗑️ تم حذف الفعالية"); };
   const updEvent = (id,f,v) => setSiteData(p=>({...p, events:(p.events||[]).map(e=>e.id===id?{...e,[f]:v}:e)}));
+
+  // ── Image Upload (Client-Side Compression) ──
+  const handleImageUpload = (slot, file) => {
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new window.Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const MAX_WIDTH = 800;
+        const MAX_HEIGHT = 800;
+        let width = img.width;
+        let height = img.height;
+
+        if (width > height) {
+          if (width > MAX_WIDTH) {
+            height = Math.round((height * MAX_WIDTH) / width);
+            width = MAX_WIDTH;
+          }
+        } else {
+          if (height > MAX_HEIGHT) {
+            width = Math.round((width * MAX_HEIGHT) / height);
+            height = MAX_HEIGHT;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.6); // Compress
+        setSiteData(p => ({
+          ...p,
+          images: { ...(p.images || {}), [slot]: dataUrl }
+        }));
+        showToast(`✅ تم رفع وتخصيص الصورة`);
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  };
 
   const renderTheme = () => {
     const props = { siteData, siteColors, lang };
@@ -481,8 +562,10 @@ function PageContent() {
             {[
               { id:"links",  label:"روابط",   icon:"Link2"        },
               { id:"events", label:"فعاليات", icon:"CalendarDays" },
+              { id:"images", label:"صـور",    icon:"Image"        },
               { id:"ai",     label:"AI",       icon:"Sparkles"    },
               { id:"design", label:"تصميم",   icon:"Palette"      },
+              { id:"telegram", label:"نداء", icon:"MessageCircle" },
             ].map(tb => {
               const Ic = LucideIcons[tb.icon]||LucideIcons.Circle;
               const active = adminTab===tb.id;
@@ -497,6 +580,51 @@ function PageContent() {
 
           {/* Scrollable Tab Content */}
           <div className="flex-1 overflow-y-auto px-5 py-5 space-y-4" style={{ scrollbarWidth:"thin", scrollbarColor:"rgba(255,255,255,.1) transparent" }}>
+
+            {/* ═══ TAB: IMAGES MANAGER ═══ */}
+            {adminTab==="images" && (
+              <div className="space-y-4">
+                <p className="text-[12px] text-slate-400 mb-2 leading-relaxed">
+                  اختر الصور التي ترغب بتبديلها. سيتم ضغطها تلقائياً لتسريع الموقع ⚡
+                </p>
+                {[
+                  { slot: 'hero1', label: 'الصورة الرئيسية 1 (Hero)', icon: 'Image' },
+                  { slot: 'hero2', label: 'الصورة الرئيسية 2 (لبعض القوالب)', icon: 'Image' },
+                  { slot: 'hero3', label: 'الصورة الرئيسية 3 (لبعض القوالب)', icon: 'Image' },
+                  { slot: 'food1', label: 'صورة المنيو/الطعام', icon: 'Coffee' },
+                  { slot: 'about1', label: 'صورة النبذة/الداخلية', icon: 'Utensils' },
+                  { slot: 'chef1', label: 'صورة الطاهي/التحضير', icon: 'User' },
+                ].map(({ slot, label, icon }) => {
+                  const Ic = LucideIcons[icon] || LucideIcons.Image;
+                  const currentImage = siteData.images?.[slot];
+                  return (
+                    <div key={slot} className="rounded-2xl p-4 space-y-3" style={{ background:"rgba(255,255,255,0.03)", border:"1px solid rgba(255,255,255,0.07)" }}>
+                      <div className="flex items-center justify-between">
+                        <Label className="flex items-center gap-2">
+                          <Ic size={14} className="text-yellow-400" /> {label}
+                        </Label>
+                        {currentImage && (
+                          <button onClick={() => setSiteData(p => { const newImgs = {...(p.images||{})}; delete newImgs[slot]; return {...p, images: newImgs}; })} className="text-[10px] text-red-400 hover:text-red-300">
+                            إزالة التخصيص
+                          </button>
+                        )}
+                      </div>
+                      <div className="flex gap-3 items-center">
+                        {currentImage && (
+                          <img src={currentImage} alt="preview" className="w-12 h-12 rounded-lg object-cover border border-white/10" />
+                        )}
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => handleImageUpload(slot, e.target.files[0])}
+                          className="block w-full text-[11px] text-slate-400 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-[11px] file:font-bold file:bg-white/10 file:text-white hover:file:bg-white/20 cursor-pointer"
+                        />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
 
             {/* ═══ TAB: LINKS MANAGER ═══ */}
             {adminTab==="links" && (
@@ -554,9 +682,20 @@ function PageContent() {
                   })}
                 </div>
 
+                {/* Upload PDF Menu Button */}
+                <div className="rounded-2xl p-4 mb-3 space-y-2" style={{ background:"rgba(16, 185, 129, 0.05)", border:"1px dashed rgba(16, 185, 129, 0.3)" }}>
+                  <Label>☁️ رفع ملف الـ PDF (المنيو)</Label>
+                  <label className={`flex items-center justify-center gap-2 py-2.5 rounded-xl font-bold text-[12px] text-white transition-all cursor-pointer ${uploadingPdf ? 'bg-emerald-600/50 cursor-not-allowed' : 'bg-emerald-600 hover:bg-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.3)]'}`}>
+                    {uploadingPdf ? <LucideIcons.Loader2 size={14} className="animate-spin" /> : <LucideIcons.CloudUpload size={14} />}
+                    {uploadingPdf ? "جاري الرفع السحابي..." : "اختر ملف من جهازك لرفعه فوراً"}
+                    <input type="file" accept="application/pdf,image/*" onChange={(e) => handlePdfUpload(e.target.files[0])} className="hidden" disabled={uploadingPdf} />
+                  </label>
+                  <p className="text-[9.5px] text-emerald-400/70 text-center mt-1">سيتم رفع الملف وتوليد الرابط المباشر وإضافته لخانة الرابط أدناه تلقائياً ✨</p>
+                </div>
+
                 {/* Add New Link */}
                 <div className="rounded-2xl p-4 space-y-3" style={{ background:"rgba(255,255,255,0.03)", border:"1px dashed rgba(255,255,255,0.10)" }}>
-                  <Label>➕ إضافة رابط جديد</Label>
+                  <Label>➕ إضافة رابط يدوياً</Label>
                   <div className="grid grid-cols-2 gap-2">
                     <div><Label>إنجليزي</Label><AdminInput value={newLink.title} onChange={v=>setNewLink(p=>({...p,title:v}))} placeholder="Instagram" dir="ltr" /></div>
                     <div><Label>عربي</Label><AdminInput value={newLink.titleAr} onChange={v=>setNewLink(p=>({...p,titleAr:v}))} placeholder="انستغرام" dir="rtl" /></div>
@@ -769,6 +908,52 @@ function PageContent() {
                       </div>
                     ))}
                   </div>
+                </div>
+              </div>
+            )}
+
+            {/* ═══ TAB: SMART WAITER (Telegram) ═══ */}
+            {adminTab==="telegram" && (
+              <div className="space-y-4">
+                <p className="text-[12px] text-slate-400 mb-2 leading-relaxed">
+                  نظام النداء الذكي يتيح للزبون طلب الخدمات عبر مسح البطاقة وتحديد رقم الطاولة. ستصلك الإشعارات فوراً على مجموعة تيليغرام.
+                </p>
+
+                <div className="rounded-2xl p-4 space-y-4" style={{ background:"rgba(255,255,255,0.03)", border:"1px solid rgba(255,255,255,0.07)" }}>
+                  <div className="flex items-center justify-between">
+                    <Label className="font-bold flex items-center gap-2 text-white text-[12px]">
+                      <LucideIcons.Power size={14} className={telegramConfig.isEnabled ? "text-emerald-400" : "text-slate-500"} />
+                      تفعيل نظام النداء
+                    </Label>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input type="checkbox" className="sr-only peer" checked={telegramConfig.isEnabled} onChange={(e) => setTelegramConfig(p => ({ ...p, isEnabled: e.target.checked }))} />
+                      <div className="w-9 h-5 bg-white/10 peer-focus:outline-none rounded-full peer peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:right-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-500"></div>
+                    </label>
+                  </div>
+
+                  {telegramConfig.isEnabled && (
+                    <div className="space-y-4 pt-4 border-t border-white/10 animate-in fade-in slide-in-from-top-2">
+                      <div className="space-y-2">
+                        <Label className="text-[11px] text-slate-400">Telegram Bot Token</Label>
+                        <AdminInput
+                          value={telegramConfig.botToken}
+                          onChange={(v) => setTelegramConfig(p => ({ ...p, botToken: v }))}
+                          placeholder="مثال: 123456:ABC-DEF1234ghIkl..."
+                          dir="ltr"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-[11px] text-slate-400">Chat ID (معرف المجموعة)</Label>
+                        <AdminInput
+                          value={telegramConfig.chatId}
+                          onChange={(v) => setTelegramConfig(p => ({ ...p, chatId: v }))}
+                          placeholder="مثال: -100123456789"
+                          dir="ltr"
+                        />
+                        <p className="text-[10px] text-slate-500 mt-1">تأكد من إضافة البوت إلى المجموعة وإعطائه صلاحية مسؤول.</p>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             )}

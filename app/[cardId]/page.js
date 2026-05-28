@@ -62,7 +62,8 @@ export default async function PublicCardPage({ params }) {
         siteData:  JSON.parse(JSON.stringify(card.siteData  || {})),
         links:     JSON.parse(JSON.stringify(card.links     || [])),
         events:    JSON.parse(JSON.stringify(card.events    || [])),
-        isLocked:  card.isLocked
+        isLocked:  card.isLocked,
+        isWaiterEnabled: card.telegramConfig?.isEnabled === true,
     };
     
     return <ClientCardViewer initialCard={serializedCard} cardId={cardId} />;

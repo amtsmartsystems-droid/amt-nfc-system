@@ -81,6 +81,14 @@ const cardSchema = new mongoose.Schema({
         },
         default: { ssid: '', password: '' },
     },
+    telegramConfig: {
+        type: {
+            botToken:  { type: String, default: '' },
+            chatId:    { type: String, default: '' },
+            isEnabled: { type: Boolean, default: false },
+        },
+        default: { botToken: '', chatId: '', isEnabled: false },
+    },
 
     // ── Subscription Gate ──────────────────────────────────────────
     /**

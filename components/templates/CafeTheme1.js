@@ -32,6 +32,10 @@ export default function CafeTheme1({ cardId, siteData, siteColors, lang = "en" }
   const subtitle = t(sd.subtitle || "Your local bakery · Est. 1972", sd.subtitleAr);
   const links    = sd.links || [];
 
+  const imgs = sd.images || {};
+  const hero1 = imgs.hero1 || "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?q=80&w=800&auto=format&fit=crop";
+  const food1 = imgs.food1 || "https://images.unsplash.com/photo-1447933601403-0c6688de566e?q=80&w=800&auto=format&fit=crop";
+
   // ── Categorize links: social vs regular ──
   const SOCIAL_KEYWORDS = ["instagram","انستا","تيك توك","tiktok","youtube","يوتيوب","facebook","twitter","تويتر","فيسبوك","snapchat","سناب","linkedin","threads"];
   const socialLinks  = links.filter(l => SOCIAL_KEYWORDS.some(kw => (l.title||"").toLowerCase().includes(kw)));
@@ -99,7 +103,7 @@ export default function CafeTheme1({ cardId, siteData, siteColors, lang = "en" }
       <section className="relative w-full h-[52vh] overflow-hidden">
         {/* Background hero image */}
         <Image
-          src="https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?q=80&w=800&auto=format&fit=crop"
+          src={hero1}
           alt="Hero"
           fill
           priority
@@ -219,7 +223,7 @@ export default function CafeTheme1({ cardId, siteData, siteColors, lang = "en" }
           style={{ background: `linear-gradient(180deg, ${bgDark} 0%, transparent 100%)` }}
         />
         <Image
-          src="https://images.unsplash.com/photo-1447933601403-0c6688de566e?q=80&w=800&auto=format&fit=crop"
+          src={food1}
           alt="Coffee beans"
           fill
           style={{ objectFit: 'cover' }}

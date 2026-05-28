@@ -27,6 +27,8 @@ export async function GET(req, { params }) {
         if (!card) return NextResponse.json({ error: 'Card not found' }, { status: 404 });
         if (card.isLocked) return NextResponse.json({ error: 'مقفلة', isLocked: true }, { status: 403 });
 
+        const user = getUser(req);
+
         return NextResponse.json({
             cardType:           card.cardType   || 'restaurant',   // ← NEW
             themeName:          card.themeName,
@@ -41,6 +43,8 @@ export async function GET(req, { params }) {
             // Subscription info — for admin dashboard UI lock
             subscriptionStatus: card.subscriptionStatus,
             allowEditing:       card.allowEditing,
+            telegramConfig:     user ? (card.telegramConfig || { botToken: '', chatId: '', isEnabled: false }) : undefined,
+            isWaiterEnabled:    card.telegramConfig?.isEnabled === true,
         });
     } catch (error) {
         return NextResponse.json({ error: 'خطأ في الخادم' }, { status: 500 });
@@ -112,6 +116,13 @@ export async function PUT(req, { params }) {
         const cleanWifi     = body.wifi
             ? { ssid: sanitizeString(body.wifi.ssid || '', 100), password: sanitizeString(body.wifi.password || '', 100) }
             : undefined;
+        const cleanTelegram = body.telegramConfig
+            ? {
+                botToken:  sanitizeString(body.telegramConfig.botToken || '', 200),
+                chatId:    sanitizeString(body.telegramConfig.chatId || '', 100),
+                isEnabled: Boolean(body.telegramConfig.isEnabled)
+              }
+            : undefined;
 
         // ── 5. Save ────────────────────────────────────────────────
         if (!card) {
@@ -137,6 +148,7 @@ export async function PUT(req, { params }) {
         if (cleanPrimary)            card.primaryColor = cleanPrimary;
         if (cleanBg)                 card.background   = cleanBg;
         if (cleanWifi !== undefined) card.wifi         = cleanWifi;
+        if (cleanTelegram !== undefined) card.telegramConfig = cleanTelegram;
         if (cleanSiteData) {
             card.siteData     = cleanSiteData;
             card.businessName = cleanSiteData.name || cleanSiteData.nameAr || card.businessName;

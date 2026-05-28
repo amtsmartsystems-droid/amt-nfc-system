@@ -31,6 +31,9 @@ export default function CafeTheme({ cardId, siteData, siteColors, lang = "en" })
   const hours = sd.hours   || "7:00 AM — 10:00 PM";
   const address = sd.address || "42 Coffee Lane, Brooklyn";
   const links = sd.links || [];
+  
+  const imgs = sd.images || {};
+  const hero1 = imgs.hero1 || "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?q=80&w=800&auto=format&fit=crop";
 
   const LinkBtn = ({ link, i }) => {
     const label = t(link.title, link.titleAr);
@@ -89,7 +92,7 @@ export default function CafeTheme({ cardId, siteData, siteColors, lang = "en" })
       {/* ── FEATURE IMAGE ── */}
       <section className="px-5 pb-8">
         <div className="rounded-3xl overflow-hidden shadow-deep relative h-[220px]">
-          <Image src="https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?q=80&w=800&auto=format&fit=crop"
+          <Image src={hero1}
                alt="cafe" fill priority style={{ objectFit: 'cover' }} />
         </div>
       </section>

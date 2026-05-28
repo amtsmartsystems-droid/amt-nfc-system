@@ -41,6 +41,12 @@ export default function GastroBarTheme({ cardId, siteData, siteColors, lang = "e
   const socialLinks  = links.filter(l => SOCIAL_KW.some(kw => (l.title||"").toLowerCase().includes(kw)));
   const primaryLinks = links.filter(l => !SOCIAL_KW.some(kw => (l.title||"").toLowerCase().includes(kw)));
 
+  const imgs = sd.images || {};
+  const hero1 = imgs.hero1 || "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?q=80&w=400&auto=format&fit=crop";
+  const hero2 = imgs.hero2 || "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?q=80&w=400&auto=format&fit=crop";
+  const hero3 = imgs.hero3 || "https://images.unsplash.com/photo-1551218372-a8789b81b253?q=80&w=400&auto=format&fit=crop";
+  const food1 = imgs.food1 || "https://images.unsplash.com/photo-1504674900247-0877df9cc836?q=80&w=800&auto=format&fit=crop";
+
   // ── Yellow accent button (main CTA) ──
   const YellowBtn = ({ link }) => {
     const label = t(link.title, link.titleAr);
@@ -109,20 +115,20 @@ export default function GastroBarTheme({ cardId, siteData, siteColors, lang = "e
           <div className="grid grid-cols-2 gap-[3px] w-full h-full">
             <div className="relative overflow-hidden">
               <Image
-                src="https://images.unsplash.com/photo-1568901346375-23c9450c58cd?q=80&w=400&auto=format&fit=crop"
+                src={hero1}
                 alt="" fill priority style={{ objectFit: 'cover' }}
               />
             </div>
             <div className="grid grid-rows-2 gap-[3px] overflow-hidden">
               <div className="relative overflow-hidden">
                 <Image
-                  src="https://images.unsplash.com/photo-1555396273-367ea4eb4db5?q=80&w=400&auto=format&fit=crop"
+                  src={hero2}
                   alt="" fill style={{ objectFit: 'cover' }}
                 />
               </div>
               <div className="relative overflow-hidden">
                 <Image
-                  src="https://images.unsplash.com/photo-1551218372-a8789b81b253?q=80&w=400&auto=format&fit=crop"
+                  src={hero3}
                   alt="" fill style={{ objectFit: 'cover' }}
                 />
               </div>
@@ -189,7 +195,7 @@ export default function GastroBarTheme({ cardId, siteData, siteColors, lang = "e
         </div>
         {/* Photo carousel-style */}
         <div className="relative mx-5 rounded-2xl overflow-hidden mb-5 shadow-[0_8px_32px_rgba(0,0,0,0.5)] h-[190px]">
-          <Image src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?q=80&w=800&auto=format&fit=crop"
+          <Image src={food1}
                alt="food" fill style={{ objectFit: 'cover' }} />
           {/* Dot indicators */}
           <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
@@ -198,13 +204,11 @@ export default function GastroBarTheme({ cardId, siteData, siteColors, lang = "e
             ))}
           </div>
         </div>
-        <div className="px-5">
-          {primaryLinks.find(l=>(l.title||"").toLowerCase().includes("menu")||("منيو قائمة").includes((l.titleAr||"").toLowerCase())) ? (
-            <YellowBtn link={primaryLinks.find(l=>(l.title||"").toLowerCase().includes("menu"))} />
-          ) : primaryLinks[1] ? (
+        {primaryLinks[1] && (
+          <div className="px-5">
             <YellowBtn link={primaryLinks[1]} />
-          ) : null}
-        </div>
+          </div>
+        )}
       </section>
 
       {/* ══════════════════════════════════════════

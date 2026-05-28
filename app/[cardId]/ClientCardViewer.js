@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import useSWR from 'swr';
 import { Globe, Wifi, Check, Copy } from 'lucide-react';
 import RestaurantTheme  from '../../components/templates/RestaurantTheme';
@@ -14,6 +14,48 @@ const fetcher = (url) => fetch(url).then((res) => res.json());
 export default function ClientCardViewer({ initialCard, cardId }) {
     const [lang,      setLang]      = useState('ar');
     const [wifiState, setWifiState] = useState('idle');
+
+    /* ── Smart Waiter State ── */
+    const [tableNumber, setTableNumber] = useState(null);
+    const [waiterToast, setWaiterToast] = useState(null);
+    const [cooldown, setCooldown]       = useState(0);
+
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            const params = new URLSearchParams(window.location.search);
+            setTableNumber(params.get('table'));
+        }
+    }, []);
+
+    useEffect(() => {
+        if (cooldown > 0) {
+            const timer = setTimeout(() => setCooldown(cooldown - 1), 1000);
+            return () => clearTimeout(timer);
+        }
+    }, [cooldown]);
+
+    const handleWaiterRequest = async (serviceType) => {
+        if (cooldown > 0 || !tableNumber) return;
+        setCooldown(60);
+        try {
+            const res = await fetch('/api/waiter', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ restaurantId: cardId, tableNumber, serviceType })
+            });
+            const data = await res.json();
+            if (res.ok) {
+                setWaiterToast({ message: data.message || "تم إرسال طلبك للويتر بنجاح! 🚀", type: 'success' });
+            } else {
+                setWaiterToast({ message: data.error || "عذراً، حدث خطأ", type: 'error' });
+                setCooldown(5); // reduced cooldown on error
+            }
+        } catch(e) {
+            setWaiterToast({ message: "خطأ في الاتصال بالخادم", type: 'error' });
+            setCooldown(5);
+        }
+        setTimeout(() => setWaiterToast(null), 4000);
+    };
 
     /* ── SWR ── */
     const { data: fetchedCard } = useSWR(`/api/cards/${cardId}`, fetcher, {
@@ -231,6 +273,60 @@ export default function ClientCardViewer({ initialCard, cardId }) {
                     </div>
                 </div>
             </div>
+
+            {/* ════════ SMART WAITER TOAST ════════ */}
+            {waiterToast && (
+                <div style={{
+                    position: 'fixed', top: 20, left: 12, right: 12, zIndex: 9999,
+                    maxWidth: 420, margin: '0 auto', pointerEvents: 'none',
+                    animation: 'fadeInDown 0.3s ease-out'
+                }}>
+                    <div style={{
+                        background: waiterToast.type === 'success' ? 'rgba(16,185,129,0.95)' : 'rgba(239,68,68,0.95)',
+                        color: '#fff', padding: '12px 16px', borderRadius: 12,
+                        textAlign: 'center', fontWeight: 'bold', fontSize: 13,
+                        boxShadow: '0 10px 25px rgba(0,0,0,0.2)', fontFamily: 'Cairo, sans-serif'
+                    }}>
+                        {waiterToast.message}
+                    </div>
+                </div>
+            )}
+
+            {/* ════════ SMART WAITER FABs ════════ */}
+            {card.isWaiterEnabled && tableNumber && (
+                <div style={{
+                    position: 'fixed', bottom: 20, left: 0, right: 0, zIndex: 9998,
+                    display: 'flex', justifyContent: 'center', pointerEvents: 'none'
+                }}>
+                    <div style={{
+                        display: 'flex', gap: 10, padding: '10px 14px', borderRadius: 24,
+                        background: 'rgba(10,15,28,0.85)', backdropFilter: 'blur(16px)',
+                        WebkitBackdropFilter: 'blur(16px)', border: `1px solid ${primary}40`,
+                        boxShadow: '0 10px 40px rgba(0,0,0,0.5)', pointerEvents: 'auto',
+                        fontFamily: 'Cairo, sans-serif'
+                    }} dir="rtl">
+                        {[
+                            { id: 'bill',   label: 'حساب',  icon: '💸' },
+                            { id: 'coal',   label: 'فحم',   icon: '💨' },
+                            { id: 'clean',  label: 'تنظيف', icon: '🧹' },
+                            { id: 'waiter', label: 'ويتر',  icon: '🔔' },
+                        ].map(btn => (
+                            <button key={btn.id}
+                                onClick={() => handleWaiterRequest(btn.id)}
+                                disabled={cooldown > 0}
+                                style={{
+                                    display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4,
+                                    background: 'transparent', border: 'none', color: '#fff',
+                                    opacity: cooldown > 0 ? 0.5 : 1, cursor: cooldown > 0 ? 'not-allowed' : 'pointer',
+                                    padding: '4px 8px', transition: 'all 0.2s'
+                                }}>
+                                <span style={{ fontSize: 20 }}>{cooldown > 0 ? '⏳' : btn.icon}</span>
+                                <span style={{ fontSize: 10, fontWeight: 700 }}>{cooldown > 0 ? `${cooldown}s` : btn.label}</span>
+                            </button>
+                        ))}
+                    </div>
+                </div>
+            )}
         </>
     );
 }

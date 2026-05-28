@@ -23,3 +23,5 @@ test.js
 
 # Debug logs
 npm-debug.log*
+
+.env*
