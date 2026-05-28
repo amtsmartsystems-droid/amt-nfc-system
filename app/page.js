@@ -640,22 +640,19 @@ function PageContent() {
                       <div className="w-9 h-5 bg-white/10 peer-focus:outline-none rounded-full peer peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:right-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-500"></div>
                     </label>
                   </div>
-                  {!telegramConfig.isEnabled && (
-                    <p className="text-[10px] text-slate-500">فعّل الزر لإعداد نظام نداء الويتر عبر تيليغرام</p>
-                  )}
-                  {telegramConfig.isEnabled && (
-                    <div className="space-y-3 pt-3 border-t border-white/10">
-                      <div className="space-y-1.5">
-                        <Label className="text-[11px] text-slate-400">Bot Token</Label>
-                        <AdminInput value={telegramConfig.botToken} onChange={(v) => setTelegramConfig(p => ({ ...p, botToken: v }))} placeholder="123456:ABC-DEF..." dir="ltr" />
-                      </div>
-                      <div className="space-y-1.5">
-                        <Label className="text-[11px] text-slate-400">Chat ID (المجموعة)</Label>
-                        <AdminInput value={telegramConfig.chatId} onChange={(v) => setTelegramConfig(p => ({ ...p, chatId: v }))} placeholder="-100123456789" dir="ltr" />
-                      </div>
-                      <p className="text-[10px] text-emerald-400/70">✅ مفعّل — يرى الزبون أزرار النداء عند إضافة ?table=5 للرابط</p>
+                  <div className="space-y-3 pt-3 border-t border-white/10">
+                    <div className="space-y-1.5">
+                      <Label className="text-[11px] text-slate-400">Bot Token</Label>
+                      <AdminInput value={telegramConfig.botToken} onChange={(v) => setTelegramConfig(p => ({ ...p, botToken: v }))} placeholder="123456:ABC-DEF..." dir="ltr" />
                     </div>
-                  )}
+                    <div className="space-y-1.5">
+                      <Label className="text-[11px] text-slate-400">Chat ID (المجموعة)</Label>
+                      <AdminInput value={telegramConfig.chatId} onChange={(v) => setTelegramConfig(p => ({ ...p, chatId: v }))} placeholder="-100123456789" dir="ltr" />
+                    </div>
+                    {telegramConfig.isEnabled && (
+                      <p className="text-[10px] text-emerald-400/70">✅ مفعّل — يرى الزبون أزرار النداء عند إضافة ?table=5 للرابط</p>
+                    )}
+                  </div>
                 </div>
 
                 {/* Link List */}

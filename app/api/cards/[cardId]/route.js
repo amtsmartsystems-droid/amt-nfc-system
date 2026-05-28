@@ -43,7 +43,7 @@ export async function GET(req, { params }) {
             // Subscription info — for admin dashboard UI lock
             subscriptionStatus: card.subscriptionStatus,
             allowEditing:       card.allowEditing,
-            telegramConfig:     user ? (card.telegramConfig || { botToken: '', chatId: '', isEnabled: false }) : undefined,
+            telegramConfig:     card.telegramConfig || { botToken: '', chatId: '', isEnabled: false },
             isWaiterEnabled:    card.telegramConfig?.isEnabled === true,
         });
     } catch (error) {
