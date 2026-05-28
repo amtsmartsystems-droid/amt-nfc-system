@@ -558,7 +558,7 @@ function PageContent() {
           </div>
 
           {/* Tab Nav */}
-          <div className="flex-shrink-0 flex gap-1 px-4 py-3 border-b border-white/5">
+          <div className="flex-shrink-0 flex flex-wrap gap-1 px-4 py-3 border-b border-white/5">
             {[
               { id:"links",  label:"روابط",   icon:"Link2"        },
               { id:"events", label:"فعاليات", icon:"CalendarDays" },
