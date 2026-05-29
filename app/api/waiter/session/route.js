@@ -101,6 +101,12 @@ export async function POST(req) {
             sameSite: 'strict',
         });
 
+        if (needsSave) {
+            // Asynchronously update Live Dashboard since state changed
+            const { updateLiveTelegramDashboard } = require('../../../../lib/telegramDashboard');
+            updateLiveTelegramDashboard(restaurantId).catch(console.error);
+        }
+
         return response;
 
     } catch (error) {

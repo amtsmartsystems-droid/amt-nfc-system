@@ -86,8 +86,9 @@ const cardSchema = new mongoose.Schema({
             botToken:  { type: String, default: '' },
             chatId:    { type: String, default: '' },
             isEnabled: { type: Boolean, default: false },
+            dashboardMessageId: { type: String, default: '' },
         },
-        default: { botToken: '', chatId: '', isEnabled: false },
+        default: { botToken: '', chatId: '', isEnabled: false, dashboardMessageId: '' },
     },
     tableMapping: {
         type: [{

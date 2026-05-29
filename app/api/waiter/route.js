@@ -209,6 +209,12 @@ export async function POST(req) {
             );
         }
 
+        // ── Asynchronously update Live Dashboard ──
+        if (isBill) {
+            const { updateLiveTelegramDashboard } = require('../../../lib/telegramDashboard');
+            updateLiveTelegramDashboard(restaurantId).catch(console.error);
+        }
+
         return NextResponse.json({ success: true, message: 'تم إرسال النداء بنجاح ✅' });
 
     } catch (err) {

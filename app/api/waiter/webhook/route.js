@@ -13,11 +13,47 @@ export async function POST(req) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
-        if (!body.callback_query) {
+        const callbackQuery = body.callback_query;
+        
+        // ── Handle Commands (e.g. /setup_dashboard) ──
+        if (body.message && body.message.text === '/setup_dashboard') {
+            const chatId = body.message.chat.id.toString();
+            await connectDB();
+            const card = await Card.findOne({ "telegramConfig.chatId": chatId });
+            
+            if (card && card.telegramConfig?.botToken) {
+                // Send initial dashboard message
+                const initText = `📊 <b>جاري إعداد لوحة التحكم المباشرة...</b>`;
+                const sendUrl = `https://api.telegram.org/bot${card.telegramConfig.botToken}/sendMessage`;
+                
+                const sendRes = await fetch(sendUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        chat_id: chatId,
+                        text: initText,
+                        parse_mode: 'HTML'
+                    })
+                });
+                
+                if (sendRes.ok) {
+                    const sendData = await sendRes.json();
+                    card.telegramConfig.dashboardMessageId = sendData.result.message_id.toString();
+                    card.markModified('telegramConfig');
+                    await card.save();
+                    
+                    // Trigger immediate update
+                    const { updateLiveTelegramDashboard } = require('../../../../lib/telegramDashboard');
+                    await updateLiveTelegramDashboard(card.shortCode);
+                }
+            }
             return NextResponse.json({ ok: true });
         }
 
-        const callbackQuery = body.callback_query;
+        if (!callbackQuery) {
+            return NextResponse.json({ ok: true });
+        }
+
         const data = callbackQuery.data || '';
 
         // Match format: action_close_table_${tableNumber}_${restaurantId} OR claim_table_${tableNumber}_${restaurantId}
@@ -157,6 +193,11 @@ export async function POST(req) {
                 })
             });
         }
+
+        // ── Asynchronously update Live Dashboard ──
+        const { updateLiveTelegramDashboard } = require('../../../../lib/telegramDashboard');
+        // Do not await to avoid blocking webhook response unnecessarily
+        updateLiveTelegramDashboard(restaurantId).catch(console.error);
 
         return NextResponse.json({ ok: true });
     } catch (error) {
