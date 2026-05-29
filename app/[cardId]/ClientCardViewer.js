@@ -10,8 +10,12 @@ import GastroBarTheme   from '../../components/templates/GastroBarTheme';
 import AMTBusinessCard  from '../../components/templates/AMTBusinessCard';
 
 // Always bypass browser cache so we get the latest data from MongoDB
-const fetcher = (url) => fetch(url, { cache: 'no-store' }).then((res) => res.json());
-
+const fetcher = async (url) => {
+    const res = await fetch(url, { cache: 'no-store' });
+    const json = await res.json();
+    if (!res.ok || json.error) throw new Error(json.error || 'Failed to fetch');
+    return json;
+};
 export default function ClientCardViewer({ initialCard, cardId }) {
     const [lang,      setLang]      = useState('ar');
     const [wifiState, setWifiState] = useState('idle');
