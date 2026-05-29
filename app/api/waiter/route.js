@@ -102,9 +102,9 @@ export async function POST(req) {
         }
 
         // ── 7. RATE LIMITING & BYPASS ────────────────────────────────────────
-        // Keep only calls from the last 10 minutes
+        // Keep only calls from the last 10 minutes (Support backward compatible Date or new Object schema)
         tableReq.calls = (tableReq.calls || []).filter(
-            t => now - new Date(t).getTime() < RATE_WINDOW_MS
+            c => now - new Date(c.timestamp || c).getTime() < RATE_WINDOW_MS
         );
 
         const isBill = (serviceType === 'bill');
@@ -119,7 +119,8 @@ export async function POST(req) {
             }
 
             if (tableReq.calls.length > 0) {
-                const lastCallMs = new Date(tableReq.calls[tableReq.calls.length - 1]).getTime();
+                const lastCall = tableReq.calls[tableReq.calls.length - 1];
+                const lastCallMs = new Date(lastCall.timestamp || lastCall).getTime();
                 const elapsed = now - lastCallMs;
                 if (elapsed < COOLDOWN_MS) {
                     const remaining = Math.ceil((COOLDOWN_MS - elapsed) / 1000);
@@ -130,8 +131,12 @@ export async function POST(req) {
                 }
             }
             
-            // Register this normal call
-            tableReq.calls.push(new Date(now));
+            // Register this normal call. We will add the messageId AFTER sending to Telegram.
+            tableReq.calls.push({ timestamp: new Date(now), service: serviceType, messageId: null });
+            
+            // Set status to pending and reset client audit
+            tableReq.status = 'pending';
+            tableReq.clientAuditStatus = 'waiting';
         }
 
         if (isBill) {
@@ -140,10 +145,6 @@ export async function POST(req) {
             // Hard expiry 10 minutes from now just as a fallback
             tableReq.sessionExpiresAt = new Date(now + 10 * 60 * 1000);
         }
-
-        // ── 8. SAVE STATE EXPLICITLY ─────────────────────────────────────────
-        card.markModified('tableRequests');
-        await card.save();
 
         // ── 9. TELEGRAM NOTIFICATION ─────────────────────────────────────────
         const businessName = card.businessName || 'المطعم';
@@ -203,11 +204,18 @@ export async function POST(req) {
 
         if (!telegramRes.ok) {
             console.error('[/api/waiter] Telegram error:', await telegramRes.text());
-            return NextResponse.json(
-                { error: 'فشل إرسال الإشعار لتيليجرام.' },
-                { status: 500 }
-            );
+            // Even if Telegram fails, we still save the db state (status pending)
+        } else {
+            const resultData = await telegramRes.json();
+            if (resultData.ok && !isBill && tableReq.calls.length > 0) {
+                // Save the messageId of the newly sent message
+                tableReq.calls[tableReq.calls.length - 1].messageId = resultData.result.message_id.toString();
+            }
         }
+
+        // ── 8. SAVE STATE EXPLICITLY ─────────────────────────────────────────
+        card.markModified('tableRequests');
+        await card.save();
 
         // ── Asynchronously update Live Dashboard ──
         if (isBill) {

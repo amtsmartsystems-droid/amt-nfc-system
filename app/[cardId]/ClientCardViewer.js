@@ -32,6 +32,35 @@ export default function ClientCardViewer({ initialCard, cardId }) {
     const [confirmBill, setConfirmBill]         = useState(false);
     const [waiterStatus, setWaiterStatus]       = useState('idle'); // 'idle' | 'session_expired' | 'bill_sent'
 
+    const postFetcher = async ([url, body]) => {
+        const res = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body)
+        });
+        return res.json();
+    };
+
+    const { data: syncData, mutate: mutateSync } = useSWR(
+        isNfc && tableNumber ? ['/api/waiter/sync', { restaurantId: cardId, tableNumber }] : null,
+        postFetcher,
+        { refreshInterval: 10000, revalidateOnFocus: true }
+    );
+
+    const submitAudit = async (answer) => {
+        // Optimistic UI hide
+        mutateSync({ ...syncData, showAudit: false }, false);
+        try {
+            await fetch('/api/waiter/audit', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ restaurantId: cardId, tableNumber, answer })
+            });
+        } catch (e) {
+            console.error(e);
+        }
+    };
+
     useEffect(() => {
         if (typeof window === 'undefined') return;
         const params = new URLSearchParams(window.location.search);
@@ -473,6 +502,35 @@ export default function ClientCardViewer({ initialCard, cardId }) {
                     </>
                 );
             })()}
+
+            {/* ════════ MINUTE 5 AUDIT MODAL ════════ */}
+            {syncData?.showAudit && syncData?.status !== 'idle' && syncData?.status !== 'closing' && (
+                <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 99999, background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Cairo, sans-serif' }}>
+                    <div style={{ background: '#1e293b', width: '90%', maxWidth: 360, borderRadius: 24, padding: '28px 20px', textAlign: 'center', boxShadow: '0 20px 40px rgba(0,0,0,0.5)', border: `1px solid ${primary}40`, animation: 'fadeIn 0.3s ease-out' }}>
+                        <div style={{ fontSize: 48, marginBottom: 16 }}>🕒</div>
+                        <h3 style={{ color: '#f8fafc', fontSize: 20, fontWeight: 900, margin: '0 0 8px' }}>هل وصلك طلبك؟</h3>
+                        
+                        {syncData.status === 'handling' ? (
+                            <p style={{ color: '#94a3b8', fontSize: 14, margin: '0 0 24px', lineHeight: 1.6 }}>
+                                لقد استلم <b style={{ color: primary }}>{syncData.assignedWaiter || 'النادل'}</b> طلبك.<br/>هل استلمته بالفعل؟
+                            </p>
+                        ) : (
+                            <p style={{ color: '#94a3b8', fontSize: 14, margin: '0 0 24px', lineHeight: 1.6 }}>
+                                لقد مر بعض الوقت منذ طلبك الأخير.<br/>هل استلمته بالفعل؟
+                            </p>
+                        )}
+
+                        <div style={{ display: 'flex', gap: 12, direction: 'rtl' }}>
+                            <button onClick={() => submitAudit('yes')} style={{ flex: 1, padding: '14px', borderRadius: 14, border: 'none', background: 'rgba(16,185,129,0.15)', color: '#10b981', border: '1px solid rgba(16,185,129,0.3)', fontWeight: 800, fontSize: 16, cursor: 'pointer', transition: 'all 0.2s' }}>
+                                نعم ✅
+                            </button>
+                            <button onClick={() => submitAudit('no')} style={{ flex: 1, padding: '14px', borderRadius: 14, border: 'none', background: 'rgba(239,68,68,0.15)', color: '#ef4444', border: '1px solid rgba(239,68,68,0.3)', fontWeight: 800, fontSize: 16, cursor: 'pointer', transition: 'all 0.2s' }}>
+                                لا ❌
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </>
     );
 }

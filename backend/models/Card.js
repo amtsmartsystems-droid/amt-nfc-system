@@ -102,9 +102,20 @@ const cardSchema = new mongoose.Schema({
     tableRequests: {
         type: [{
             tableNumber:     { type: String, required: true },
-            status:          { type: String, enum: ['idle', 'active', 'closing'], default: 'idle' },
+            status:          { type: String, enum: ['idle', 'pending', 'handling', 'closing'], default: 'idle' },
             sessionId:       { type: String, default: null },
-            calls:           { type: [Date], default: [] },
+            calls: {
+                type: [{
+                    timestamp: { type: Date, required: true },
+                    service:   { type: String, required: true },
+                    messageId: { type: String, default: null }
+                }],
+                default: []
+            },
+            assignedWaiter:  { type: String, default: null },
+            claimedAt:       { type: Date, default: null },
+            undoExpired:     { type: Boolean, default: false },
+            clientAuditStatus: { type: String, enum: ['waiting', 'yes', 'no'], default: 'waiting' },
             sessionExpiresAt:{ type: Date, default: null }
         }],
         default: [],
