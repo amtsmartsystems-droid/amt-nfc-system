@@ -1,4 +1,5 @@
 import { NextResponse }      from 'next/server';
+import { revalidatePath }    from 'next/cache';
 import connectDB             from '../../../../backend/config/db';
 import Card                  from '../../../../backend/models/Card';
 import { rateLimit }         from '../../../../lib/rateLimit';
@@ -169,6 +170,8 @@ export async function PUT(req, { params }) {
         }
 
         await card.save();
+        // Invalidate ISR/CDN cache so the public page shows fresh data immediately
+        try { revalidatePath(`/${cardId}`); } catch(_) {}
         return NextResponse.json({ success: true, card });
 
     } catch (error) {

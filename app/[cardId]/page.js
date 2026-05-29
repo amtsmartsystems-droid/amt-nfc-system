@@ -3,7 +3,7 @@ import Card from '../../backend/models/Card';
 import { notFound } from 'next/navigation';
 import ClientCardViewer from './ClientCardViewer';
 
-export const revalidate = 10; // ISR cache for 10 seconds
+export const dynamic = 'force-dynamic'; // Always fetch fresh from MongoDB on every request
 
 export async function generateMetadata({ params }) {
     await connectDB();
