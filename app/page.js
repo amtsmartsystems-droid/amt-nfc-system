@@ -288,7 +288,13 @@ function PageContent() {
       
       setSiteData(p => {
         const newLinks = [...p.links];
-        const dummyIndex = newLinks.findIndex(l => l.url === '#' && (l.title?.toLowerCase().includes('menu') || l.titleAr?.includes('قائمة')));
+        // Find ANY link that looks like a menu link, regardless of its current URL
+        const dummyIndex = newLinks.findIndex(l => 
+          l.title?.toLowerCase().includes('menu') || 
+          l.titleAr?.includes('قائمة') || 
+          l.titleAr?.includes('منيو')
+        );
+        
         if (dummyIndex !== -1) {
           newLinks[dummyIndex] = { ...newLinks[dummyIndex], url: data.url };
         } else {

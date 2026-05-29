@@ -66,13 +66,5 @@ export default async function PublicCardPage({ params }) {
         isWaiterEnabled: card.telegramConfig?.isEnabled === true,
     };
     
-    return (
-        <div style={{ padding: '50px', fontSize: '24px', color: 'black', background: 'white' }}>
-            <h1>Live DB Connection Test</h1>
-            <p>Current Theme from DB: <strong style={{ color: "red" }}>{card.themeName || 'UNDEFINED'}</strong></p>
-            <p>Primary Color from DB: <strong>{card.primaryColor || 'UNDEFINED'}</strong></p>
-            <hr style={{ margin: "20px 0" }}/>
-            <p style={{ fontSize: "16px", color: "gray" }}>Try changing the theme in the Admin Dashboard, then refresh this page.</p>
-        </div>
-    );
+    return <ClientCardViewer initialCard={serializedCard} cardId={cardId} />;
 }

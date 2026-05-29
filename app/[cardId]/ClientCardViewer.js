@@ -20,20 +20,6 @@ export default function ClientCardViewer({ initialCard, cardId }) {
     const [lang,      setLang]      = useState('ar');
     const [wifiState, setWifiState] = useState('idle');
 
-    /* ─── DEBUG MODE: Show raw DB values ─── */
-    const _dbCard = initialCard || {};
-    return (
-        <div style={{ padding: '50px', fontSize: '24px', color: 'black', background: 'white', fontFamily: 'monospace' }}>
-            <h1>🔍 Live DB Connection Test</h1>
-            <p>Theme from DB (initialCard): <strong style={{ color: 'red' }}>{_dbCard.themeName || 'UNDEFINED'}</strong></p>
-            <p>Primary Color: <strong>{_dbCard.primaryColor || 'UNDEFINED'}</strong></p>
-            <p>Card ID: <strong>{cardId}</strong></p>
-            <hr style={{ margin: '20px 0' }} />
-            <p style={{ fontSize: '14px', color: 'gray' }}>Change theme in Admin Dashboard, save, then hard-refresh this page (Ctrl+Shift+R)</p>
-        </div>
-    );
-    /* ─── END DEBUG ─── */
-
     /* ── Smart Waiter State (Server-Side Session) ── */
     const COOLDOWN_SECONDS     = 60;
 
