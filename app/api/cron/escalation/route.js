@@ -130,7 +130,7 @@ export async function GET(req) {
             if (stateChanged) {
                 card.markModified('tableRequests');
                 await card.save();
-                const { updateLiveTelegramDashboard } = require('../../../../../lib/telegramDashboard');
+                const { updateLiveTelegramDashboard } = require('../../../../lib/telegramDashboard');
                 updateLiveTelegramDashboard(card.shortCode).catch(console.error);
                 processedCount++;
             }

@@ -154,8 +154,12 @@ export async function POST(req) {
         if (stateChanged) {
             card.markModified('tableRequests');
             await card.save();
-            const { updateLiveTelegramDashboard } = require('../../../../../lib/telegramDashboard');
-            updateLiveTelegramDashboard(restaurantId).catch(console.error);
+            try {
+                const { updateLiveTelegramDashboard } = require('../../../../lib/telegramDashboard');
+                await updateLiveTelegramDashboard(restaurantId);
+            } catch (err) {
+                console.error(err);
+            }
         }
 
         return NextResponse.json({
