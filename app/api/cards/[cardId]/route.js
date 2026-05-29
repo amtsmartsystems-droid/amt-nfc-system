@@ -6,6 +6,8 @@ import { rateLimit }         from '../../../../lib/rateLimit';
 import { getUser }           from '../../../../lib/auth';
 import { sanitizeString, sanitizeColor, sanitizeSiteData } from '../../../../lib/sanitize';
 
+export const dynamic = 'force-dynamic'; // Prevent Vercel API caching
+
 // ── GET /api/cards/[cardId] ──────────────────────────────────────────
 export async function GET(req, { params }) {
     const { allowed, retryAfter } = rateLimit(req, { limit: 60, windowMs: 60_000, prefix: 'get-card' });
