@@ -8,6 +8,7 @@ import CafeTheme1       from "../components/templates/CafeTheme1";
 import GastroBarTheme   from "../components/templates/GastroBarTheme";
 import AMTBusinessCard  from "../components/templates/AMTBusinessCard";
 import { getIconForLink } from "../utils/icons";
+import { upload } from '@vercel/blob/client';
 
 // ─────────────────────────────────────────────────────────────────────
 // DEFAULT DATA
@@ -258,6 +259,11 @@ function PageContent() {
   // ── File Upload (Vercel Blob) ──
   const handlePdfUpload = async (file) => {
     if (!file) return;
+    if (file.size > 4.4 * 1024 * 1024) {
+      showToast("❌ حجم الملف كبير جداً! الحد الأقصى للرفع هو 4.5 ميجابايت. يرجى ضغط الـ PDF قبل رفعه.", false);
+      return;
+    }
+
     setUploadingPdf(true);
     try {
       const formData = new FormData();
@@ -266,8 +272,19 @@ function PageContent() {
         method: 'POST',
         body: formData,
       });
+
+      if (!res.ok) {
+        if (res.status === 413) throw new Error("حجم الملف يتجاوز الحد الأقصى للسيرفر (4.5MB). يرجى ضغط الملف.");
+        const text = await res.text();
+        // Fallback for HTML error pages from Vercel proxy
+        if (text.startsWith('<') || text.includes('Request Entity Too Large')) {
+            throw new Error("حجم الملف كبير جداً للسيرفر. يرجى تقليل حجم الملف إلى أقل من 4.5 ميجابايت.");
+        }
+        const data = JSON.parse(text);
+        throw new Error(data.error || 'فشل الرفع');
+      }
+
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'فشل الرفع');
       
       setSiteData(p => {
         const newLinks = [...p.links];

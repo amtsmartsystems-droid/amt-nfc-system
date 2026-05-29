@@ -10,16 +10,15 @@ export async function POST(request) {
       return NextResponse.json({ error: 'لم يتم توفير أي ملف' }, { status: 400 });
     }
 
-    // رفع الملف إلى Vercel Blob
-    // يمكنك تعديل مسار المجلد واسم الملف كما ترغب
-    // قمنا بوضع 'menus/' كمجلد لتنظيم الملفات
     const blob = await put(`menus/${file.name}`, file, {
       access: 'public',
-      // يمنع استبدال الملفات إذا كان هناك ملف بنفس الاسم، بل يضيف رقم عشوائي
       addRandomSuffix: true, 
     });
 
-    return NextResponse.json({ url: blob.url });
+    // Generate proxy URL instead of raw Vercel Storage URL
+    const proxyUrl = blob.url.replace('https://9vaqqf9s1c4ou0pk.public.blob.vercel-storage.com', '/blob');
+
+    return NextResponse.json({ url: proxyUrl });
   } catch (error) {
     console.error('Error uploading file to blob:', error);
     return NextResponse.json({ error: 'حدث خطأ أثناء الرفع' }, { status: 500 });

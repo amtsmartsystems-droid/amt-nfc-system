@@ -10,6 +10,14 @@ const nextConfig = {
     },
     experimental: {
         serverComponentsExternalPackages: ["mongoose"]
+    },
+    async rewrites() {
+        return [
+            {
+                source: '/blob/:path*',
+                destination: 'https://9vaqqf9s1c4ou0pk.public.blob.vercel-storage.com/:path*',
+            },
+        ];
     }
 };
 
