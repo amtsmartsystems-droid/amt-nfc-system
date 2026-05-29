@@ -326,8 +326,8 @@ export default function ClientCardViewer({ initialCard, cardId }) {
 
                     {/* ════════ Restaurant / Cafe Theme Content ════════ */}
                     {(() => {
-                        // Normalize both old DB names (e.g. 'CafeTheme', 'luxury') and new ones ('cafe', 'restaurant')
-                        const tn = (card.themeName || '').toLowerCase();
+                        const tn = (card.themeName || '').toLowerCase().trim();
+                        console.log("ClientCardViewer Render -> Current Theme:", tn);
                         if (tn === 'cafe' || tn === 'cafetheme')          return <CafeTheme      {...props} />;
                         if (tn === 'cafe1' || tn === 'cafetheme1')        return <CafeTheme1     {...props} />;
                         if (tn === 'gastro' || tn === 'gastrobartheme')   return <GastroBarTheme {...props} />;
