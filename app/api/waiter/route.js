@@ -171,12 +171,20 @@ export async function POST(req) {
         `.trim();
 
         const replyMarkup = {
-            inline_keyboard: [[
-                {
-                    text: '🛑 إنهاء الجلسة (إغلاق الطاولة)',
-                    callback_data: `action_close_table_${tableNumber}_${restaurantId}`
-                }
-            ]]
+            inline_keyboard: [
+                [
+                    {
+                        text: '✋ أنا أخذت الطلب',
+                        callback_data: `claim_table_${tableNumber}_${restaurantId}`
+                    }
+                ],
+                [
+                    {
+                        text: '🛑 إنهاء الجلسة (إغلاق الطاولة)',
+                        callback_data: `action_close_table_${tableNumber}_${restaurantId}`
+                    }
+                ]
+            ]
         };
 
         const telegramRes = await fetch(
