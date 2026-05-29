@@ -257,14 +257,14 @@ function PageContent() {
   };
 
   // ── File Upload (Vercel Blob) ──
-  const handlePdfUpload = async (file) => {
+  const handlePdfUpload = async (file, linkId) => {
     if (!file) return;
     if (file.size > 4.4 * 1024 * 1024) {
       showToast("❌ حجم الملف كبير جداً! الحد الأقصى للرفع هو 4.5 ميجابايت. يرجى ضغط الـ PDF قبل رفعه.", false);
       return;
     }
 
-    setUploadingPdf(true);
+    setUploadingPdf(linkId);
     try {
       const formData = new FormData();
       formData.append('file', file);
@@ -276,7 +276,6 @@ function PageContent() {
       if (!res.ok) {
         if (res.status === 413) throw new Error("حجم الملف يتجاوز الحد الأقصى للسيرفر (4.5MB). يرجى ضغط الملف.");
         const text = await res.text();
-        // Fallback for HTML error pages from Vercel proxy
         if (text.startsWith('<') || text.includes('Request Entity Too Large')) {
             throw new Error("حجم الملف كبير جداً للسيرفر. يرجى تقليل حجم الملف إلى أقل من 4.5 ميجابايت.");
         }
@@ -286,27 +285,15 @@ function PageContent() {
 
       const data = await res.json();
       
-      setSiteData(p => {
-        const newLinks = [...p.links];
-        // Find ANY link that looks like a menu link, regardless of its current URL
-        const dummyIndex = newLinks.findIndex(l => 
-          l.title?.toLowerCase().includes('menu') || 
-          l.titleAr?.includes('قائمة') || 
-          l.titleAr?.includes('منيو')
-        );
-        
-        if (dummyIndex !== -1) {
-          newLinks[dummyIndex] = { ...newLinks[dummyIndex], url: data.url };
-        } else {
-          newLinks.unshift({ id: Date.now(), title: "Menu", titleAr: "المنيو", url: data.url });
-        }
-        return { ...p, links: newLinks };
-      });
-      showToast("✅ تم رفع المنيو وتحديث الرابط! (لا تنسَ الضغط على حفظ ونشر)");
+      setSiteData(p => ({
+        ...p,
+        links: p.links.map(l => l.id === linkId ? { ...l, url: data.url } : l)
+      }));
+      showToast("✅ تم رفع الملف وتحديث الرابط! (لا تنسَ الضغط على حفظ ونشر)");
     } catch (e) {
       showToast(`❌ خطأ: ${e.message}`, false);
     } finally {
-      setUploadingPdf(false);
+      setUploadingPdf(null);
     }
   };
 
@@ -746,7 +733,18 @@ function PageContent() {
                               <div><Label>إنجليزي</Label><AdminInput value={lk.title} onChange={v=>updLink(lk.id,"title",v)} placeholder="View Menu" dir="ltr" /></div>
                               <div><Label>عربي</Label><AdminInput value={lk.titleAr||""} onChange={v=>updLink(lk.id,"titleAr",v)} placeholder="عرض القائمة" dir="rtl" /></div>
                             </div>
-                            <div><Label>الرابط</Label><AdminInput value={lk.url} onChange={v=>updLink(lk.id,"url",v)} placeholder="https://..." type="url" dir="ltr" /></div>
+                            <div>
+                              <Label>الرابط</Label>
+                              <div className="flex gap-2">
+                                <div className="flex-1">
+                                  <AdminInput value={lk.url} onChange={v=>updLink(lk.id,"url",v)} placeholder="https://..." type="url" dir="ltr" />
+                                </div>
+                                <label title="رفع ملف PDF بدلاً من الرابط" className={`flex-shrink-0 flex items-center justify-center w-10 h-10 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white cursor-pointer transition-all ${uploadingPdf === lk.id ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                                  {uploadingPdf === lk.id ? <LucideIcons.Loader2 size={16} className="animate-spin" /> : <LucideIcons.UploadCloud size={16} />}
+                                  <input type="file" accept="application/pdf,image/*" className="hidden" disabled={uploadingPdf === lk.id} onChange={(e) => handlePdfUpload(e.target.files[0], lk.id)} />
+                                </label>
+                              </div>
+                            </div>
                             <div className="flex items-center gap-2 pt-1">
                               <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background:bg }}><Ic size={14} color={color} /></div>
                               <p className="text-[9.5px] text-slate-600">الأيقونة تتغير تلقائياً بناءً على الاسم ✨</p>
@@ -758,16 +756,7 @@ function PageContent() {
                   })}
                 </div>
 
-                {/* Upload PDF Menu Button */}
-                <div className="rounded-2xl p-4 mb-3 space-y-2" style={{ background:"rgba(16, 185, 129, 0.05)", border:"1px dashed rgba(16, 185, 129, 0.3)" }}>
-                  <Label>☁️ رفع ملف الـ PDF (المنيو)</Label>
-                  <label className={`flex items-center justify-center gap-2 py-2.5 rounded-xl font-bold text-[12px] text-white transition-all cursor-pointer ${uploadingPdf ? 'bg-emerald-600/50 cursor-not-allowed' : 'bg-emerald-600 hover:bg-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.3)]'}`}>
-                    {uploadingPdf ? <LucideIcons.Loader2 size={14} className="animate-spin" /> : <LucideIcons.CloudUpload size={14} />}
-                    {uploadingPdf ? "جاري الرفع السحابي..." : "اختر ملف من جهازك لرفعه فوراً"}
-                    <input type="file" accept="application/pdf,image/*" onChange={(e) => handlePdfUpload(e.target.files[0])} className="hidden" disabled={uploadingPdf} />
-                  </label>
-                  <p className="text-[9.5px] text-emerald-400/70 text-center mt-1">سيتم رفع الملف وتوليد الرابط المباشر وإضافته لخانة الرابط أدناه تلقائياً ✨</p>
-                </div>
+
 
                 {/* Add New Link */}
                 <div className="rounded-2xl p-4 space-y-3" style={{ background:"rgba(255,255,255,0.03)", border:"1px dashed rgba(255,255,255,0.10)" }}>
