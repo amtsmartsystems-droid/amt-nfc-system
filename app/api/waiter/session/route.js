@@ -79,6 +79,7 @@ export async function POST(req) {
         
         let rateLimitExpiresInMs = 0;
         let cooldownRemainingMs = 0;
+        let lastService = null;
         
         if (tableReq.calls && tableReq.calls.length > 0) {
             // Find the oldest call for the 3-calls limit
@@ -90,6 +91,7 @@ export async function POST(req) {
             
             // Find the newest call for the 1-minute cooldown
             const latestCall = tableReq.calls[tableReq.calls.length - 1];
+            lastService = latestCall.service || null;
             const latestCallMs = new Date(latestCall.timestamp || latestCall).getTime();
             if (now - latestCallMs < 60000) {
                 cooldownRemainingMs = 60000 - (now - latestCallMs);
@@ -104,7 +106,8 @@ export async function POST(req) {
             rateLimitExpiresInMs: rateLimitExpiresInMs > 0 ? rateLimitExpiresInMs : 0,
             cooldownRemainingMs: cooldownRemainingMs > 0 ? cooldownRemainingMs : 0,
             status: tableReq.status,
-            assignedWaiter: tableReq.assignedWaiter || null
+            assignedWaiter: tableReq.assignedWaiter || null,
+            lastService
         });
 
         response.cookies.set({

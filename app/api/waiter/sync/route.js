@@ -162,10 +162,16 @@ export async function POST(req) {
             }
         }
 
+        let lastService = null;
+        if (tableReq.calls && tableReq.calls.length > 0) {
+            lastService = tableReq.calls[tableReq.calls.length - 1].service || null;
+        }
+
         return NextResponse.json({
             status: tableReq.status,
             showAudit,
-            assignedWaiter: tableReq.assignedWaiter
+            assignedWaiter: tableReq.assignedWaiter,
+            lastService
         });
 
     } catch (err) {

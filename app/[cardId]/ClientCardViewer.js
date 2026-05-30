@@ -29,6 +29,7 @@ export default function ClientCardViewer({ initialCard, cardId }) {
     const [cooldown, setCooldown]               = useState(0);
     const [limitReached, setLimitReached]       = useState(false);
     const [assignedWaiter, setAssignedWaiter]   = useState(null);
+    const [lastService, setLastService]         = useState(null);
     const [showPaymentOptions, setShowPaymentOptions] = useState(false);
     const [selectedPayment, setSelectedPayment] = useState(null);
     const [confirmBill, setConfirmBill]         = useState(false);
@@ -89,6 +90,7 @@ export default function ClientCardViewer({ initialCard, cardId }) {
                 }
                 
                 if (data.assignedWaiter) setAssignedWaiter(data.assignedWaiter);
+                if (data.lastService) setLastService(data.lastService);
                 
                 if (data.rateLimitExpiresInMs && data.rateLimitExpiresInMs > 0) {
                     setLimitReached(true);
@@ -164,6 +166,7 @@ export default function ClientCardViewer({ initialCard, cardId }) {
 
             if (res.ok) {
                 if (serviceType === 'bill') setWaiterStatus('bill_sent');
+                setLastService(serviceType);
                 setWaiterToast({ message: data.message || "تم إرسال طلبك للويتر بنجاح! 🚀", type: 'success' });
                 setCooldown(COOLDOWN_SECONDS);
             } else {
@@ -471,6 +474,26 @@ export default function ClientCardViewer({ initialCard, cardId }) {
                 const block = computeWaiterBlock();
                 const isBusy = block !== 'ready' && block !== 'qr_mode';
                 const waiterName = syncData?.assignedWaiter || assignedWaiter;
+                const currentService = syncData?.lastService || lastService;
+
+                const getAssignedMessage = () => {
+                    const isAr = lang === 'ar';
+                    if (!currentService) return isAr ? `🏃‍♂️ طلبك في عهدة النادل [${waiterName}] ويتم تلبيته الآن.` : `🏃‍♂️ Your request is handled by [${waiterName}].`;
+                    
+                    if (currentService === 'clean') {
+                        return isAr ? `🧻 طلب تنظيف الطاولة في عهدة النادل [${waiterName}]` : `🧻 Table cleaning is assigned to [${waiterName}]`;
+                    }
+                    if (currentService === 'waiter') {
+                        return isAr ? `👨‍🍳 الويتر [${waiterName}] في طريقه إليك` : `👨‍🍳 Waiter [${waiterName}] is on the way`;
+                    }
+                    if (currentService === 'coal') {
+                        return isAr ? `💨 طلب تغيير فحم الشيشة في عهدة النادل [${waiterName}]` : `💨 Coal replacement is assigned to [${waiterName}]`;
+                    }
+                    if (currentService === 'bill') {
+                        return isAr ? `🧾 طلب الفاتورة في عهدة النادل [${waiterName}]` : `🧾 Bill request is assigned to [${waiterName}]`;
+                    }
+                    return isAr ? `🏃‍♂️ طلبك في عهدة النادل [${waiterName}] ويتم تلبيته الآن.` : `🏃‍♂️ Your request is handled by [${waiterName}].`;
+                };
 
                 return (
                     <>
@@ -481,7 +504,7 @@ export default function ClientCardViewer({ initialCard, cardId }) {
                             {waiterName && block === 'ready' && !limitReached && cooldown === 0 && (
                                 <div style={{ background: 'rgba(17,24,39,0.85)', backdropFilter: 'blur(10px)', padding: '10px 20px', borderRadius: 999, border: '1px solid rgba(245,197,24,0.3)', boxShadow: '0 4px 15px rgba(0,0,0,0.2)', pointerEvents: 'auto', animation: 'fadeInUp 0.4s ease-out' }}>
                                     <span style={{ color: '#f5c518', fontSize: 13, fontWeight: 800, fontFamily: 'Cairo, sans-serif' }}>
-                                        🏃‍♂️ طلبك في عهدة النادل [{waiterName}] ويتم تلبيته الآن.
+                                        {getAssignedMessage()}
                                     </span>
                                 </div>
                             )}
