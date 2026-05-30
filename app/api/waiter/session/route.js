@@ -35,7 +35,7 @@ export async function POST(req) {
             // New table session
             tableReq = {
                 tableNumber,
-                status: 'active',
+                status: 'idle',
                 sessionId: Math.random().toString(36).substring(2, 15),
                 calls: [],
                 sessionExpiresAt: new Date(now + SESSION_DURATION_MS)
@@ -44,7 +44,7 @@ export async function POST(req) {
             needsSave = true;
         } else {
             // Forcefully clear the old session and start a new 10-minute session
-            tableReq.status = 'active';
+            tableReq.status = 'idle';
             tableReq.sessionId = Math.random().toString(36).substring(2, 15);
             tableReq.calls = [];
             tableReq.sessionExpiresAt = new Date(now + SESSION_DURATION_MS);

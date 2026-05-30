@@ -86,7 +86,7 @@ export async function POST(req) {
             ? new Date(tableReq.sessionExpiresAt).getTime()
             : null;
 
-        if (tableReq.status === 'idle' || (sessionExpiredMs && sessionExpiredMs < now)) {
+        if (sessionExpiredMs && sessionExpiredMs < now) {
             return NextResponse.json(
                 { error: 'الجلسة مغلقة. يرجى مسح البطاقة لتفعيل طاولة جديدة.' },
                 { status: 403 }
