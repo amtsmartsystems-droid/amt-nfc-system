@@ -69,6 +69,7 @@ export async function POST(req) {
             success: true, 
             message: 'Session active',
             sessionExpiresAt: tableReq.sessionExpiresAt,
+            expiresInMs: SESSION_DURATION_MS,
             status: tableReq.status
         });
 

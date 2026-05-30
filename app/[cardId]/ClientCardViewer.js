@@ -79,13 +79,11 @@ export default function ClientCardViewer({ initialCard, cardId }) {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ restaurantId: cardId, tableNumber: tbl })
             }).then(res => res.json()).then(data => {
-                if (data.sessionExpiresAt) {
-                    const expireMs = new Date(data.sessionExpiresAt).getTime() - Date.now();
-                    if (expireMs > 0) {
-                        setTimeout(() => setWaiterStatus('session_expired'), expireMs);
-                    } else {
-                        setWaiterStatus('session_expired');
-                    }
+                const expireMs = data.expiresInMs || (10 * 60 * 1000); // 10 minutes fallback
+                if (expireMs > 0) {
+                    setTimeout(() => setWaiterStatus('session_expired'), expireMs);
+                } else {
+                    setWaiterStatus('session_expired');
                 }
             }).catch(() => {});
         }
