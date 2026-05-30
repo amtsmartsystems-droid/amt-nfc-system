@@ -85,6 +85,10 @@ export default function ClientCardViewer({ initialCard, cardId }) {
                 } else {
                     setWaiterStatus('session_expired');
                 }
+                
+                if (data.rateLimitExpiresInMs && data.rateLimitExpiresInMs > 0) {
+                    setCooldown(Math.ceil(data.rateLimitExpiresInMs / 1000));
+                }
             }).catch(() => {});
         }
     }, [cardId]);

@@ -43,12 +43,22 @@ export async function POST(req) {
             card.tableRequests.push(tableReq);
             needsSave = true;
         } else {
-            // Forcefully clear the old session and start a new 10-minute session
-            tableReq.status = 'idle';
-            tableReq.sessionId = Math.random().toString(36).substring(2, 15);
-            tableReq.calls = [];
-            tableReq.sessionExpiresAt = new Date(now + SESSION_DURATION_MS);
-            needsSave = true;
+            const sessionExpiresAtMs = tableReq.sessionExpiresAt ? new Date(tableReq.sessionExpiresAt).getTime() : 0;
+            if (sessionExpiresAtMs > now) {
+                // CONDITION A: Active Session Exists
+                // Filter old calls to keep the state accurate for rate limiting
+                const RATE_WINDOW_MS = 10 * 60 * 1000;
+                tableReq.calls = (tableReq.calls || []).filter(
+                    c => now - new Date(c.timestamp || c).getTime() < RATE_WINDOW_MS
+                );
+            } else {
+                // CONDITION B: Expired or No Session
+                tableReq.status = 'idle';
+                tableReq.sessionId = Math.random().toString(36).substring(2, 15);
+                tableReq.calls = [];
+                tableReq.sessionExpiresAt = new Date(now + SESSION_DURATION_MS);
+                needsSave = true;
+            }
         }
 
         if (needsSave) {
@@ -65,11 +75,22 @@ export async function POST(req) {
         };
         const token = jwt.sign(tokenPayload, JWT_SECRET, { expiresIn: '2h' });
 
+        const remainingSessionMs = new Date(tableReq.sessionExpiresAt).getTime() - now;
+        
+        let rateLimitExpiresInMs = 0;
+        if (tableReq.calls && tableReq.calls.length >= 3) {
+            // Find the oldest call in the rolling window
+            const oldestCall = tableReq.calls[0];
+            const oldestCallMs = new Date(oldestCall.timestamp || oldestCall).getTime();
+            rateLimitExpiresInMs = (oldestCallMs + 10 * 60 * 1000) - now;
+        }
+
         const response = NextResponse.json({ 
             success: true, 
             message: 'Session active',
             sessionExpiresAt: tableReq.sessionExpiresAt,
-            expiresInMs: SESSION_DURATION_MS,
+            expiresInMs: remainingSessionMs > 0 ? remainingSessionMs : 0,
+            rateLimitExpiresInMs: rateLimitExpiresInMs > 0 ? rateLimitExpiresInMs : 0,
             status: tableReq.status
         });
 
