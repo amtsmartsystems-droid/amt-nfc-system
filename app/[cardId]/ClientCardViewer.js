@@ -27,6 +27,8 @@ export default function ClientCardViewer({ initialCard, cardId }) {
     const [isNfc, setIsNfc]                     = useState(false);
     const [waiterToast, setWaiterToast]         = useState(null);
     const [cooldown, setCooldown]               = useState(0);
+    const [limitReached, setLimitReached]       = useState(false);
+    const [assignedWaiter, setAssignedWaiter]   = useState(null);
     const [showPaymentOptions, setShowPaymentOptions] = useState(false);
     const [selectedPayment, setSelectedPayment] = useState(null);
     const [confirmBill, setConfirmBill]         = useState(false);
@@ -86,8 +88,12 @@ export default function ClientCardViewer({ initialCard, cardId }) {
                     setWaiterStatus('session_expired');
                 }
                 
+                if (data.assignedWaiter) setAssignedWaiter(data.assignedWaiter);
+                
                 if (data.rateLimitExpiresInMs && data.rateLimitExpiresInMs > 0) {
-                    setCooldown(Math.ceil(data.rateLimitExpiresInMs / 1000));
+                    setLimitReached(true);
+                } else if (data.cooldownRemainingMs && data.cooldownRemainingMs > 0) {
+                    setCooldown(Math.ceil(data.cooldownRemainingMs / 1000));
                 }
             }).catch(() => {});
         }
@@ -170,7 +176,13 @@ export default function ClientCardViewer({ initialCard, cardId }) {
                         setWaiterStatus('session_expired');
                     }
                 } else if (res.status === 429) {
-                    setCooldown(15);
+                    if (data.error && data.error.includes('الحد الأقصى')) {
+                        setLimitReached(true);
+                    } else if (data.remainingSeconds) {
+                        setCooldown(data.remainingSeconds);
+                    } else {
+                        setCooldown(15);
+                    }
                 } else {
                     setCooldown(5);
                 }
@@ -458,13 +470,22 @@ export default function ClientCardViewer({ initialCard, cardId }) {
             {card.isWaiterEnabled && tableNumber && (() => {
                 const block = computeWaiterBlock();
                 const isBusy = block !== 'ready' && block !== 'qr_mode';
+                const waiterName = syncData?.assignedWaiter || assignedWaiter;
 
                 return (
                     <>
                         <div style={{
                             position: 'fixed', bottom: 20, left: 0, right: 0, zIndex: 9998,
-                            display: 'flex', justifyContent: 'center', pointerEvents: 'none'
+                            display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12, pointerEvents: 'none'
                         }}>
+                            {waiterName && block === 'ready' && !limitReached && cooldown === 0 && (
+                                <div style={{ background: 'rgba(17,24,39,0.85)', backdropFilter: 'blur(10px)', padding: '10px 20px', borderRadius: 999, border: '1px solid rgba(245,197,24,0.3)', boxShadow: '0 4px 15px rgba(0,0,0,0.2)', pointerEvents: 'auto', animation: 'fadeInUp 0.4s ease-out' }}>
+                                    <span style={{ color: '#f5c518', fontSize: 13, fontWeight: 800, fontFamily: 'Cairo, sans-serif' }}>
+                                        🏃‍♂️ طلبك في عهدة النادل [{waiterName}] ويتم تلبيته الآن.
+                                    </span>
+                                </div>
+                            )}
+
                             {block === 'session_expired' ? (
                                 <div style={{ background: '#111827', color: '#ea580c', border: '1px solid #ea580c', borderRadius: 24, padding: '12px 24px', fontWeight: 900, pointerEvents: 'auto', boxShadow: '0 10px 25px rgba(0,0,0,0.3)', fontFamily: 'Cairo, sans-serif' }}>
                                     ⏳ انتهت الجلسة. يرجى مسح البطاقة مجدداً.
@@ -472,6 +493,22 @@ export default function ClientCardViewer({ initialCard, cardId }) {
                             ) : block === 'bill_sent' ? (
                                 <div style={{ background: '#111827', color: '#f5c518', border: '1px solid #f5c518', borderRadius: 24, padding: '12px 24px', fontWeight: 900, pointerEvents: 'auto', boxShadow: '0 10px 25px rgba(0,0,0,0.3)', fontFamily: 'Cairo, sans-serif' }}>
                                     🧾 تم طلب الفاتورة. الجلسة مغلقة.
+                                </div>
+                            ) : limitReached ? (
+                                <div style={{ background: '#111827', color: '#ef4444', border: '1px solid #ef4444', borderRadius: 24, padding: '12px 24px', fontWeight: 900, pointerEvents: 'auto', boxShadow: '0 10px 25px rgba(0,0,0,0.3)', fontFamily: 'Cairo, sans-serif' }}>
+                                    🛑 تم استهلاك الحد الأقصى للطلبات (3) لهذه الجلسة.
+                                </div>
+                            ) : cooldown > 0 ? (
+                                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, pointerEvents: 'auto', animation: 'fadeInUp 0.3s ease-out' }}>
+                                    <button disabled style={{ background: '#374151', color: '#9ca3af', border: 'none', borderRadius: 999, padding: '16px 36px', fontWeight: 900, fontSize: 18, display: 'flex', alignItems: 'center', gap: 12, cursor: 'not-allowed', fontFamily: 'Cairo, sans-serif', boxShadow: '0 10px 30px rgba(0,0,0,0.3)' }}>
+                                        <span style={{ fontSize: 24, animation: 'spin 2s linear infinite' }}>⏳</span>
+                                        <span>{lang === 'ar' ? 'الرجاء الانتظار' : 'Please Wait'}</span>
+                                    </button>
+                                    <div style={{ background: 'rgba(17,24,39,0.9)', backdropFilter: 'blur(8px)', padding: '8px 16px', borderRadius: 12, border: '1px solid rgba(255,255,255,0.1)' }}>
+                                        <span style={{ color: '#f5c518', fontSize: 12, fontWeight: 700, fontFamily: 'Cairo, sans-serif' }}>
+                                            ⏱️ يمكنك طلب خدمة أخرى بعد {cooldown} ثانية
+                                        </span>
+                                    </div>
                                 </div>
                             ) : (
                                 <button

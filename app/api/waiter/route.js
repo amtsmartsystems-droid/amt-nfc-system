@@ -125,7 +125,10 @@ export async function POST(req) {
                 if (elapsed < COOLDOWN_MS) {
                     const remaining = Math.ceil((COOLDOWN_MS - elapsed) / 1000);
                     return NextResponse.json(
-                        { error: `⏳ يرجى الانتظار ${remaining} ثانية قبل نداء الويتر مرة أخرى.` },
+                        { 
+                            error: `⏳ يرجى الانتظار ${remaining} ثانية قبل نداء الويتر مرة أخرى.`,
+                            remainingSeconds: remaining 
+                        },
                         { status: 429 }
                     );
                 }

@@ -78,11 +78,22 @@ export async function POST(req) {
         const remainingSessionMs = new Date(tableReq.sessionExpiresAt).getTime() - now;
         
         let rateLimitExpiresInMs = 0;
-        if (tableReq.calls && tableReq.calls.length >= 3) {
-            // Find the oldest call in the rolling window
-            const oldestCall = tableReq.calls[0];
-            const oldestCallMs = new Date(oldestCall.timestamp || oldestCall).getTime();
-            rateLimitExpiresInMs = (oldestCallMs + 10 * 60 * 1000) - now;
+        let cooldownRemainingMs = 0;
+        
+        if (tableReq.calls && tableReq.calls.length > 0) {
+            // Find the oldest call for the 3-calls limit
+            if (tableReq.calls.length >= 3) {
+                const oldestCall = tableReq.calls[0];
+                const oldestCallMs = new Date(oldestCall.timestamp || oldestCall).getTime();
+                rateLimitExpiresInMs = (oldestCallMs + 10 * 60 * 1000) - now;
+            }
+            
+            // Find the newest call for the 1-minute cooldown
+            const latestCall = tableReq.calls[tableReq.calls.length - 1];
+            const latestCallMs = new Date(latestCall.timestamp || latestCall).getTime();
+            if (now - latestCallMs < 60000) {
+                cooldownRemainingMs = 60000 - (now - latestCallMs);
+            }
         }
 
         const response = NextResponse.json({ 
@@ -91,7 +102,9 @@ export async function POST(req) {
             sessionExpiresAt: tableReq.sessionExpiresAt,
             expiresInMs: remainingSessionMs > 0 ? remainingSessionMs : 0,
             rateLimitExpiresInMs: rateLimitExpiresInMs > 0 ? rateLimitExpiresInMs : 0,
-            status: tableReq.status
+            cooldownRemainingMs: cooldownRemainingMs > 0 ? cooldownRemainingMs : 0,
+            status: tableReq.status,
+            assignedWaiter: tableReq.assignedWaiter || null
         });
 
         response.cookies.set({
