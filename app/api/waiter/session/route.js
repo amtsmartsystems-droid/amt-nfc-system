@@ -5,7 +5,7 @@ import connectDB from '../../../../backend/config/db';
 import Card from '../../../../backend/models/Card';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'amt_smart_waiter_super_secret';
-const SESSION_DURATION_MS = 120 * 60 * 1000; // 120 mins
+const SESSION_DURATION_MS = 10 * 60 * 1000; // 10 mins
 
 export async function POST(req) {
     try {
@@ -43,31 +43,12 @@ export async function POST(req) {
             card.tableRequests.push(tableReq);
             needsSave = true;
         } else {
-            // Check if this request is from the SAME browser session (e.g., page refresh)
-            let isSameSession = false;
-            const cookieStore = await cookies();
-            const sessionCookie = cookieStore.get('waiter_session');
-            if (sessionCookie?.value) {
-                try {
-                    const decoded = jwt.verify(sessionCookie.value, JWT_SECRET);
-                    if (decoded.sessionId === tableReq.sessionId) {
-                        isSameSession = true;
-                    }
-                } catch(e) {}
-            }
-
-            const isExpired = tableReq.sessionExpiresAt && new Date(tableReq.sessionExpiresAt).getTime() < now;
-            
-            // DUAL RESET SYSTEM:
-            // 1. If it's a NEW phone (!isSameSession), OVERRIDE the lock immediately!
-            // 2. If it's the SAME phone, only override if it's idle or expired (DO NOT override 'closing').
-            if (!isSameSession || tableReq.status === 'idle' || isExpired) {
-                tableReq.status = 'active';
-                tableReq.sessionId = Math.random().toString(36).substring(2, 15);
-                tableReq.calls = [];
-                tableReq.sessionExpiresAt = new Date(now + SESSION_DURATION_MS);
-                needsSave = true;
-            }
+            // Forcefully clear the old session and start a new 10-minute session
+            tableReq.status = 'active';
+            tableReq.sessionId = Math.random().toString(36).substring(2, 15);
+            tableReq.calls = [];
+            tableReq.sessionExpiresAt = new Date(now + SESSION_DURATION_MS);
+            needsSave = true;
         }
 
         if (needsSave) {

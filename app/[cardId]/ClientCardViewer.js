@@ -323,15 +323,15 @@ export default function ClientCardViewer({ initialCard, cardId }) {
                         overflowX: 'hidden',
                     }}
                 >
-                    {/* ════════ MODERN DARK HEADER ════════ */}
+                    {/* ════════ MODERN HEADER ════════ */}
                     <div style={{
-                        background: '#111827', // bg-gray-900
+                        background: 'linear-gradient(to right, #ea580c, #f5c518)', // orange to yellow gradient
                         padding: '16px 20px',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'space-between',
-                        borderBottom: '2px solid #ea580c', // orange accent
-                        boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
+                        borderBottom: '1px solid rgba(0,0,0,0.1)',
+                        boxShadow: '0 4px 20px rgba(0,0,0,0.15)',
                         position: 'relative',
                         zIndex: 50
                     }}>
@@ -339,18 +339,18 @@ export default function ClientCardViewer({ initialCard, cardId }) {
                             <div style={{
                                 width: 40, height: 40,
                                 borderRadius: '50%',
-                                background: 'linear-gradient(135deg, #f5c518, #ea580c)',
+                                background: '#111827', // dark background for contrast against gradient
                                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                color: '#111827', fontWeight: 900, fontSize: 18
+                                color: '#f5c518', fontWeight: 900, fontSize: 18
                             }}>
                                 {card.businessName ? card.businessName.charAt(0) : 'R'}
                             </div>
                             <div>
-                                <h1 style={{ color: '#f5c518', fontSize: 16, fontWeight: 900, margin: 0, fontFamily: 'Cairo, sans-serif' }}>
+                                <h1 style={{ color: '#ffffff', fontSize: 16, fontWeight: 900, margin: 0, fontFamily: 'Cairo, sans-serif', textShadow: '0 1px 2px rgba(0,0,0,0.2)' }}>
                                     {card.businessName || 'المطعم الذكي'}
                                 </h1>
                                 {tableNumber && (
-                                    <p style={{ color: '#9ca3af', fontSize: 12, margin: 0, fontWeight: 700, fontFamily: 'Cairo, sans-serif' }}>
+                                    <p style={{ color: '#ffffff', opacity: 0.9, fontSize: 13, margin: 0, fontWeight: 700, fontFamily: 'Cairo, sans-serif', textShadow: '0 1px 2px rgba(0,0,0,0.2)' }}>
                                         الطاولة {tableNumber}
                                     </p>
                                 )}

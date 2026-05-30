@@ -144,19 +144,19 @@ export default function GastroBarTheme({ cardId, siteData, siteColors, lang = "e
         {/* Logo badge — z-10, pointer-events preserved for the badge only */}
         <div className="absolute top-0 inset-x-0 z-10 flex justify-center pointer-events-none">
           <div
-            className="mt-4 px-5 py-3 rounded-b-2xl text-center pointer-events-auto"
+            className="mt-4 px-5 py-3 rounded-b-2xl text-center pointer-events-auto shadow-lg"
             style={{
-              background: "rgba(17,17,17,0.92)",
+              background: "rgba(255,255,255,0.2)",
               backdropFilter: "blur(12px)",
-              border: "1px solid rgba(255,255,255,0.08)",
+              border: "1px solid rgba(255,255,255,0.3)",
               borderTop: "none",
             }}
           >
             <div className="flex items-center gap-2 justify-center">
-              <LucideIcons.UtensilsCrossed size={18} style={{ color: accent }} />
-              <span className="font-black text-white text-[15px] uppercase tracking-[0.2em]">{name}</span>
+              <LucideIcons.UtensilsCrossed size={18} style={{ color: "#ffffff", filter: "drop-shadow(0px 1px 2px rgba(0,0,0,0.5))" }} />
+              <span className="font-black text-white text-[15px] uppercase tracking-[0.2em]" style={{ textShadow: "0 1px 3px rgba(0,0,0,0.8)" }}>{name}</span>
             </div>
-            <p className="text-[10px] uppercase tracking-[0.25em] mt-0.5" style={{ color: accent }}>{tagline}</p>
+            <p className="text-[10px] uppercase tracking-[0.25em] mt-0.5 text-white" style={{ textShadow: "0 1px 2px rgba(0,0,0,0.8)" }}>{tagline}</p>
           </div>
         </div>
       </section>
