@@ -46,6 +46,10 @@ const cardSchema = new mongoose.Schema({
         type:    String,
         default: '#000000',
     },
+    hasShisha: {
+        type:    Boolean,
+        default: false,
+    },
     background: {
         type:    String,
         default: '#ffffff',

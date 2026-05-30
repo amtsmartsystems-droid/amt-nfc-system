@@ -30,6 +30,7 @@ export default function ClientCardViewer({ initialCard, cardId }) {
     const [showPaymentOptions, setShowPaymentOptions] = useState(false);
     const [selectedPayment, setSelectedPayment] = useState(null);
     const [confirmBill, setConfirmBill]         = useState(false);
+    const [showWaiterMenu, setShowWaiterMenu]   = useState(false);
     const [waiterStatus, setWaiterStatus]       = useState('idle'); // 'idle' | 'session_expired' | 'bill_sent'
 
     const postFetcher = async ([url, body]) => {
@@ -140,6 +141,7 @@ export default function ClientCardViewer({ initialCard, cardId }) {
     const sendWaiterAPI = async (serviceType, paymentMethod) => {
         setConfirmBill(false);
         setShowPaymentOptions(false);
+        setShowWaiterMenu(false);
 
         try {
             const bodyPayload = { restaurantId: cardId, tableNumber, serviceType };
@@ -321,40 +323,73 @@ export default function ClientCardViewer({ initialCard, cardId }) {
                         overflowX: 'hidden',
                     }}
                 >
-                    {/* ════════ FLOATING PILL BUTTONS ════════ */}
+                    {/* ════════ MODERN DARK HEADER ════════ */}
                     <div style={{
-                        position:       'absolute',
-                        top:            14,
-                        left:           14,
-                        right:          14,
-                        zIndex:         50,
-                        display:        'flex',
-                        alignItems:     'center',
+                        background: '#111827', // bg-gray-900
+                        padding: '16px 20px',
+                        display: 'flex',
+                        alignItems: 'center',
                         justifyContent: 'space-between',
-                        pointerEvents:  'none',   // let clicks pass through gap between buttons
+                        borderBottom: '2px solid #ea580c', // orange accent
+                        boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
+                        position: 'relative',
+                        zIndex: 50
                     }}>
-                        {/* Language toggle */}
-                        <button
-                            onClick={() => setLang(l => l === 'ar' ? 'en' : 'ar')}
-                            style={{ ...pillBtn(false), pointerEvents: 'auto' }}
-                        >
-                            <Globe size={13} color={primary} strokeWidth={2.5} />
-                            <span style={{ paddingTop: 1 }}>{lang === 'ar' ? 'EN' : 'عربي'}</span>
-                        </button>
-
-                        {/* Wi-Fi */}
-                        {hasWifi && (
-                            <button
-                                onClick={handleCopyWifi}
-                                style={{ ...pillBtn(wifiState === 'copied'), pointerEvents: 'auto' }}
-                            >
-                                {wifiState === 'copied' ? (
-                                    <><Check size={13} color="#fff" strokeWidth={3}/><span style={{paddingTop:1}}>{lang==='ar'?'تم ✓':'Done ✓'}</span></>
-                                ) : (
-                                    <><Wifi size={13} color={primary} strokeWidth={2.5}/><span style={{paddingTop:1}}>{lang==='ar'?'واي فاي':'Wi-Fi'}</span></>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                            <div style={{
+                                width: 40, height: 40,
+                                borderRadius: '50%',
+                                background: 'linear-gradient(135deg, #f5c518, #ea580c)',
+                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                color: '#111827', fontWeight: 900, fontSize: 18
+                            }}>
+                                {card.businessName ? card.businessName.charAt(0) : 'R'}
+                            </div>
+                            <div>
+                                <h1 style={{ color: '#f5c518', fontSize: 16, fontWeight: 900, margin: 0, fontFamily: 'Cairo, sans-serif' }}>
+                                    {card.businessName || 'المطعم الذكي'}
+                                </h1>
+                                {tableNumber && (
+                                    <p style={{ color: '#9ca3af', fontSize: 12, margin: 0, fontWeight: 700, fontFamily: 'Cairo, sans-serif' }}>
+                                        الطاولة {tableNumber}
+                                    </p>
                                 )}
+                            </div>
+                        </div>
+
+                        <div style={{ display: 'flex', gap: 8 }}>
+                            {hasWifi && (
+                                <button
+                                    onClick={handleCopyWifi}
+                                    style={{
+                                        background: wifiState === 'copied' ? '#10b981' : '#1f2937',
+                                        color: wifiState === 'copied' ? '#fff' : '#f5c518',
+                                        border: `1px solid ${wifiState === 'copied' ? '#10b981' : '#f5c518'}`,
+                                        borderRadius: 8,
+                                        width: 36, height: 36,
+                                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                        transition: 'all 0.3s'
+                                    }}
+                                >
+                                    {wifiState === 'copied' ? <Check size={18} /> : <Wifi size={18} />}
+                                </button>
+                            )}
+                            <button
+                                onClick={() => setLang(l => l === 'ar' ? 'en' : 'ar')}
+                                style={{
+                                    background: '#1f2937',
+                                    color: '#f5c518',
+                                    border: '1px solid #f5c518',
+                                    borderRadius: 8,
+                                    width: 36, height: 36,
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                    fontWeight: 900, fontSize: 13,
+                                    transition: 'all 0.3s'
+                                }}
+                            >
+                                {lang === 'ar' ? 'EN' : 'ع'}
                             </button>
-                        )}
+                        </div>
                     </div>
 
                     {/* ════════ Restaurant / Cafe Theme Content ════════ */}
@@ -417,7 +452,7 @@ export default function ClientCardViewer({ initialCard, cardId }) {
                 </div>
             )}
 
-            {/* ════════ SMART WAITER FABs & MODALS ════════ */}
+            {/* ════════ SMART WAITER MAIN BUTTON ════════ */}
             {card.isWaiterEnabled && tableNumber && (() => {
                 const block = computeWaiterBlock();
                 const isBusy = block !== 'ready' && block !== 'qr_mode';
@@ -428,56 +463,105 @@ export default function ClientCardViewer({ initialCard, cardId }) {
                             position: 'fixed', bottom: 20, left: 0, right: 0, zIndex: 9998,
                             display: 'flex', justifyContent: 'center', pointerEvents: 'none'
                         }}>
-                            <div style={{
-                                display: 'flex', gap: 10, padding: '10px 14px', borderRadius: 24,
-                                background: 'rgba(10,15,28,0.85)', backdropFilter: 'blur(16px)',
-                                WebkitBackdropFilter: 'blur(16px)', border: `1px solid ${primary}40`,
-                                boxShadow: '0 10px 40px rgba(0,0,0,0.5)', pointerEvents: 'auto',
-                                fontFamily: 'Cairo, sans-serif'
-                            }} dir="rtl">
-                                {block === 'session_expired' ? (
-                                    <div style={{ color: '#fff', fontSize: 13, fontWeight: 'bold', padding: '4px 16px' }}>⏳ انتهت الجلسة. يرجى مسح البطاقة مجدداً.</div>
-                                ) : block === 'bill_sent' ? (
-                                    <div style={{ color: '#fff', fontSize: 13, fontWeight: 'bold', padding: '4px 16px' }}>🧾 تم طلب الفاتورة. الجلسة مغلقة.</div>
-                                ) : (
-                                    [
-                                        { id: 'bill',   label: 'حساب',  icon: '🧾' },
-                                        { id: 'coal',   label: 'فحم',   icon: '💨' },
-                                        { id: 'clean',  label: 'تنظيف', icon: '🧻' },
-                                        { id: 'waiter', label: 'ويتر',  icon: '👨‍🍳' },
-                                    ].map(btn => (
-                                        <button key={btn.id}
-                                            onClick={() => handleWaiterRequest(btn.id)}
-                                            disabled={isBusy}
-                                            style={{
-                                                display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4,
-                                                background: 'transparent', border: 'none', color: '#fff',
-                                                opacity: (isBusy && block !== 'qr_mode') ? 0.5 : (block === 'qr_mode' && btn.id !== 'bill') ? 0.5 : 1, 
-                                                cursor: isBusy ? 'not-allowed' : 'pointer',
-                                                padding: '4px 8px', transition: 'all 0.2s'
-                                            }}>
-                                            <span style={{ fontSize: 20 }}>{cooldown > 0 ? '⏳' : btn.icon}</span>
-                                            <span style={{ fontSize: 10, fontWeight: 700 }}>{cooldown > 0 ? `${cooldown}s` : btn.label}</span>
-                                        </button>
-                                    ))
-                                )}
-                            </div>
+                            {block === 'session_expired' ? (
+                                <div style={{ background: '#111827', color: '#ea580c', border: '1px solid #ea580c', borderRadius: 24, padding: '12px 24px', fontWeight: 900, pointerEvents: 'auto', boxShadow: '0 10px 25px rgba(0,0,0,0.3)', fontFamily: 'Cairo, sans-serif' }}>
+                                    ⏳ انتهت الجلسة. يرجى مسح البطاقة مجدداً.
+                                </div>
+                            ) : block === 'bill_sent' ? (
+                                <div style={{ background: '#111827', color: '#f5c518', border: '1px solid #f5c518', borderRadius: 24, padding: '12px 24px', fontWeight: 900, pointerEvents: 'auto', boxShadow: '0 10px 25px rgba(0,0,0,0.3)', fontFamily: 'Cairo, sans-serif' }}>
+                                    🧾 تم طلب الفاتورة. الجلسة مغلقة.
+                                </div>
+                            ) : (
+                                <button
+                                    onClick={() => setShowWaiterMenu(true)}
+                                    disabled={isBusy}
+                                    style={{
+                                        background: 'linear-gradient(135deg, #f5c518, #ea580c)',
+                                        color: '#111827',
+                                        border: 'none',
+                                        borderRadius: 999,
+                                        padding: '16px 36px',
+                                        fontWeight: 900,
+                                        fontSize: 18,
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: 12,
+                                        pointerEvents: 'auto',
+                                        cursor: isBusy ? 'not-allowed' : 'pointer',
+                                        boxShadow: '0 10px 30px rgba(234,88,12,0.4)',
+                                        fontFamily: 'Cairo, sans-serif',
+                                        opacity: isBusy ? 0.6 : 1,
+                                        transition: 'transform 0.2s',
+                                    }}
+                                    onMouseDown={(e) => e.currentTarget.style.transform = 'scale(0.95)'}
+                                    onMouseUp={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                                >
+                                    <span style={{ fontSize: 24 }}>🛎️</span>
+                                    <span>{lang === 'ar' ? 'طلب خدمة' : 'Call Waiter'}</span>
+                                </button>
+                            )}
                         </div>
 
-                        {/* Payment Modals - reusing the overlayStyle but keeping it neat */}
-                        {showPaymentOptions && (
-                            <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 9999, background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(6px)', display: 'flex', alignItems: 'flex-end', justifyContent: 'center', fontFamily: 'Cairo, sans-serif' }} onClick={() => setShowPaymentOptions(false)}>
-                                <div style={{ background: '#1e293b', width: '100%', maxWidth: 448, borderTopLeftRadius: 28, borderTopRightRadius: 28, padding: '8px 20px 36px', borderTop: `2px solid ${primary}60`, boxShadow: '0 -10px 40px rgba(0,0,0,0.5)' }} onClick={e => e.stopPropagation()}>
-                                    <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom: 16, direction:'rtl', marginTop: 15 }}>
-                                        <h3 style={{ margin:0, color: '#f8fafc', fontSize: 18, fontWeight: 900, display:'flex', alignItems:'center', gap:8 }}><span style={{ fontSize:20 }}>💸</span>كيف تفضل الدفع؟</h3>
-                                        <button onClick={() => setShowPaymentOptions(false)} style={{ background: 'transparent', border: 'none', color: '#94a3b8', fontSize: 24, cursor: 'pointer' }}>×</button>
+                        {/* ════════ WAITER BOTTOM SHEET MODAL ════════ */}
+                        {showWaiterMenu && (
+                            <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 9999, background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'flex-end', justifyContent: 'center', fontFamily: 'Cairo, sans-serif' }} onClick={() => setShowWaiterMenu(false)}>
+                                <div style={{ background: '#111827', width: '100%', maxWidth: 448, borderTopLeftRadius: 32, borderTopRightRadius: 32, padding: '24px 20px 40px', borderTop: '2px solid #ea580c', boxShadow: '0 -10px 40px rgba(0,0,0,0.6)', animation: 'slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1)' }} onClick={e => e.stopPropagation()}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24, direction: lang === 'ar' ? 'rtl' : 'ltr' }}>
+                                        <h3 style={{ margin: 0, color: '#f8fafc', fontSize: 20, fontWeight: 900 }}>{lang === 'ar' ? 'ماذا تحتاج؟' : 'What do you need?'}</h3>
+                                        <button onClick={() => setShowWaiterMenu(false)} style={{ background: '#1f2937', border: 'none', color: '#9ca3af', width: 32, height: 32, borderRadius: 16, fontSize: 20, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>×</button>
                                     </div>
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }} dir="rtl">
-                                        <button onClick={() => { setSelectedPayment('cash'); setShowPaymentOptions(false); setConfirmBill(true); }} style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '15px 18px', borderRadius: 16, cursor: 'pointer', fontSize: 15, fontWeight: 700, textAlign: 'right', background: `${primary}14`, color: '#f8fafc', border: `1px solid ${primary}38` }}>
-                                            <span style={{ fontSize: 22 }}>💵</span><span>الدفع نقداً (Cash)</span>
+                                    
+                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, direction: lang === 'ar' ? 'rtl' : 'ltr' }}>
+                                        {[
+                                            { id: 'waiter', label: lang === 'ar' ? 'نداء ويتر' : 'Waiter',  icon: '👨‍🍳', color: '#3b82f6' },
+                                            { id: 'clean',  label: lang === 'ar' ? 'تنظيف الطاولة' : 'Clean', icon: '🧻', color: '#10b981' },
+                                            ...(card.hasShisha ? [{ id: 'coal',   label: lang === 'ar' ? 'تغيير فحم' : 'Coal',   icon: '💨', color: '#8b5cf6' }] : []),
+                                            { id: 'bill',   label: lang === 'ar' ? 'طلب الفاتورة' : 'Bill',  icon: '🧾', color: '#ea580c' },
+                                        ].map(btn => (
+                                            <button key={btn.id}
+                                                onClick={() => handleWaiterRequest(btn.id)}
+                                                disabled={cooldown > 0}
+                                                style={{
+                                                    background: '#1f2937',
+                                                    border: `1px solid ${btn.color}40`,
+                                                    borderRadius: 20,
+                                                    padding: '20px 10px',
+                                                    display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12,
+                                                    color: '#f8fafc',
+                                                    cursor: cooldown > 0 ? 'not-allowed' : 'pointer',
+                                                    opacity: cooldown > 0 ? 0.5 : 1,
+                                                    transition: 'all 0.2s'
+                                                }}
+                                            >
+                                                <div style={{ width: 56, height: 56, borderRadius: 28, background: `${btn.color}20`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 28 }}>
+                                                    {cooldown > 0 ? '⏳' : btn.icon}
+                                                </div>
+                                                <span style={{ fontSize: 15, fontWeight: 800 }}>{cooldown > 0 ? `${cooldown}s` : btn.label}</span>
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Payment Modals */}
+                        {showPaymentOptions && (
+                            <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 9999, background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'flex-end', justifyContent: 'center', fontFamily: 'Cairo, sans-serif' }} onClick={() => setShowPaymentOptions(false)}>
+                                <div style={{ background: '#111827', width: '100%', maxWidth: 448, borderTopLeftRadius: 32, borderTopRightRadius: 32, padding: '24px 20px 40px', borderTop: `2px solid #f5c518`, boxShadow: '0 -10px 40px rgba(0,0,0,0.6)', animation: 'slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1)' }} onClick={e => e.stopPropagation()}>
+                                    <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom: 24, direction: lang === 'ar' ? 'rtl' : 'ltr' }}>
+                                        <h3 style={{ margin:0, color: '#f8fafc', fontSize: 20, fontWeight: 900, display:'flex', alignItems:'center', gap:8 }}>
+                                            <span style={{ fontSize:24 }}>💸</span>{lang === 'ar' ? 'كيف تفضل الدفع؟' : 'How would you like to pay?'}
+                                        </h3>
+                                        <button onClick={() => setShowPaymentOptions(false)} style={{ background: '#1f2937', border: 'none', color: '#9ca3af', width: 32, height: 32, borderRadius: 16, fontSize: 20, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>×</button>
+                                    </div>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: 16, direction: lang === 'ar' ? 'rtl' : 'ltr' }}>
+                                        <button onClick={() => { setSelectedPayment('cash'); setShowPaymentOptions(false); setConfirmBill(true); }} style={{ display: 'flex', alignItems: 'center', gap: 16, padding: '20px', borderRadius: 20, cursor: 'pointer', fontSize: 16, fontWeight: 800, textAlign: lang === 'ar' ? 'right' : 'left', background: '#1f2937', color: '#f8fafc', border: `1px solid #10b98140`, transition: 'all 0.2s' }}>
+                                            <div style={{ width: 48, height: 48, borderRadius: 24, background: '#10b98120', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24 }}>💵</div>
+                                            <span>{lang === 'ar' ? 'الدفع نقداً (Cash)' : 'Cash'}</span>
                                         </button>
-                                        <button onClick={() => { setSelectedPayment('visa'); setShowPaymentOptions(false); setConfirmBill(true); }} style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '15px 18px', borderRadius: 16, cursor: 'pointer', fontSize: 15, fontWeight: 700, textAlign: 'right', background: `${primary}14`, color: '#f8fafc', border: `1px solid ${primary}38` }}>
-                                            <span style={{ fontSize: 22 }}>💳</span><span>الدفع بالبطاقة (Visa/Mada)</span>
+                                        <button onClick={() => { setSelectedPayment('visa'); setShowPaymentOptions(false); setConfirmBill(true); }} style={{ display: 'flex', alignItems: 'center', gap: 16, padding: '20px', borderRadius: 20, cursor: 'pointer', fontSize: 16, fontWeight: 800, textAlign: lang === 'ar' ? 'right' : 'left', background: '#1f2937', color: '#f8fafc', border: `1px solid #3b82f640`, transition: 'all 0.2s' }}>
+                                            <div style={{ width: 48, height: 48, borderRadius: 24, background: '#3b82f620', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24 }}>💳</div>
+                                            <span>{lang === 'ar' ? 'الدفع بالبطاقة (Visa/Mada)' : 'Card (Visa/Mada)'}</span>
                                         </button>
                                     </div>
                                 </div>
@@ -485,16 +569,25 @@ export default function ClientCardViewer({ initialCard, cardId }) {
                         )}
 
                         {confirmBill && (
-                            <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 9999, background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(6px)', display: 'flex', alignItems: 'flex-end', justifyContent: 'center', fontFamily: 'Cairo, sans-serif' }} onClick={() => setConfirmBill(false)}>
-                                <div style={{ background: '#1e293b', width: '100%', maxWidth: 448, borderTopLeftRadius: 28, borderTopRightRadius: 28, padding: '24px 20px 32px', borderTop: `2px solid ${primary}60`, boxShadow: '0 -10px 40px rgba(0,0,0,0.5)' }} onClick={e => e.stopPropagation()}>
-                                    <div style={{ textAlign: 'center', marginBottom: 20 }}>
-                                        <span style={{ fontSize: 40 }}>{selectedPayment === 'visa' ? '💳' : '💵'}</span>
-                                        <h3 style={{ color: '#f8fafc', fontSize: 18, fontWeight: 900, margin: '12px 0 6px' }}>تأكيد الفاتورة</h3>
-                                        <p style={{ color: '#94a3b8', fontSize: 13, margin: 0 }}>الدفع عبر: <b style={{ color: '#fff' }}>{selectedPayment === 'visa' ? 'فيزا / شبكة' : 'كاش'}</b></p>
+                            <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 9999, background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'flex-end', justifyContent: 'center', fontFamily: 'Cairo, sans-serif' }} onClick={() => setConfirmBill(false)}>
+                                <div style={{ background: '#111827', width: '100%', maxWidth: 448, borderTopLeftRadius: 32, borderTopRightRadius: 32, padding: '32px 20px 40px', borderTop: `2px solid #ea580c`, boxShadow: '0 -10px 40px rgba(0,0,0,0.6)', animation: 'slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1)' }} onClick={e => e.stopPropagation()}>
+                                    <div style={{ textAlign: 'center', marginBottom: 32 }}>
+                                        <div style={{ width: 80, height: 80, borderRadius: 40, background: selectedPayment === 'visa' ? '#3b82f620' : '#10b98120', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px', fontSize: 40 }}>
+                                            {selectedPayment === 'visa' ? '💳' : '💵'}
+                                        </div>
+                                        <h3 style={{ color: '#f8fafc', fontSize: 22, fontWeight: 900, margin: '0 0 8px' }}>{lang === 'ar' ? 'تأكيد الفاتورة' : 'Confirm Bill'}</h3>
+                                        <p style={{ color: '#9ca3af', fontSize: 15, margin: 0 }}>
+                                            {lang === 'ar' ? 'الدفع عبر: ' : 'Pay via: '}
+                                            <b style={{ color: '#f5c518' }}>{selectedPayment === 'visa' ? (lang === 'ar' ? 'فيزا / شبكة' : 'Visa / Mada') : (lang === 'ar' ? 'كاش' : 'Cash')}</b>
+                                        </p>
                                     </div>
-                                    <div style={{ display: 'flex', gap: 10, direction: 'rtl' }}>
-                                        <button onClick={handleBillConfirm} style={{ flex: 1, padding: '14px', borderRadius: 14, border: 'none', background: primary, color: '#1e293b', fontWeight: 900, fontSize: 15, cursor: 'pointer' }}>نعم، تأكيد</button>
-                                        <button onClick={() => { setConfirmBill(false); setShowPaymentOptions(true); }} style={{ flex: 1, padding: '14px', borderRadius: 14, border: `1px solid rgba(255,255,255,0.07)`, background: 'transparent', color: '#94a3b8', fontWeight: 700, fontSize: 15, cursor: 'pointer' }}>تغيير الدفع</button>
+                                    <div style={{ display: 'flex', gap: 12, direction: lang === 'ar' ? 'rtl' : 'ltr' }}>
+                                        <button onClick={handleBillConfirm} style={{ flex: 1, padding: '16px', borderRadius: 16, border: 'none', background: 'linear-gradient(135deg, #f5c518, #ea580c)', color: '#111827', fontWeight: 900, fontSize: 16, cursor: 'pointer', transition: 'transform 0.2s' }} onMouseDown={(e) => e.currentTarget.style.transform = 'scale(0.96)'} onMouseUp={(e) => e.currentTarget.style.transform = 'scale(1)'}>
+                                            {lang === 'ar' ? 'نعم، تأكيد' : 'Yes, Confirm'}
+                                        </button>
+                                        <button onClick={() => { setConfirmBill(false); setShowPaymentOptions(true); }} style={{ flex: 1, padding: '16px', borderRadius: 16, border: `2px solid #374151`, background: 'transparent', color: '#d1d5db', fontWeight: 800, fontSize: 16, cursor: 'pointer' }}>
+                                            {lang === 'ar' ? 'تغيير الدفع' : 'Change Payment'}
+                                        </button>
                                     </div>
                                 </div>
                             </div>

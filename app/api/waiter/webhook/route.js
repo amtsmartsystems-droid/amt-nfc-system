@@ -7,16 +7,6 @@ export async function POST(req) {
         const body = await req.json();
         console.log("[Webhook] Received:", JSON.stringify(body, null, 2));
 
-        // ── Security Check: Verify Telegram Secret Token ──
-        // BYPASSED FOR NOW: The webhook was set without a secret token.
-        /*
-        const secretToken = req.headers.get('x-telegram-bot-api-secret-token');
-        if (secretToken !== process.env.TELEGRAM_WEBHOOK_SECRET) {
-            console.error('[Webhook] Unauthorized: Invalid secret token');
-            return NextResponse.json({ ok: true }); // Return 200 to prevent Telegram from retrying
-        }
-        */
-
         const callbackQuery = body.callback_query;
         
         // ── Handle Commands (e.g. /setup_dashboard) ──
