@@ -85,11 +85,7 @@ export async function POST(req) {
             cat.items.forEach((item, iIdx) => {
               item.id = cat.id + iIdx.toString();
               item.available = true;
-              if (item.name) {
-                 item.image = `https://image.pollinations.ai/prompt/delicious%20food%20${encodeURIComponent(item.name)}?width=400&height=400&nologo=true`;
-              } else {
-                 item.image = "";
-              }
+              item.image = "";
             });
           }
         });
