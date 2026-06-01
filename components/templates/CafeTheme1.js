@@ -48,9 +48,13 @@ export default function CafeTheme1({ cardId, siteData, siteColors, lang = "en", 
     const handleClick = (e) => {
       if(cardId) fetch('/api/clicks', { method: 'POST', body: JSON.stringify({ cardId, linkId: link.id || link._id }) }).catch(()=>{});
       if (link.url === '#menu-section') {
-        e.preventDefault();
-        setIsMenuModalOpen(true);
-      }
+          e.preventDefault();
+          if (menuMode === 'pdf' && pdfMenuUrl) {
+            window.open(pdfMenuUrl, '_blank');
+          } else {
+            setIsMenuModalOpen(true);
+          }
+        }
     };
     return (
       <a
@@ -75,8 +79,16 @@ export default function CafeTheme1({ cardId, siteData, siteColors, lang = "en", 
   // ── Social Icon Button ──
   const SocialBtn = ({ link }) => {
     const { IconComponent } = getIconForLink(link.title || link.titleAr || "");
-    const handleClick = () => {
+    const handleClick = (e) => {
       if(cardId) fetch('/api/clicks', { method: 'POST', body: JSON.stringify({ cardId, linkId: link.id || link._id }) }).catch(()=>{});
+      if (link.url === '#menu-section') {
+        e.preventDefault();
+        if (menuMode === 'pdf' && pdfMenuUrl) {
+          window.open(pdfMenuUrl, '_blank');
+        } else {
+          setIsMenuModalOpen(true);
+        }
+      }
     };
     return (
       <a

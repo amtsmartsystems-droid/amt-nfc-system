@@ -51,8 +51,16 @@ export default function RestaurantTheme({ cardId, siteData, siteColors, lang = "
   const LinkBtn = ({ link, i }) => {
     const label = t(link.title, link.titleAr);
     const { IconComponent, color, bg } = getIconForLink(link.title || link.titleAr || "");
-    const handleClick = () => {
+    const handleClick = (e) => {
       if(cardId) fetch('/api/clicks', { method: 'POST', body: JSON.stringify({ cardId, linkId: link.id || link._id }) }).catch(()=>{});
+      if (link.url === '#menu-section') {
+        e.preventDefault();
+        if (menuMode === 'pdf' && pdfMenuUrl) {
+          window.open(pdfMenuUrl, '_blank');
+        } else {
+          setIsMenuModalOpen(true);
+        }
+      }
     };
     return (
       <a

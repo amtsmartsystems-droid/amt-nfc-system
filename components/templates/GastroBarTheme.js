@@ -55,9 +55,13 @@ export default function GastroBarTheme({ cardId, siteData, siteColors, lang = "e
     const handleClick = (e) => { 
       if(cardId) fetch('/api/clicks', { method: 'POST', body: JSON.stringify({ cardId, linkId: link.id || link._id }) }).catch(()=>{}); 
       if (link.url === '#menu-section') {
-        e.preventDefault();
-        setIsMenuModalOpen(true);
-      }
+          e.preventDefault();
+          if (menuMode === 'pdf' && pdfMenuUrl) {
+            window.open(pdfMenuUrl, '_blank');
+          } else {
+            setIsMenuModalOpen(true);
+          }
+        }
     };
     return (
       <a href={link.url || "#"} onClick={handleClick} target={link.url && link.url !== "#" && !link.url.startsWith('#') ? "_blank" : undefined} rel="noopener noreferrer"
@@ -75,7 +79,17 @@ export default function GastroBarTheme({ cardId, siteData, siteColors, lang = "e
   const OutlineBtn = ({ link }) => {
     const label = t(link.title, link.titleAr);
     const { IconComponent } = getIconForLink(link.title || link.titleAr || "");
-    const handleClick = () => { if(cardId) fetch('/api/clicks', { method: 'POST', body: JSON.stringify({ cardId, linkId: link.id || link._id }) }).catch(()=>{}); };
+    const handleClick = (e) => { 
+      if(cardId) fetch('/api/clicks', { method: 'POST', body: JSON.stringify({ cardId, linkId: link.id || link._id }) }).catch(()=>{}); 
+      if (link.url === '#menu-section') {
+        e.preventDefault();
+        if (menuMode === 'pdf' && pdfMenuUrl) {
+          window.open(pdfMenuUrl, '_blank');
+        } else {
+          setIsMenuModalOpen(true);
+        }
+      }
+    };
     return (
       <a href={link.url || "#"} onClick={handleClick} target={link.url && link.url !== "#" ? "_blank" : undefined} rel="noopener noreferrer"
         className="flex items-center justify-center gap-3 w-full py-4 rounded-xl font-bold text-[13px] uppercase tracking-wider transition-all duration-300 hover:bg-white/10 active:scale-95"
