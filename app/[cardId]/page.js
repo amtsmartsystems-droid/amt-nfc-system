@@ -62,8 +62,14 @@ export default async function PublicCardPage({ params }) {
         siteData:  JSON.parse(JSON.stringify(card.siteData  || {})),
         links:     JSON.parse(JSON.stringify(card.links     || [])),
         events:    JSON.parse(JSON.stringify(card.events    || [])),
-        isLocked:  card.isLocked,
+        telegramConfig: card.telegramConfig || { botToken: '', chatId: '', isEnabled: false },
         isWaiterEnabled: card.telegramConfig?.isEnabled === true,
+        tableMapping:   card.tableMapping || [],
+        isMenuEnabled:  card.isMenuEnabled || false,
+        menuMode:       card.menuMode || 'interactive',
+        pdfMenuUrl:     card.pdfMenuUrl || '',
+        menuCategories: card.menuCategories || [],
+        cliqConfig:     card.cliqConfig || { isEnabled: false, alias: '', message: '' },
     };
     
     return <ClientCardViewer initialCard={serializedCard} cardId={cardId} />;
