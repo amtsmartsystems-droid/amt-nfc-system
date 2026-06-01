@@ -11,7 +11,7 @@ import ScrollReveal from "../ScrollReveal";
 //  Dark espresso bg · circular logo badge · pill buttons · social icons
 //  Props: { siteData, siteColors, lang }
 // ══════════════════════════════════════════════════════════════════════
-export default function CafeTheme1({ cardId, siteData, siteColors, lang = "en" }) {
+export default function CafeTheme1({ cardId, siteData, siteColors, lang = "en", isMenuEnabled, menuMode, menuCategories, addToCart, pdfMenuUrl }) {
   const primary    = siteColors?.primary    || "#C9A96E";   // warm gold
   const bgDark     = siteColors?.background || "#2C1503";   // espresso brown
   const isAr       = lang === "ar";
@@ -44,8 +44,12 @@ export default function CafeTheme1({ cardId, siteData, siteColors, lang = "en" }
   // ── Pill Button (main links) ──
   const PillBtn = ({ link }) => {
     const label = t(link.title, link.titleAr);
-    const handleClick = () => {
+    const handleClick = (e) => {
       if(cardId) fetch('/api/clicks', { method: 'POST', body: JSON.stringify({ cardId, linkId: link.id || link._id }) }).catch(()=>{});
+      if (link.url === '#menu-section') {
+        e.preventDefault();
+        document.getElementById('menu-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
     };
     return (
       <a
@@ -184,6 +188,42 @@ export default function CafeTheme1({ cardId, siteData, siteColors, lang = "en" }
           ))
         )}
       </section>
+
+      {/* ══════════════════════════════════════════
+          MENU SECTION 
+      ══════════════════════════════════════════ */}
+      {isMenuEnabled && menuMode === 'interactive' && menuCategories && menuCategories.length > 0 && (
+        <section id="menu-section" className="px-5 pb-6 scroll-mt-6">
+          <div className="text-center mb-6">
+            <h2 className="text-[22px] font-black uppercase" style={{ color: primary, fontFamily:"Cairo,sans-serif" }}>
+              {t("Our Menu", "قائمة الطعام")}
+            </h2>
+          </div>
+          <div className="flex flex-col gap-6">
+            {menuCategories.map((cat, i) => (
+              <div key={i}>
+                <h3 className="font-bold text-[18px] mb-3 pb-2 border-b" style={{ color: primary, borderColor: `rgba(var(--primary-rgb),.3)` }}>
+                  {t(cat.name, cat.nameAr)}
+                </h3>
+                <div className="flex flex-col gap-3">
+                  {cat.items.map((item, idx) => (
+                    <div key={idx} className="flex justify-between items-center p-4 rounded-2xl shadow-sm transition-transform hover:-translate-y-0.5" style={{ background: "rgba(255,255,255,0.05)", border: `1px solid rgba(var(--primary-rgb),.1)` }}>
+                      <div className="flex-1">
+                        <h4 className="font-bold text-[15px] text-white">{t(item.name, item.nameAr)}</h4>
+                        {item.descAr && <p className="text-[12px] mt-1 leading-relaxed max-w-[90%]" style={{ color: "rgba(255,255,255,0.5)" }}>{t(item.desc, item.descAr)}</p>}
+                        <div className="text-[14px] font-black mt-2" style={{ color: primary }}>{item.price} JOD</div>
+                      </div>
+                      <button onClick={() => addToCart && addToCart(item)} className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 transition-transform active:scale-95" style={{ background: primary }}>
+                        <LucideIcons.Plus size={18} color={bgDark} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* ══════════════════════════════════════════
           SOCIAL ICONS ROW

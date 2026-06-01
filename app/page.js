@@ -930,7 +930,13 @@ function PageContent() {
                                   {menuMode === 'pdf' ? (
                                     <div className="space-y-2">
                                       <Label className="text-[10px] text-white/70">رابط ملف المنيو PDF</Label>
-                                      <input type="text" value={pdfMenuUrl} onChange={e => { setPdfMenuUrl(e.target.value); updLink(lk.id, "url", e.target.value); }} placeholder="https://..." className="w-full bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-xs text-white outline-none focus:border-yellow-500" dir="ltr" />
+                                      <div className="flex gap-2">
+                                        <input type="text" value={pdfMenuUrl} onChange={e => { setPdfMenuUrl(e.target.value); updLink(lk.id, "url", e.target.value); }} placeholder="https://..." className="w-full bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-xs text-white outline-none focus:border-yellow-500" dir="ltr" />
+                                        <label title="رفع ملف PDF" className={`flex-shrink-0 flex items-center justify-center w-10 h-10 rounded-xl bg-yellow-600 hover:bg-yellow-500 text-white cursor-pointer transition-all ${uploadingPdf === lk.id ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                                          {uploadingPdf === lk.id ? <LucideIcons.Loader2 size={16} className="animate-spin" /> : <LucideIcons.UploadCloud size={16} />}
+                                          <input type="file" accept="application/pdf,image/*" className="hidden" disabled={uploadingPdf === lk.id} onChange={(e) => handlePdfUpload(e.target.files[0], lk.id)} />
+                                        </label>
+                                      </div>
                                     </div>
                                   ) : (
                                     <>

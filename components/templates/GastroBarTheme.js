@@ -14,7 +14,7 @@ import ScrollReveal from "../ScrollReveal";
 
 const SOCIAL_KW = ["instagram","انستا","telegram","تيليغرام","whatsapp","واتس","tiktok","تيك","facebook","فيسبوك","twitter","تويتر","youtube","يوتيوب","vk","snapchat","سناب","linkedin"];
 
-export default function GastroBarTheme({ cardId, siteData, siteColors, lang = "en" }) {
+export default function GastroBarTheme({ cardId, siteData, siteColors, lang = "en", isMenuEnabled, menuMode, menuCategories, addToCart, pdfMenuUrl }) {
   const accent  = siteColors?.primary    || "#F5C518";   // gastrobar yellow
   const bgColor = siteColors?.background || "#111111";   // near-black
   const isAr    = lang === "ar";
@@ -51,9 +51,15 @@ export default function GastroBarTheme({ cardId, siteData, siteColors, lang = "e
   const YellowBtn = ({ link }) => {
     const label = t(link.title, link.titleAr);
     const { IconComponent } = getIconForLink(link.title || link.titleAr || "");
-    const handleClick = () => { if(cardId) fetch('/api/clicks', { method: 'POST', body: JSON.stringify({ cardId, linkId: link.id || link._id }) }).catch(()=>{}); };
+    const handleClick = (e) => { 
+      if(cardId) fetch('/api/clicks', { method: 'POST', body: JSON.stringify({ cardId, linkId: link.id || link._id }) }).catch(()=>{}); 
+      if (link.url === '#menu-section') {
+        e.preventDefault();
+        document.getElementById('menu-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    };
     return (
-      <a href={link.url || "#"} onClick={handleClick} target={link.url && link.url !== "#" ? "_blank" : undefined} rel="noopener noreferrer"
+      <a href={link.url || "#"} onClick={handleClick} target={link.url && link.url !== "#" && !link.url.startsWith('#') ? "_blank" : undefined} rel="noopener noreferrer"
         className="flex items-center justify-center gap-3 w-full py-4 rounded-xl font-black text-[14px] uppercase tracking-wider transition-all duration-300 hover:brightness-110 active:scale-95 hover:shadow-[0_0_24px_rgba(var(--primary-rgb),0.45)]"
         style={{ background: accent, color: "#111", boxShadow: `0 4px 20px rgba(var(--primary-rgb),0.30)`, fontFamily:"Cairo,sans-serif" }}>
         <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background:"rgba(0,0,0,0.15)" }}>
@@ -210,6 +216,38 @@ export default function GastroBarTheme({ cardId, siteData, siteColors, lang = "e
           </div>
         )}
       </section>
+
+      {/* ══════════════════════════════════════════
+          MENU SECTION 
+      ══════════════════════════════════════════ */}
+      {isMenuEnabled && menuMode === 'interactive' && menuCategories && menuCategories.length > 0 && (
+        <section id="menu-section" className="px-5 pb-8 scroll-mt-6" style={{ borderTop:`1px solid rgba(255,255,255,0.06)` }}>
+          <div className="pt-7 mb-5"><STitle center>{t("OUR MENU", "قائمة الطعام")}</STitle></div>
+          <div className="flex flex-col gap-6">
+            {menuCategories.map((cat, i) => (
+              <div key={i}>
+                <h3 className="font-black text-[17px] text-white mb-4 border-b border-white/10 pb-2 uppercase tracking-wide" style={{ fontFamily:"Cairo,sans-serif" }}>
+                  {t(cat.name, cat.nameAr)}
+                </h3>
+                <div className="flex flex-col gap-3">
+                  {cat.items.map((item, idx) => (
+                    <div key={idx} className="flex justify-between items-center p-4 rounded-2xl" style={{ background:"rgba(255,255,255,0.03)", border:"1px solid rgba(255,255,255,0.06)" }}>
+                      <div className="flex-1">
+                        <h4 className="font-bold text-[14.5px] text-white" style={{ fontFamily:"Cairo,sans-serif" }}>{t(item.name, item.nameAr)}</h4>
+                        {item.descAr && <p className="text-[12px] text-white/50 mt-1 leading-relaxed max-w-[90%]" style={{ fontFamily:"Cairo,sans-serif" }}>{t(item.desc, item.descAr)}</p>}
+                        <div className="text-[14px] font-black mt-2 tracking-wide" style={{ color: accent }}>{item.price} JOD</div>
+                      </div>
+                      <button onClick={() => addToCart && addToCart(item)} className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 transition-all hover:brightness-110 active:scale-95" style={{ background: accent }}>
+                        <LucideIcons.Plus size={18} color="#111" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* ══════════════════════════════════════════
           EVENTS SECTION — fully dynamic from siteData.events
