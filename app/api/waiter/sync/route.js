@@ -64,81 +64,19 @@ export async function POST(req) {
             }
         }
 
-        // === MINUTE 5: AUDIT FLAG ===
+        // === MINUTE 5: SMART REMINDER FLAG ===
         if (elapsedMinutes >= 5 && elapsedMinutes < 6 && (tableReq.status === 'pending' || tableReq.status === 'handling')) {
-            if (tableReq.clientAuditStatus === 'waiting') {
+            if (tableReq.clientAuditStatus === 'waiting' || tableReq.clientAuditStatus === 'reminded') {
                 showAudit = true;
             }
         }
 
-        // === MINUTE 6: STRICT ESCALATION ===
+        // === MINUTE 6: SILENCE = CONSENT (AUTO-CLOSE) ===
         if (elapsedMinutes >= 6 && elapsedMinutes < 10) {
-            const auditRes = tableReq.clientAuditStatus;
-
-            if (tableReq.status === 'handling') {
-                // MAP 1
-                if (auditRes === 'yes' || auditRes === 'waiting') {
-                    // Silence = Consent or Explicit Yes
-                    tableReq.status = 'idle';
-                    tableReq.calls = [];
-                    tableReq.assignedWaiter = null;
-                    stateChanged = true;
-                } else if (auditRes === 'no') {
-                    // Alert Telegram
-                    if (botToken && chatId && lastCall.messageId) {
-                        const alertText = `⚠️ تنبيه: [${tableReq.assignedWaiter || 'النادل'}] استلم طلب طاولة ${tableNumber} والزبون يطلب استعجاله!`;
-                        await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({
-                                chat_id: chatId,
-                                text: alertText,
-                                reply_to_message_id: lastCall.messageId
-                            })
-                        });
-                        // Prevent re-firing
-                        tableReq.clientAuditStatus = 'waiting'; // Reset so it doesn't loop
-                        // Wait, it will keep polling. We should mark status as 'idle' or keep 'handling'? 
-                        // The prompt says "Server instantly edits the Telegram message to an exposed alert...".
-                    }
-                }
-            } else if (tableReq.status === 'pending') {
-                // MAP 2
-                if (auditRes === 'yes') {
-                    tableReq.status = 'idle';
-                    tableReq.calls = [];
-                    stateChanged = true;
-                } else {
-                    // auditRes is 'no' or 'waiting' (Silence is NOT consent)
-                    if (botToken && chatId && lastCall.messageId) {
-                        const alertText = `🚨 نداء للجميع: طاولة ${tableNumber} تنتظر منذ 6 دقائق ولم يستلم أحد الطلب!`;
-                        const res = await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({
-                                chat_id: chatId,
-                                text: alertText,
-                                reply_to_message_id: lastCall.messageId
-                            })
-                        });
-                        if (res.ok) {
-                            const result = await res.json();
-                            // Pin message
-                            await fetch(`https://api.telegram.org/bot${botToken}/pinChatMessage`, {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({
-                                    chat_id: chatId,
-                                    message_id: result.result.message_id
-                                })
-                            });
-                        }
-                    }
-                    // Change status or audit to prevent looping before minute 10
-                    tableReq.clientAuditStatus = 'yes'; // Hack to prevent re-firing in the same minute
-                    stateChanged = true;
-                }
-            }
+            tableReq.status = 'idle';
+            tableReq.calls = [];
+            tableReq.assignedWaiter = null;
+            stateChanged = true;
         }
 
         // === MINUTE 10: AUTO EXPIRE CALL ===

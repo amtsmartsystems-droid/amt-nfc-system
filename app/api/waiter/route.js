@@ -102,16 +102,15 @@ export async function POST(req) {
         }
 
         // ── 7. RATE LIMITING & BYPASS ────────────────────────────────────────
-        // Keep only calls from the last 10 minutes (Support backward compatible Date or new Object schema)
-        tableReq.calls = (tableReq.calls || []).filter(
-            c => now - new Date(c.timestamp || c).getTime() < RATE_WINDOW_MS
-        );
-
         const isBill = (serviceType === 'bill');
 
         if (!isBill) {
-            // Normal services: check limits and cooldowns
-            if (tableReq.calls.length >= MAX_CALLS) {
+            // Normal services: check limits
+            const recentCalls = (tableReq.calls || []).filter(
+                c => now - new Date(c.timestamp || c).getTime() < RATE_WINDOW_MS
+            );
+
+            if (recentCalls.length >= MAX_CALLS) {
                 return NextResponse.json(
                     { error: '🚫 تم الوصول للحد الأقصى للنداءات. يرجى الانتظار.' },
                     { status: 429 }
@@ -133,20 +132,56 @@ export async function POST(req) {
                     );
                 }
             }
-            
-            // Register this normal call. We will add the messageId AFTER sending to Telegram.
-            tableReq.calls.push({ timestamp: new Date(now), service: serviceType, messageId: null });
-            
-            // Set status to pending and reset client audit
-            tableReq.status = 'pending';
-            tableReq.clientAuditStatus = 'waiting';
         }
 
+        // ── 8. ATOMIC LOCK & PUSH (RACE CONDITION FIX) ───────────────────────
+        let updateQuery = {
+            $push: {
+                "tableRequests.$.calls": { timestamp: new Date(now), service: serviceType, messageId: null }
+            }
+        };
+
         if (isBill) {
-            // Bill bypasses calls limit and instantly locks the table
-            tableReq.status = 'closing';
-            // Hard expiry 10 minutes from now just as a fallback
-            tableReq.sessionExpiresAt = new Date(now + 10 * 60 * 1000);
+            updateQuery.$set = {
+                "tableRequests.$.status": "closing",
+                "tableRequests.$.sessionExpiresAt": new Date(now + 7200000)
+            };
+        } else {
+            updateQuery.$set = {
+                "tableRequests.$.status": "pending",
+                "tableRequests.$.clientAuditStatus": "waiting",
+                "tableRequests.$.sessionExpiresAt": new Date(now + 7200000)
+            };
+        }
+
+        const lockedCard = await Card.findOneAndUpdate(
+            {
+                shortCode: restaurantId,
+                tableRequests: {
+                    $elemMatch: {
+                        tableNumber: tableNumber,
+                        sessionId: decodedPayload.sessionId,
+                        calls: {
+                            $not: {
+                                $elemMatch: { timestamp: { $gt: new Date(now - COOLDOWN_MS) } }
+                            }
+                        }
+                    }
+                }
+            },
+            updateQuery,
+            { new: true }
+        );
+
+        if (!lockedCard) {
+            // Atomic check failed meaning another request beat us to it in the last 60s
+            return NextResponse.json(
+                { 
+                    error: `⏳ عذراً، تم تسجيل طلبك بالفعل للتو (منع التكرار).`,
+                    remainingSeconds: 60 
+                },
+                { status: 429 }
+            );
         }
 
         // ── 9. TELEGRAM NOTIFICATION ─────────────────────────────────────────
@@ -210,15 +245,15 @@ export async function POST(req) {
             // Even if Telegram fails, we still save the db state (status pending)
         } else {
             const resultData = await telegramRes.json();
-            if (resultData.ok && !isBill && tableReq.calls.length > 0) {
-                // Save the messageId of the newly sent message
-                tableReq.calls[tableReq.calls.length - 1].messageId = resultData.result.message_id.toString();
+            if (resultData.ok && !isBill) {
+                // Atomically set the messageId of the newly pushed call
+                await Card.updateOne(
+                    { shortCode: restaurantId },
+                    { $set: { "tableRequests.$[t].calls.$[c].messageId": resultData.result.message_id.toString() } },
+                    { arrayFilters: [ { "t.tableNumber": tableNumber }, { "c.timestamp": new Date(now) } ] }
+                );
             }
         }
-
-        // ── 8. SAVE STATE EXPLICITLY ─────────────────────────────────────────
-        card.markModified('tableRequests');
-        await card.save();
 
         // ── Asynchronously update Live Dashboard ──
         if (isBill) {

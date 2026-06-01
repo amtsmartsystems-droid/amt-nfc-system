@@ -36,6 +36,9 @@ export default function ClientCardViewer({ initialCard, cardId }) {
     const [showWaiterMenu, setShowWaiterMenu]   = useState(false);
     const [waiterStatus, setWaiterStatus]       = useState('idle'); // 'idle' | 'session_expired' | 'bill_sent'
 
+    const [timeOffset, setTimeOffset]           = useState(0);
+    const [cooldownEndMs, setCooldownEndMs]     = useState(0);
+
     const postFetcher = async ([url, body]) => {
         const res = await fetch(url, {
             method: 'POST',
@@ -51,18 +54,26 @@ export default function ClientCardViewer({ initialCard, cardId }) {
         { refreshInterval: 10000, revalidateOnFocus: true }
     );
 
-    const submitAudit = async (answer) => {
+    const handleRemindWaiter = async () => {
         // Optimistic UI hide
         mutateSync({ ...syncData, showAudit: false }, false);
         try {
-            await fetch('/api/waiter/audit', {
+            const res = await fetch('/api/waiter/remind', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ restaurantId: cardId, tableNumber, answer })
+                body: JSON.stringify({ restaurantId: cardId, tableNumber })
             });
+            const data = await res.json();
+            if (res.ok) {
+                setWaiterToast({ message: data.message || "تم إرسال التذكير بنجاح", type: 'success' });
+            } else {
+                setWaiterToast({ message: data.error || "حدث خطأ", type: 'error' });
+            }
         } catch (e) {
             console.error(e);
+            setWaiterToast({ message: "خطأ في الاتصال بالخادم", type: 'error' });
         }
+        setTimeout(() => setWaiterToast(null), 4000);
     };
 
     useEffect(() => {
@@ -77,12 +88,20 @@ export default function ClientCardViewer({ initialCard, cardId }) {
         setIsNfc(auth === 'nfc');
 
         if (auth === 'nfc') {
+            const token = params.get('token');
             fetch('/api/waiter/session', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ restaurantId: cardId, tableNumber: tbl })
+                body: JSON.stringify({ restaurantId: cardId, tableNumber: tbl, token })
             }).then(res => res.json()).then(data => {
-                const expireMs = data.expiresInMs || (10 * 60 * 1000); // 10 minutes fallback
+                const offset = data.serverTime ? data.serverTime - Date.now() : 0;
+                setTimeOffset(offset);
+                const getAccurateNow = () => Date.now() + offset;
+
+                const expireMs = data.sessionExpiresAt 
+                    ? new Date(data.sessionExpiresAt).getTime() - getAccurateNow()
+                    : (data.expiresInMs || 10 * 60 * 1000);
+                
                 if (expireMs > 0) {
                     setTimeout(() => setWaiterStatus('session_expired'), expireMs);
                 } else {
@@ -95,18 +114,36 @@ export default function ClientCardViewer({ initialCard, cardId }) {
                 if (data.rateLimitExpiresInMs && data.rateLimitExpiresInMs > 0) {
                     setLimitReached(true);
                 } else if (data.cooldownRemainingMs && data.cooldownRemainingMs > 0) {
-                    setCooldown(Math.ceil(data.cooldownRemainingMs / 1000));
+                    setCooldownEndMs(getAccurateNow() + data.cooldownRemainingMs);
                 }
             }).catch(() => {});
         }
     }, [cardId]);
 
     useEffect(() => {
-        if (cooldown > 0) {
-            const timer = setTimeout(() => setCooldown(cooldown - 1), 1000);
-            return () => clearTimeout(timer);
+        if (cooldownEndMs > 0) {
+            const accurateNow = Date.now() + timeOffset;
+            const remaining = Math.ceil((cooldownEndMs - accurateNow) / 1000);
+            
+            if (remaining > 0) {
+                setCooldown(remaining);
+                const timer = setTimeout(() => {
+                    const nextNow = Date.now() + timeOffset;
+                    const nextRemaining = Math.ceil((cooldownEndMs - nextNow) / 1000);
+                    if (nextRemaining <= 0) {
+                        setCooldown(0);
+                        setCooldownEndMs(0);
+                    } else {
+                        setCooldown(nextRemaining);
+                    }
+                }, 1000);
+                return () => clearTimeout(timer);
+            } else {
+                setCooldown(0);
+                setCooldownEndMs(0);
+            }
         }
-    }, [cooldown]);
+    }, [cooldown, cooldownEndMs, timeOffset]);
 
     const computeWaiterBlock = () => {
         if (!isNfc)                             return 'qr_mode';
@@ -168,7 +205,7 @@ export default function ClientCardViewer({ initialCard, cardId }) {
                 if (serviceType === 'bill') setWaiterStatus('bill_sent');
                 setLastService(serviceType);
                 setWaiterToast({ message: data.message || "تم إرسال طلبك للويتر بنجاح! 🚀", type: 'success' });
-                setCooldown(COOLDOWN_SECONDS);
+                setCooldownEndMs((Date.now() + timeOffset) + (COOLDOWN_SECONDS * 1000));
             } else {
                 if (res.status === 401) {
                     setWaiterStatus('session_expired');
@@ -182,17 +219,17 @@ export default function ClientCardViewer({ initialCard, cardId }) {
                     if (data.error && data.error.includes('الحد الأقصى')) {
                         setLimitReached(true);
                     } else if (data.remainingSeconds) {
-                        setCooldown(data.remainingSeconds);
+                        setCooldownEndMs((Date.now() + timeOffset) + (data.remainingSeconds * 1000));
                     } else {
-                        setCooldown(15);
+                        setCooldownEndMs((Date.now() + timeOffset) + (15 * 1000));
                     }
                 } else {
-                    setCooldown(5);
+                    setCooldownEndMs((Date.now() + timeOffset) + (5 * 1000));
                 }
                 setWaiterToast({ message: data.error || "عذراً، حدث خطأ", type: 'error' });
             }
         } catch(e) {
-            setCooldown(5);
+            setCooldownEndMs((Date.now() + timeOffset) + (5 * 1000));
             setWaiterToast({ message: "خطأ في الاتصال بالخادم", type: 'error' });
         }
         setTimeout(() => setWaiterToast(null), 4000);
@@ -658,31 +695,16 @@ export default function ClientCardViewer({ initialCard, cardId }) {
                 );
             })()}
 
-            {/* ════════ MINUTE 5 AUDIT MODAL ════════ */}
+            {/* ════════ MINUTE 5 SMART REMINDER BANNER ════════ */}
             {syncData?.showAudit && syncData?.status !== 'idle' && syncData?.status !== 'closing' && (
-                <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 99999, background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Cairo, sans-serif' }}>
-                    <div style={{ background: '#1e293b', width: '90%', maxWidth: 360, borderRadius: 24, padding: '28px 20px', textAlign: 'center', boxShadow: '0 20px 40px rgba(0,0,0,0.5)', border: `1px solid ${primary}40`, animation: 'fadeIn 0.3s ease-out' }}>
-                        <div style={{ fontSize: 48, marginBottom: 16 }}>🕒</div>
-                        <h3 style={{ color: '#f8fafc', fontSize: 20, fontWeight: 900, margin: '0 0 8px' }}>هل وصلك طلبك؟</h3>
-                        
-                        {syncData.status === 'handling' ? (
-                            <p style={{ color: '#94a3b8', fontSize: 14, margin: '0 0 24px', lineHeight: 1.6 }}>
-                                لقد استلم <b style={{ color: primary }}>{syncData.assignedWaiter || 'النادل'}</b> طلبك.<br/>هل استلمته بالفعل؟
-                            </p>
-                        ) : (
-                            <p style={{ color: '#94a3b8', fontSize: 14, margin: '0 0 24px', lineHeight: 1.6 }}>
-                                لقد مر بعض الوقت منذ طلبك الأخير.<br/>هل استلمته بالفعل؟
-                            </p>
-                        )}
-
-                        <div style={{ display: 'flex', gap: 12, direction: 'rtl' }}>
-                            <button onClick={() => submitAudit('yes')} style={{ flex: 1, padding: '14px', borderRadius: 14, border: 'none', background: 'rgba(16,185,129,0.15)', color: '#10b981', border: '1px solid rgba(16,185,129,0.3)', fontWeight: 800, fontSize: 16, cursor: 'pointer', transition: 'all 0.2s' }}>
-                                نعم ✅
-                            </button>
-                            <button onClick={() => submitAudit('no')} style={{ flex: 1, padding: '14px', borderRadius: 14, border: 'none', background: 'rgba(239,68,68,0.15)', color: '#ef4444', border: '1px solid rgba(239,68,68,0.3)', fontWeight: 800, fontSize: 16, cursor: 'pointer', transition: 'all 0.2s' }}>
-                                لا ❌
-                            </button>
-                        </div>
+                <div style={{ position: 'fixed', top: 80, left: 16, right: 16, zIndex: 9998, pointerEvents: 'none', display: 'flex', justifyContent: 'center', animation: 'fadeInDown 0.4s ease-out' }}>
+                    <div style={{ background: 'rgba(17,24,39,0.95)', backdropFilter: 'blur(10px)', padding: '16px 20px', borderRadius: 16, border: '1px solid rgba(234,88,12,0.4)', boxShadow: '0 10px 30px rgba(0,0,0,0.3)', pointerEvents: 'auto', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12 }}>
+                        <span style={{ color: '#f8fafc', fontSize: 14, fontWeight: 700, textAlign: 'center', fontFamily: 'Cairo, sans-serif' }}>
+                            {lang === 'ar' ? 'هل تأخر طلبك؟ يمكنك تذكير الويتر الآن.' : 'Order taking too long? You can remind the waiter.'}
+                        </span>
+                        <button onClick={handleRemindWaiter} style={{ background: 'linear-gradient(135deg, #f5c518, #ea580c)', color: '#111827', border: 'none', borderRadius: 999, padding: '10px 24px', fontWeight: 900, fontSize: 14, display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', fontFamily: 'Cairo, sans-serif', boxShadow: '0 4px 15px rgba(234,88,12,0.3)' }}>
+                            🛎️ {lang === 'ar' ? 'تذكير واستعجال الويتر' : 'Remind Waiter'}
+                        </button>
                     </div>
                 </div>
             )}

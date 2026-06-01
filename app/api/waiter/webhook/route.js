@@ -4,6 +4,12 @@ import Card from '../../../../backend/models/Card';
 
 export async function POST(req) {
     try {
+        const secretToken = req.headers.get('x-telegram-bot-api-secret-token');
+        if (process.env.TELEGRAM_SECRET_TOKEN && secretToken !== process.env.TELEGRAM_SECRET_TOKEN) {
+            console.error('[Webhook] Unauthorized access attempt: Invalid Secret Token');
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+
         const body = await req.json();
         console.log("[Webhook] Received:", JSON.stringify(body, null, 2));
 
@@ -40,6 +46,69 @@ export async function POST(req) {
                     const { updateLiveTelegramDashboard } = require('../../../../lib/telegramDashboard');
                     await updateLiveTelegramDashboard(card.shortCode);
                 }
+            }
+            return NextResponse.json({ ok: true });
+        }
+
+        const msgText = body.message?.text?.trim() || '';
+        if (msgText.startsWith('/status') || msgText === 'الحالة' || msgText === 'حالة') {
+            const chatId = body.message.chat.id.toString();
+            await connectDB();
+            const card = await Card.findOne({ "telegramConfig.chatId": chatId });
+            
+            if (card && card.telegramConfig?.botToken) {
+                const now = Date.now();
+                const tables = card.tableRequests || [];
+                
+                const emptyTables = [];
+                const occupiedTables = [];
+                const serviceTables = [];
+                
+                tables.forEach(t => {
+                    const expiry = t.sessionExpiresAt ? new Date(t.sessionExpiresAt).getTime() : 0;
+                    if (expiry < now || (t.status === 'idle' && expiry < now)) {
+                        emptyTables.push(t.tableNumber);
+                    } else if (t.status === 'idle') {
+                        occupiedTables.push(t.tableNumber);
+                    } else {
+                        let serviceDesc = "طاولة " + t.tableNumber;
+                        if (t.calls && t.calls.length > 0) {
+                            const lastSvc = t.calls[t.calls.length - 1].service;
+                            let svcAr = lastSvc;
+                            if (lastSvc === 'bill') svcAr = 'فاتورة 🧾';
+                            else if (lastSvc === 'coal') svcAr = 'فحم 💨';
+                            else if (lastSvc === 'clean') svcAr = 'تنظيف 🧻';
+                            else if (lastSvc === 'waiter') svcAr = 'ويتر 👨‍🍳';
+                            serviceDesc += ` (${svcAr})`;
+                        } else {
+                            serviceDesc += ` (تطلب خدمة)`;
+                        }
+                        serviceTables.push(serviceDesc);
+                    }
+                });
+
+                let statusMsg = `📊 <b>حالة الصالة الآن:</b>\n`;
+                statusMsg += `🟢 <b>فارغة:</b> ${emptyTables.length > 0 ? emptyTables.map(t => 'طاولة ' + t).join('، ') : 'لا يوجد'}\n`;
+                
+                statusMsg += `🟡 <b>تطلب خدمة:</b>\n`;
+                if (serviceTables.length > 0) {
+                    statusMsg += serviceTables.map(s => `  • ${s}`).join('\n');
+                } else {
+                    statusMsg += `  لا يوجد طلبات حالية`;
+                }
+                
+                statusMsg += `\n🔴 <b>الطاولات المشغولة (تأكل الآن):</b> ${occupiedTables.length} طاولة\n`;
+
+                const sendUrl = `https://api.telegram.org/bot${card.telegramConfig.botToken}/sendMessage`;
+                await fetch(sendUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        chat_id: chatId,
+                        text: statusMsg,
+                        parse_mode: 'HTML'
+                    })
+                });
             }
             return NextResponse.json({ ok: true });
         }

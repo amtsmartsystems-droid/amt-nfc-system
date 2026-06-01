@@ -31,7 +31,7 @@ const connectDB = async () => {
     } catch (error) {
         cached.promise = null;
         console.error(`Error connecting to MongoDB: ${error.message}`);
-        process.exit(1); // إيقاف الخادم في حال فشل الاتصال
+        throw new Error(`Error connecting to MongoDB: ${error.message}`);
     }
 
     return cached.conn;

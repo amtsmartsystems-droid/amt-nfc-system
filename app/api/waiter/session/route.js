@@ -5,15 +5,36 @@ import connectDB from '../../../../backend/config/db';
 import Card from '../../../../backend/models/Card';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'amt_smart_waiter_super_secret';
-const SESSION_DURATION_MS = 10 * 60 * 1000; // 10 mins
+const SESSION_DURATION_MS = 7200000; // 2 hours
 
 export async function POST(req) {
     try {
         const body = await req.json();
-        const { restaurantId, tableNumber } = body;
+        const { restaurantId, tableNumber, token } = body;
 
         if (!restaurantId || !tableNumber) {
             return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+        }
+
+        if (!token) {
+            return NextResponse.json({ error: 'رابط غير صالح. يرجى مسح بطاقة الطاولة مجدداً.' }, { status: 403 });
+        }
+
+        try {
+            const decodedToken = jwt.verify(token, JWT_SECRET);
+            const tokenAge = Date.now() - decodedToken.createdAt;
+            
+            // Token is older than 2 minutes (120000ms)
+            if (tokenAge > 120000) {
+                return NextResponse.json({ error: 'رابط منتهي الصلاحية. يرجى مسح بطاقة الطاولة مجدداً.' }, { status: 403 });
+            }
+            
+            // Validate payload matches
+            if (decodedToken.restaurantId !== restaurantId || decodedToken.tableNumber !== tableNumber) {
+                return NextResponse.json({ error: 'رابط غير صالح للطاولة الحالية.' }, { status: 403 });
+            }
+        } catch (err) {
+            return NextResponse.json({ error: 'رابط غير صالح. يرجى مسح بطاقة الطاولة مجدداً.' }, { status: 403 });
         }
 
         await connectDB();
@@ -32,6 +53,11 @@ export async function POST(req) {
         let needsSave = false;
 
         if (!tableReq) {
+            // Prevent DoS by capping max concurrent tables to 300
+            if (card.tableRequests.length >= 300) {
+                return NextResponse.json({ error: 'الحد الأقصى للطاولات النشطة تجاوز المسموح' }, { status: 403 });
+            }
+
             // New table session
             tableReq = {
                 tableNumber,
@@ -73,7 +99,7 @@ export async function POST(req) {
             tableNumber,
             sessionId: tableReq.sessionId
         };
-        const token = jwt.sign(tokenPayload, JWT_SECRET, { expiresIn: '2h' });
+        const sessionToken = jwt.sign(tokenPayload, JWT_SECRET, { expiresIn: '2h' });
 
         const remainingSessionMs = new Date(tableReq.sessionExpiresAt).getTime() - now;
         
@@ -107,12 +133,13 @@ export async function POST(req) {
             cooldownRemainingMs: cooldownRemainingMs > 0 ? cooldownRemainingMs : 0,
             status: tableReq.status,
             assignedWaiter: tableReq.assignedWaiter || null,
-            lastService
+            lastService,
+            serverTime: now
         });
 
         response.cookies.set({
             name: 'waiter_session',
-            value: token,
+            value: sessionToken,
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
             path: '/',

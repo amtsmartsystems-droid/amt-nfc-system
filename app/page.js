@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, Suspense } from "react";
+import { useSearchParams } from 'next/navigation';
 import * as LucideIcons from "lucide-react";
 import RestaurantTheme  from "../components/templates/RestaurantTheme";
 import CafeTheme        from "../components/templates/CafeTheme";
@@ -70,6 +71,7 @@ const Label = ({ children }) => (
 // PageContent
 // ─────────────────────────────────────────────────────────────────────
 function PageContent() {
+  const searchParams = useSearchParams();
   const [mounted,    setMounted]    = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [password,   setPassword]   = useState("");
@@ -92,6 +94,7 @@ function PageContent() {
   const [publishedUrl, setPublishedUrl] = useState("");
   const [wifi,       setWifi]       = useState({ ssid: "", password: "" });
   const [telegramConfig, setTelegramConfig] = useState({ botToken: "", chatId: "", isEnabled: false });
+  const [nfcTableNum, setNfcTableNum] = useState("");
   const [uploadingPdf, setUploadingPdf] = useState(false);
   // Subscription gate state
   const [subscriptionStatus, setSubscriptionStatus] = useState('active');
@@ -108,7 +111,18 @@ function PageContent() {
     fetch('/api/auth/me').then(r => r.json()).then(d => {
       if(d.authenticated) setCurrentUserRole(d.role);
     }).catch(() => {});
-  }, []);
+
+    // Auto-load card if ?id=xyz is present
+    const idParam = searchParams.get('id');
+    if (idParam) {
+      setTargetCardId(idParam);
+      // Wait a tick for state to settle then fetch
+      setTimeout(() => {
+        handleLoadCard(idParam);
+      }, 500);
+    }
+  }, [searchParams]);
+
   const showToast = (msg, ok=true) => {
     setToast({msg,ok}); setTimeout(()=>setToast({msg:"",ok:true}), 3500);
   };
@@ -692,6 +706,54 @@ function PageContent() {
                   )}
                 </div>
 
+                {/* ═══ NFC LINK GENERATOR ═══ */}
+                {cardType === 'restaurant' && targetCardId && (
+                  <div className="rounded-2xl p-4 mb-4 space-y-4" style={{ background:"rgba(59,130,246,0.08)", border:"1.5px dashed rgba(59,130,246,0.4)" }}>
+                    <div className="flex items-center gap-2 mb-2">
+                      <LucideIcons.Nfc size={15} className="text-blue-400" />
+                      <Label className="font-bold text-blue-300 text-[12px] mb-0">
+                        مُولّد روابط الطاولات (NFC)
+                      </Label>
+                    </div>
+                    <p className="text-[10px] text-slate-400 leading-relaxed">
+                      أدخل رقم الطاولة لنسخ رابط الأمان المباشر (Scan API) لبرمجته على البطاقة بسرعة.
+                    </p>
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2">
+                        <div className="flex-1">
+                          <AdminInput
+                            value={nfcTableNum}
+                            onChange={setNfcTableNum}
+                            placeholder="أدخل رقم الطاولة (مثال: 5)"
+                            type="number"
+                            dir="ltr"
+                          />
+                        </div>
+                      </div>
+                      {nfcTableNum && (
+                        <div className="flex items-center gap-2 mt-2 p-2 bg-blue-500/10 rounded-lg border border-blue-500/20">
+                          <input 
+                            type="text" 
+                            readOnly 
+                            value={`${window.location.origin}/api/scan?r=${targetCardId}&t=${nfcTableNum}`} 
+                            className="w-full text-[10px] bg-black/40 text-blue-200 px-2 py-2 rounded border border-white/5 outline-none font-mono" 
+                            dir="ltr" 
+                          />
+                          <button 
+                            onClick={()=>{
+                              navigator.clipboard.writeText(`${window.location.origin}/api/scan?r=${targetCardId}&t=${nfcTableNum}`); 
+                              showToast("✅ تم نسخ رابط الـ NFC للطاولة");
+                            }} 
+                            className="px-3 py-2 bg-blue-600 hover:bg-blue-500 text-white text-[11px] font-bold rounded transition-all flex items-center gap-1 shrink-0"
+                          >
+                            <LucideIcons.Copy size={13} /> نسخ
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
                 {/* Link List */}
                 <div className="space-y-2">
                   {siteData.links.length===0 && (
@@ -990,5 +1052,9 @@ function PageContent() {
 }
 
 export default function Home() {
-  return <PageContent />;
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-[#111] flex items-center justify-center text-white">Loading...</div>}>
+      <PageContent />
+    </Suspense>
+  );
 }
