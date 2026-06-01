@@ -198,7 +198,24 @@ export default function GastroBarTheme({ cardId, siteData, siteColors, lang = "e
           </div>
         )}
         {/* CTA button — relative z-10 makes it always clickable */}
-        {primaryLinks[0] && (
+        {isMenuEnabled ? (
+          <div className="relative z-10">
+            <button
+              onClick={(e) => {
+                if (menuMode === 'pdf' && pdfMenuUrl) {
+                  window.open(pdfMenuUrl, '_blank');
+                } else {
+                  setIsMenuModalOpen(true);
+                }
+              }}
+              className="flex items-center justify-center gap-3 w-full py-4 rounded-xl font-black text-[14px] uppercase tracking-wider transition-all duration-300 hover:brightness-110 active:scale-95 hover:shadow-[0_0_24px_rgba(var(--primary-rgb),0.45)]"
+              style={{ background: accent, color: "#111", boxShadow: `0 4px 20px rgba(var(--primary-rgb),0.30)`, fontFamily:"Cairo,sans-serif" }}
+            >
+              <LucideIcons.UtensilsCrossed size={18} color="#111" />
+              {t("View Menu", "عرض القائمة")}
+            </button>
+          </div>
+        ) : primaryLinks[0] && (
           <div className="relative z-10">
             <YellowBtn link={primaryLinks[0]} />
           </div>
@@ -226,25 +243,8 @@ export default function GastroBarTheme({ cardId, siteData, siteColors, lang = "e
             ))}
           </div>
         </div>
-        {/* ── MENU BUTTON: Always show when isMenuEnabled ── */}
-        {isMenuEnabled ? (
-          <div className="px-5">
-            <button
-              onClick={() => {
-                if (menuMode === 'pdf' && pdfMenuUrl) {
-                  window.open(pdfMenuUrl, '_blank');
-                } else {
-                  setIsMenuModalOpen(true);
-                }
-              }}
-              className="flex items-center justify-center gap-3 w-full py-4 rounded-xl font-black text-[14px] uppercase tracking-wider transition-all duration-300 hover:brightness-110 active:scale-95"
-              style={{ background: accent, color: "#111", boxShadow: `0 4px 20px rgba(var(--primary-rgb),0.30)`, fontFamily:"Cairo,sans-serif" }}
-            >
-              <LucideIcons.UtensilsCrossed size={18} color="#111" />
-              {t("View Menu", "عرض القائمة")}
-            </button>
-          </div>
-        ) : (() => {
+        {/* ── SECONDARY MENU LINK (Fallback) ── */}
+        {(() => {
           const menuLink = primaryLinks.find(l => l.url === '#menu-section');
           const fallbackMenuLink = links.find(l => l.url === '#menu-section');
           const linkToShow = menuLink || primaryLinks[1] || fallbackMenuLink;
