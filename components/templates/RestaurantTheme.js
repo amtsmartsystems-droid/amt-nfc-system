@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import { getIconForLink } from "../../utils/icons";
 import * as LucideIcons from "lucide-react";
@@ -14,6 +14,7 @@ export default function RestaurantTheme({ cardId, siteData, siteColors, lang = "
   const primary = siteColors?.primary    || "#EDD98A";
   const bgCream = siteColors?.background || "#F5EDD6";
   const isAr    = lang === "ar";
+  const [isMenuModalOpen, setIsMenuModalOpen] = useState(false);
 
   useEffect(() => {
     document.documentElement.style.setProperty("--primary-color", primary);
@@ -102,7 +103,7 @@ export default function RestaurantTheme({ cardId, siteData, siteColors, lang = "
                onClick={(e) => {
                    if (isMenuEnabled && menuMode !== 'pdf') {
                        e.preventDefault();
-                       document.getElementById('menu-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                       setIsMenuModalOpen(true);
                    }
                }}
                className="flex items-center justify-center w-full py-[17px] rounded-2xl font-bold text-[13px] uppercase tracking-[.15em] transition-all hover:brightness-110 active:scale-95"
@@ -148,71 +149,62 @@ export default function RestaurantTheme({ cardId, siteData, siteColors, lang = "
         )}
       </section>
 
-      {/* ── MENU SECTION ── */}
-      {isMenuEnabled && menuMode === 'interactive' && menuCategories && menuCategories.length > 0 && (
-        <section id="menu-section" className="px-5 pt-9 pb-11 bg-white scroll-mt-6">
-          <STitle c>{t("Our Menu", "قائمة الطعام")}</STitle>
-          <div className="flex flex-col gap-8 mt-6">
-            {menuCategories.map((cat, i) => (
-              <div key={i}>
-                <h3 className="font-black text-[18px] text-[#1C1C1C] mb-4 border-b-2 border-gray-100 pb-2">{t(cat.name, cat.nameAr)}</h3>
-                <div className="flex flex-col gap-4">
-                  {cat.items.map((item, idx) => (
-                    <div key={idx} className="flex justify-between items-center bg-gray-50 p-4 rounded-2xl border border-gray-100 shadow-sm">
-                      <div className="flex-1">
-                        <h4 className="font-bold text-[15px] text-[#1C1C1C]">{t(item.name, item.nameAr)}</h4>
-                        {item.descAr && <p className="text-[12px] text-gray-500 mt-1 leading-relaxed max-w-[90%]">{t(item.desc, item.descAr)}</p>}
-                        <div className="text-[14px] font-black mt-2" style={{ color: primary }}>{item.price} JOD</div>
-                      </div>
-                      <button onClick={() => addToCart && addToCart(item)} className="w-10 h-10 rounded-xl bg-white border border-gray-200 shadow-sm flex items-center justify-center flex-shrink-0 hover:bg-gray-100 transition-colors">
-                        <LucideIcons.Plus size={18} color="#1C1C1C" />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ))}
+      </section>
+
+      {/* ── MENU MODAL ── */}
+      {isMenuModalOpen && (
+        <div className="fixed inset-0 z-[100] flex flex-col bg-[#111] overflow-hidden">
+          {/* Header */}
+          <div className="relative flex-shrink-0 flex items-center justify-between p-5 border-b border-white/10 bg-[#1A1A1A]">
+            <h2 className="text-white text-[18px] font-black uppercase tracking-wide" style={{ fontFamily:"Cairo,sans-serif" }}>
+              {t("Our Menu", "قائمة الطعام")}
+            </h2>
+            <button 
+              onClick={() => setIsMenuModalOpen(false)}
+              className="w-10 h-10 rounded-full flex items-center justify-center bg-white/10 hover:bg-white/20 transition-colors"
+            >
+              <LucideIcons.X size={20} color="#fff" />
+            </button>
           </div>
-        </section>
+
+          {/* Scrollable Content */}
+          <div className="flex-1 overflow-y-auto p-5 pb-20">
+            {(!menuCategories || menuCategories.length === 0) ? (
+              <div className="flex flex-col items-center justify-center h-full gap-4 opacity-60">
+                <LucideIcons.UtensilsCrossed size={40} color="#fff" />
+                <p className="text-white text-[15px]" style={{ fontFamily:"Cairo,sans-serif" }}>
+                  {t("Menu is currently being updated.", "جاري تحديث قائمة الطعام حالياً.")}
+                </p>
+              </div>
+            ) : (
+              <div className="flex flex-col gap-8">
+                {menuCategories.map((cat, i) => (
+                  <div key={i}>
+                    <h3 className="font-black text-[20px] text-white mb-4 border-b border-white/10 pb-2" style={{ fontFamily:"Cairo,sans-serif" }}>
+                      {t(cat.name, cat.nameAr)}
+                    </h3>
+                    <div className="flex flex-col gap-4">
+                      {cat.items.map((item, idx) => (
+                        <div key={idx} className="flex justify-between items-center bg-[#1A1A1A] p-4 rounded-2xl border border-white/5 shadow-sm">
+                          <div className="flex-1">
+                            <h4 className="font-bold text-[16px] text-white" style={{ fontFamily:"Cairo,sans-serif" }}>{t(item.name, item.nameAr)}</h4>
+                            {item.descAr && <p className="text-[13px] text-white/50 mt-1 leading-relaxed max-w-[90%]" style={{ fontFamily:"Cairo,sans-serif" }}>{t(item.desc, item.descAr)}</p>}
+                            <div className="text-[15px] font-black mt-2 tracking-wide" style={{ color: primary }}>{item.price} JOD</div>
+                          </div>
+                          <button onClick={() => addToCart && addToCart(item)} className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 transition-transform active:scale-95 hover:brightness-110" style={{ background: primary }}>
+                            <LucideIcons.Plus size={18} color="#1C1C1C" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
       )}
 
-      {/* ── PRINCIPLES ── */}
-      <section className="px-5 pt-9 pb-11" style={{ background:bgCream }}>
-        <div className="relative rounded-[20px] overflow-hidden mb-7 shadow-card h-[190px]">
-          <Image src={chef1}
-               alt="chef" fill style={{ objectFit: 'cover' }} />
-        </div>
-        <STitle>{prinT}</STitle>
-        <div className="mb-7"><Body>{prinSub}</Body></div>
-        <div className="flex flex-col gap-[10px]">
-          {principles.map((p,i) => (
-            <div key={i} className="flex items-start gap-4 bg-white rounded-2xl px-5 py-[14px] shadow-soft">
-              <span className="text-[15px] font-black text-[#1C1C1C] min-w-[28px] pt-0.5" style={{ fontFamily:"Georgia,serif", fontStyle:"italic" }}>{p.num}</span>
-              <div>
-                <p className="font-black text-[12.5px] text-[#1C1C1C] uppercase tracking-wide mb-1">{t(p.title,p.titleAr)}</p>
-                <p className="text-[12.5px] text-[#666] leading-snug">{t(p.desc,p.descAr)}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* ── CONTACTS ── */}
-      <section className="px-5 pt-9 pb-14" style={{ background:bgCream }}>
-        <STitle c>{contactT}</STitle>
-        <div className="relative rounded-2xl overflow-hidden shadow-card mb-5 h-[160px] bg-gray-200">
-          <Image src="https://images.unsplash.com/photo-1524661135-423995f22d0b?q=80&w=800&auto=format&fit=crop"
-               alt="map" fill style={{ objectFit: 'cover' }} className="opacity-70" />
-          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-            <LucideIcons.MapPin size={36} color="#e74c3c" className="-mt-3 drop-shadow-xl" />
-          </div>
-        </div>
-        <div className="text-center space-y-1 mb-4">
-          <Body c>{address}</Body>
-          <p className="font-black text-[11px] uppercase tracking-widest text-[#999] mt-2">{t("Business Hours","ساعات العمل")}</p>
-          <p className="text-[#444] text-[14px] font-semibold">{hours}</p>
-        </div>
-      </section>
     </div>
   );
 }

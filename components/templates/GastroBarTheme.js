@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import { getIconForLink } from "../../utils/icons";
 import * as LucideIcons from "lucide-react";
@@ -18,6 +18,7 @@ export default function GastroBarTheme({ cardId, siteData, siteColors, lang = "e
   const accent  = siteColors?.primary    || "#F5C518";   // gastrobar yellow
   const bgColor = siteColors?.background || "#111111";   // near-black
   const isAr    = lang === "ar";
+  const [isMenuModalOpen, setIsMenuModalOpen] = useState(false);
 
   useEffect(() => {
     document.documentElement.style.setProperty("--primary-color", accent);
@@ -55,7 +56,7 @@ export default function GastroBarTheme({ cardId, siteData, siteColors, lang = "e
       if(cardId) fetch('/api/clicks', { method: 'POST', body: JSON.stringify({ cardId, linkId: link.id || link._id }) }).catch(()=>{}); 
       if (link.url === '#menu-section') {
         e.preventDefault();
-        document.getElementById('menu-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        setIsMenuModalOpen(true);
       }
     };
     return (
@@ -106,8 +107,9 @@ export default function GastroBarTheme({ cardId, siteData, siteColors, lang = "e
   );
 
   return (
-    <div
-      className="w-full min-h-screen flex flex-col overflow-x-hidden"
+    <>
+      <div
+        className="w-full min-h-screen flex flex-col overflow-x-hidden"
       dir={isAr ? "rtl" : "ltr"}
       style={{ background: bgColor, fontFamily: "Cairo,sans-serif" }}
     >
@@ -216,38 +218,6 @@ export default function GastroBarTheme({ cardId, siteData, siteColors, lang = "e
           </div>
         )}
       </section>
-
-      {/* ══════════════════════════════════════════
-          MENU SECTION 
-      ══════════════════════════════════════════ */}
-      {isMenuEnabled && menuMode === 'interactive' && menuCategories && menuCategories.length > 0 && (
-        <section id="menu-section" className="px-5 pb-8 scroll-mt-6" style={{ borderTop:`1px solid rgba(255,255,255,0.06)` }}>
-          <div className="pt-7 mb-5"><STitle center>{t("OUR MENU", "قائمة الطعام")}</STitle></div>
-          <div className="flex flex-col gap-6">
-            {menuCategories.map((cat, i) => (
-              <div key={i}>
-                <h3 className="font-black text-[17px] text-white mb-4 border-b border-white/10 pb-2 uppercase tracking-wide" style={{ fontFamily:"Cairo,sans-serif" }}>
-                  {t(cat.name, cat.nameAr)}
-                </h3>
-                <div className="flex flex-col gap-3">
-                  {cat.items.map((item, idx) => (
-                    <div key={idx} className="flex justify-between items-center p-4 rounded-2xl" style={{ background:"rgba(255,255,255,0.03)", border:"1px solid rgba(255,255,255,0.06)" }}>
-                      <div className="flex-1">
-                        <h4 className="font-bold text-[14.5px] text-white" style={{ fontFamily:"Cairo,sans-serif" }}>{t(item.name, item.nameAr)}</h4>
-                        {item.descAr && <p className="text-[12px] text-white/50 mt-1 leading-relaxed max-w-[90%]" style={{ fontFamily:"Cairo,sans-serif" }}>{t(item.desc, item.descAr)}</p>}
-                        <div className="text-[14px] font-black mt-2 tracking-wide" style={{ color: accent }}>{item.price} JOD</div>
-                      </div>
-                      <button onClick={() => addToCart && addToCart(item)} className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 transition-all hover:brightness-110 active:scale-95" style={{ background: accent }}>
-                        <LucideIcons.Plus size={18} color="#111" />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
 
       {/* ══════════════════════════════════════════
           EVENTS SECTION — fully dynamic from siteData.events
@@ -393,5 +363,60 @@ export default function GastroBarTheme({ cardId, siteData, siteColors, lang = "e
       </section>
 
     </div>
+      
+      {/* ── MENU MODAL ── */}
+      {isMenuModalOpen && (
+        <div className="fixed inset-0 z-[100] flex flex-col bg-[#111] overflow-hidden" dir={isAr ? "rtl" : "ltr"}>
+          {/* Header */}
+          <div className="relative flex-shrink-0 flex items-center justify-between p-5 border-b border-white/10 bg-[#1A1A1A]">
+            <h2 className="text-white text-[18px] font-black uppercase tracking-wide" style={{ fontFamily:"Cairo,sans-serif" }}>
+              {t("Our Menu", "قائمة الطعام")}
+            </h2>
+            <button 
+              onClick={() => setIsMenuModalOpen(false)}
+              className="w-10 h-10 rounded-full flex items-center justify-center bg-white/10 hover:bg-white/20 transition-colors"
+            >
+              <LucideIcons.X size={20} color="#fff" />
+            </button>
+          </div>
+
+          {/* Scrollable Content */}
+          <div className="flex-1 overflow-y-auto p-5 pb-20">
+            {(!menuCategories || menuCategories.length === 0) ? (
+              <div className="flex flex-col items-center justify-center h-full gap-4 opacity-60">
+                <LucideIcons.UtensilsCrossed size={40} color="#fff" />
+                <p className="text-white text-[15px]" style={{ fontFamily:"Cairo,sans-serif" }}>
+                  {t("Menu is currently being updated.", "جاري تحديث قائمة الطعام حالياً.")}
+                </p>
+              </div>
+            ) : (
+              <div className="flex flex-col gap-8">
+                {menuCategories.map((cat, i) => (
+                  <div key={i}>
+                    <h3 className="font-black text-[20px] text-white mb-4 border-b border-white/10 pb-2" style={{ fontFamily:"Cairo,sans-serif" }}>
+                      {t(cat.name, cat.nameAr)}
+                    </h3>
+                    <div className="flex flex-col gap-4">
+                      {cat.items.map((item, idx) => (
+                        <div key={idx} className="flex justify-between items-center bg-[#1A1A1A] p-4 rounded-2xl border border-white/5 shadow-sm">
+                          <div className="flex-1">
+                            <h4 className="font-bold text-[16px] text-white" style={{ fontFamily:"Cairo,sans-serif" }}>{t(item.name, item.nameAr)}</h4>
+                            {item.descAr && <p className="text-[13px] text-white/50 mt-1 leading-relaxed max-w-[90%]" style={{ fontFamily:"Cairo,sans-serif" }}>{t(item.desc, item.descAr)}</p>}
+                            <div className="text-[15px] font-black mt-2 tracking-wide" style={{ color: accent }}>{item.price} JOD</div>
+                          </div>
+                          <button onClick={() => addToCart && addToCart(item)} className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 transition-transform active:scale-95 hover:brightness-110" style={{ background: accent }}>
+                            <LucideIcons.Plus size={18} color="#1C1C1C" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+    </>
   );
 }
