@@ -189,6 +189,26 @@ export default function CafeTheme1({ cardId, siteData, siteColors, lang = "en", 
             </div>
           ))
         )}
+
+        {/* ── DEDICATED MENU BUTTON (if isMenuEnabled) ── */}
+        {isMenuEnabled && (
+          <ScrollReveal yOffset={30}>
+            <button
+              onClick={() => {
+                if (menuMode === 'pdf' && pdfMenuUrl) {
+                  window.open(pdfMenuUrl, '_blank');
+                } else {
+                  setIsMenuModalOpen(true);
+                }
+              }}
+              className="flex items-center justify-center gap-3 w-full py-[18px] rounded-full font-bold text-[14px] transition-all duration-300 hover:brightness-110 active:scale-95"
+              style={{ background: primary, color: "#fff", fontFamily: "Cairo, sans-serif", boxShadow: `0 6px 20px rgba(var(--primary-rgb), 0.35)` }}
+            >
+              <LucideIcons.UtensilsCrossed size={18} color="#fff" />
+              {t("View Menu", "عرض القائمة")}
+            </button>
+          </ScrollReveal>
+        )}
       </section>
 
       {/* ══════════════════════════════════════════

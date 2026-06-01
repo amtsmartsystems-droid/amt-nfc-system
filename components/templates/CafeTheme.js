@@ -129,6 +129,29 @@ export default function CafeTheme({ cardId, siteData, siteColors, lang = "en", i
             </p>
           </div>
         )}
+
+        {/* ── MENU BUTTON (if isMenuEnabled) ── */}
+        {isMenuEnabled && (
+          <div className="mt-4">
+            <button
+              onClick={() => {
+                if (menuMode === 'pdf' && pdfMenuUrl) {
+                  window.open(pdfMenuUrl, '_blank');
+                } else {
+                  setIsMenuModalOpen(true);
+                }
+              }}
+              className="group flex items-center gap-4 w-full px-5 py-[15px] rounded-2xl font-bold text-[13.5px] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg active:scale-[0.98]"
+              style={{ background: primary, color:"#fff", boxShadow:`0 4px 18px rgba(var(--primary-rgb),.28)`, fontFamily:"Cairo,sans-serif" }}
+            >
+              <div className="w-9 h-9 rounded-xl flex-shrink-0 flex items-center justify-center transition-transform group-hover:scale-110 bg-white/20">
+                <LucideIcons.UtensilsCrossed size={18} color="#fff" />
+              </div>
+              <span className="flex-1 truncate">{t("View Menu", "عرض القائمة")}</span>
+              <LucideIcons.ArrowLeft size={15} color="rgba(255,255,255,0.50)" />
+            </button>
+          </div>
+        )}
       </section>
 
       {/* ── CONTACT INFO ── */}

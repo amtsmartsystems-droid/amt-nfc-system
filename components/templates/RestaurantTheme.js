@@ -96,22 +96,29 @@ export default function RestaurantTheme({ cardId, siteData, siteColors, lang = "
           </h1>
           <p className="text-white/80 text-[14px] leading-relaxed max-w-[270px] mb-7">{sub}</p>
 
-          {/* Primary CTA (View Menu) */}
-          {isMenuEnabled || links[0] ? (
-            <a href={isMenuEnabled ? (menuMode === 'pdf' ? (pdfMenuUrl || '#') : '#menu-section') : (links[0]?.url || '#')} 
-               target={isMenuEnabled && menuMode === 'pdf' && pdfMenuUrl ? "_blank" : undefined}
+          {/* Primary CTA (View Menu / First Link) */}
+          {isMenuEnabled ? (
+            <button
+              onClick={(e) => {
+                if (menuMode === 'pdf' && pdfMenuUrl) {
+                  window.open(pdfMenuUrl, '_blank');
+                } else {
+                  setIsMenuModalOpen(true);
+                }
+              }}
+              className="flex items-center justify-center w-full py-[17px] rounded-2xl font-bold text-[13px] uppercase tracking-[.15em] transition-all hover:brightness-110 active:scale-95"
+              style={{ background:primary, color:"#1C1C1C", boxShadow:`0 8px 28px rgba(var(--primary-rgb),.45)` }}>
+              {t("View Menu", "عرض القائمة")}
+            </button>
+          ) : links[0] ? (
+            <a href={links[0].url || '#'}
+               target={links[0].url && links[0].url !== '#' && !links[0].url.startsWith('#') ? "_blank" : undefined}
                onClick={(e) => {
-                   if (isMenuEnabled && menuMode !== 'pdf') {
-                       e.preventDefault();
-                       setIsMenuModalOpen(true);
-                   } else if (links[0]?.url === '#menu-section') {
-                       e.preventDefault();
-                       setIsMenuModalOpen(true);
-                   }
+                   if (cardId) fetch('/api/clicks', { method: 'POST', body: JSON.stringify({ cardId, linkId: links[0].id || links[0]._id }) }).catch(()=>{});
                }}
                className="flex items-center justify-center w-full py-[17px] rounded-2xl font-bold text-[13px] uppercase tracking-[.15em] transition-all hover:brightness-110 active:scale-95"
                style={{ background:primary, color:"#1C1C1C", boxShadow:`0 8px 28px rgba(var(--primary-rgb),.45)` }}>
-              {links[0] ? t(links[0].title, links[0].titleAr) : t("View Menu", "عرض المنيو")}
+              {t(links[0].title, links[0].titleAr)}
             </a>
           ) : (
             <div className="w-full py-[17px] rounded-2xl text-center font-bold text-[13px] opacity-30 uppercase"
