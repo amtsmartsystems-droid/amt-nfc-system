@@ -433,8 +433,13 @@ export default function GastroBarTheme({ cardId, siteData, siteColors, lang = "e
                     <div className="flex flex-col gap-4">
                       {cat.items.map((item, idx) => (
                         <div key={idx} className="flex justify-between items-center bg-[#1A1A1A] p-4 rounded-2xl border border-white/5 shadow-sm">
-                          <div className="flex-1">
-                            <h4 className="font-bold text-[16px] text-white" style={{ fontFamily:"Cairo,sans-serif" }}>{t(item.name, item.nameAr)}</h4>
+                          {item.image && (
+                              <div className="w-[70px] h-[70px] sm:w-20 sm:h-20 rounded-xl overflow-hidden flex-shrink-0 mr-3 ml-3 rtl:mr-0 rtl:ml-3 ltr:ml-0 ltr:mr-3 relative shadow-md border border-white/5">
+                                <img src={item.image} alt={item.name} className="absolute inset-0 w-full h-full object-cover" />
+                              </div>
+                            )}
+                            <div className="flex-1">
+                              <h4 className="font-bold text-[16px] text-white" style={{ fontFamily:"Cairo,sans-serif" }}>{t(item.name, item.nameAr)}</h4>
                             {item.descAr && <p className="text-[13px] text-white/50 mt-1 leading-relaxed max-w-[90%]" style={{ fontFamily:"Cairo,sans-serif" }}>{t(item.desc, item.descAr)}</p>}
                             <div className="text-[15px] font-black mt-2 tracking-wide" style={{ color: accent }}>{item.price} JOD</div>
                           </div>
