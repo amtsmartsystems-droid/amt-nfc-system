@@ -13,7 +13,6 @@ import ScrollReveal from "../ScrollReveal";
 export default function CafeTheme({ cardId, siteData, siteColors, lang = "en", isMenuEnabled, menuMode, menuCategories, addToCart, pdfMenuUrl }) {
   const primary = siteColors?.primary    || "#6B4226";
   const bgLight = siteColors?.background || "#FAFAF7";
-  const bgLight = siteColors?.background || "#FAFAF7";
   const isAr    = lang === "ar";
   const [isMenuModalOpen, setIsMenuModalOpen] = useState(false);
 

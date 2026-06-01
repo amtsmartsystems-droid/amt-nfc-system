@@ -149,7 +149,7 @@ export default function RestaurantTheme({ cardId, siteData, siteColors, lang = "
         )}
       </section>
 
-      </section>
+
 
       {/* ── MENU MODAL ── */}
       {isMenuModalOpen && (

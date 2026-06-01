@@ -14,7 +14,6 @@ import ScrollReveal from "../ScrollReveal";
 export default function CafeTheme1({ cardId, siteData, siteColors, lang = "en", isMenuEnabled, menuMode, menuCategories, addToCart, pdfMenuUrl }) {
   const primary    = siteColors?.primary    || "#C9A96E";   // warm gold
   const bgDark     = siteColors?.background || "#2C1503";   // espresso brown
-  const bgDark     = siteColors?.background || "#2C1503";   // espresso brown
   const isAr       = lang === "ar";
   const [isMenuModalOpen, setIsMenuModalOpen] = useState(false);
 
