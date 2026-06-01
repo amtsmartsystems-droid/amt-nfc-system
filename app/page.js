@@ -96,8 +96,7 @@ function PageContent() {
   const [telegramConfig, setTelegramConfig] = useState({ botToken: "", chatId: "", isEnabled: false });
   const [nfcTableNum, setNfcTableNum] = useState("");
   const [uploadingPdf, setUploadingPdf] = useState(false);
-  const [isMenuEnabled,
-          showMenuImages, setIsMenuEnabled] = useState(false);
+  const [isMenuEnabled, setIsMenuEnabled] = useState(false);
   const [showMenuImages, setShowMenuImages] = useState(true);
   const [menuCategories, setMenuCategories] = useState([]);
   const [menuMode, setMenuMode] = useState('interactive');
