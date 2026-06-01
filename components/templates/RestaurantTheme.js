@@ -99,6 +99,12 @@ export default function RestaurantTheme({ cardId, siteData, siteColors, lang = "
           {isMenuEnabled || links[0] ? (
             <a href={isMenuEnabled ? (menuMode === 'pdf' ? (pdfMenuUrl || '#') : '#menu-section') : (links[0]?.url || '#')} 
                target={isMenuEnabled && menuMode === 'pdf' && pdfMenuUrl ? "_blank" : undefined}
+               onClick={(e) => {
+                   if (isMenuEnabled && menuMode !== 'pdf') {
+                       e.preventDefault();
+                       document.getElementById('menu-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                   }
+               }}
                className="flex items-center justify-center w-full py-[17px] rounded-2xl font-bold text-[13px] uppercase tracking-[.15em] transition-all hover:brightness-110 active:scale-95"
                style={{ background:primary, color:"#1C1C1C", boxShadow:`0 8px 28px rgba(var(--primary-rgb),.45)` }}>
               {links[0] ? t(links[0].title, links[0].titleAr) : t("View Menu", "عرض المنيو")}
