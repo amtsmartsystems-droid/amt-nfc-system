@@ -891,7 +891,8 @@ function PageContent() {
                               <div><Label>عربي</Label><AdminInput value={lk.titleAr||""} onChange={v=>updLink(lk.id,"titleAr",v)} placeholder="عرض القائمة" dir="rtl" /></div>
                             </div>
 
-                            {/* Menu Integration Toggle inside Link Editor */}
+                            {/* Menu Integration Toggle — only for restaurant cards */}
+                            {cardType === 'restaurant' && (
                             <div className="p-3 rounded-xl border border-yellow-500/30 bg-yellow-500/5">
                               <div className="flex items-center justify-between mb-3">
                                 <Label className="flex items-center gap-2 mb-0 font-bold text-yellow-400 text-xs">
@@ -982,6 +983,8 @@ function PageContent() {
                                 </div>
                               )}
                             </div>
+
+                            )}
 
                             <div className="flex items-center gap-2 pt-1">
                               <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background:bg }}><Ic size={14} color={color} /></div>

@@ -212,11 +212,22 @@ export default function GastroBarTheme({ cardId, siteData, siteColors, lang = "e
             ))}
           </div>
         </div>
-        {primaryLinks[1] && (
-          <div className="px-5">
-            <YellowBtn link={primaryLinks[1]} />
-          </div>
-        )}
+        {/* Show menu link from primaryLinks, OR show a hardcoded menu button if categories exist */}
+        {(() => {
+          const menuLink = primaryLinks.find(l => l.url === '#menu-section');
+          const fallbackMenuLink = links.find(l => l.url === '#menu-section');
+          const linkToShow = menuLink || primaryLinks[1] || fallbackMenuLink;
+          if (linkToShow) return <div className="px-5"><YellowBtn link={linkToShow} /></div>;
+          if (menuCategories && menuCategories.length > 0) return (
+            <div className="px-5">
+              <button onClick={() => setIsMenuModalOpen(true)} className="flex items-center justify-center gap-3 w-full py-4 rounded-xl font-black text-[14px] uppercase tracking-wider transition-all duration-300 hover:brightness-110 active:scale-95" style={{ background: accent, color: "#111", boxShadow: `0 4px 20px rgba(var(--primary-rgb),0.30)`, fontFamily:"Cairo,sans-serif" }}>
+                <LucideIcons.UtensilsCrossed size={18} color="#111" />
+                {t("View Menu", "عرض القائمة")}
+              </button>
+            </div>
+          );
+          return null;
+        })()}
       </section>
 
       {/* ══════════════════════════════════════════

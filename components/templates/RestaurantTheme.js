@@ -104,6 +104,9 @@ export default function RestaurantTheme({ cardId, siteData, siteColors, lang = "
                    if (isMenuEnabled && menuMode !== 'pdf') {
                        e.preventDefault();
                        setIsMenuModalOpen(true);
+                   } else if (links[0]?.url === '#menu-section') {
+                       e.preventDefault();
+                       setIsMenuModalOpen(true);
                    }
                }}
                className="flex items-center justify-center w-full py-[17px] rounded-2xl font-bold text-[13px] uppercase tracking-[.15em] transition-all hover:brightness-110 active:scale-95"
