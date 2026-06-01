@@ -52,6 +52,7 @@ export async function GET(req, { params }) {
             isMenuEnabled:      card.isMenuEnabled || false,
             menuMode:           card.menuMode || 'interactive',
             pdfMenuUrl:         card.pdfMenuUrl || '',
+            showMenuImages:     card.showMenuImages !== false,
             menuCategories:     card.menuCategories || [],
             cliqConfig:         card.cliqConfig || { isEnabled: false, alias: '', message: '' },
         });
@@ -141,6 +142,7 @@ export async function PUT(req, { params }) {
               })).filter(t => t.tagId && t.tableName) : [])
             : undefined;
 
+        const cleanShowMenuImages = body.showMenuImages;
         const cleanMenuCategories = body.menuCategories;
         const cleanCliqConfig     = body.cliqConfig;
         const cleanIsMenuEnabled  = body.isMenuEnabled;
@@ -165,6 +167,7 @@ export async function PUT(req, { params }) {
                 isMenuEnabled: cleanIsMenuEnabled || false,
                 menuMode:      cleanMenuMode || 'interactive',
                 pdfMenuUrl:    cleanPdfMenuUrl || '',
+                showMenuImages: cleanShowMenuImages !== false,
                 menuCategories: cleanMenuCategories || [],
                 cliqConfig:    cleanCliqConfig || { isEnabled: false, alias: '', message: '' },
             });
@@ -182,6 +185,7 @@ export async function PUT(req, { params }) {
         if (cleanIsMenuEnabled !== undefined) card.isMenuEnabled = cleanIsMenuEnabled;
         if (cleanMenuMode !== undefined) card.menuMode = cleanMenuMode;
         if (cleanPdfMenuUrl !== undefined) card.pdfMenuUrl = cleanPdfMenuUrl;
+        if (cleanShowMenuImages !== undefined) card.showMenuImages = cleanShowMenuImages;
         if (cleanMenuCategories !== undefined) card.menuCategories = cleanMenuCategories;
         if (cleanCliqConfig !== undefined) card.cliqConfig = cleanCliqConfig;
         if (cleanSiteData) {

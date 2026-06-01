@@ -158,6 +158,7 @@ const cardSchema = new mongoose.Schema({
         type: String,
         default: '',
     },
+    showMenuImages: { type: Boolean, default: true },
     menuCategories: {
         type: [{
             id: String,

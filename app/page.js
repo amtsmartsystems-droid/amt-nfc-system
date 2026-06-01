@@ -96,7 +96,9 @@ function PageContent() {
   const [telegramConfig, setTelegramConfig] = useState({ botToken: "", chatId: "", isEnabled: false });
   const [nfcTableNum, setNfcTableNum] = useState("");
   const [uploadingPdf, setUploadingPdf] = useState(false);
-  const [isMenuEnabled, setIsMenuEnabled] = useState(false);
+  const [isMenuEnabled,
+          showMenuImages, setIsMenuEnabled] = useState(false);
+  const [showMenuImages, setShowMenuImages] = useState(true);
   const [menuCategories, setMenuCategories] = useState([]);
   const [menuMode, setMenuMode] = useState('interactive');
   const [pdfMenuUrl, setPdfMenuUrl] = useState('');
@@ -290,6 +292,7 @@ function PageContent() {
       else setTelegramConfig({ botToken: '', chatId: '', isEnabled: false, dashboardMessageId: '' });
 
       if (data.isMenuEnabled !== undefined) setIsMenuEnabled(data.isMenuEnabled);
+      if (data.showMenuImages !== undefined) setShowMenuImages(data.showMenuImages !== false);
       if (data.menuMode) setMenuMode(data.menuMode);
       if (data.pdfMenuUrl) setPdfMenuUrl(data.pdfMenuUrl);
       if (data.menuCategories) setMenuCategories(data.menuCategories);
@@ -404,7 +407,7 @@ function PageContent() {
   };
 
   const renderTheme = () => {
-    const props = { siteData, siteColors, lang, isMenuEnabled, menuMode, pdfMenuUrl, menuCategories };
+    const props = { siteData, siteColors, lang, isMenuEnabled, menuMode, pdfMenuUrl, menuCategories, showMenuImages };
     if (theme === 'business_card') return <AMTBusinessCard />;
     switch (theme) {
       case "cafe":   return <CafeTheme      {...props} />;

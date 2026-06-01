@@ -10,7 +10,7 @@ import ScrollReveal from "../ScrollReveal";
 //  CafeTheme — Warm Minimalist Light style
 //  Props: { siteData, siteColors, lang }
 // ══════════════════════════════════════════════════════════════════════
-export default function CafeTheme({ cardId, siteData, siteColors, lang = "en", isMenuEnabled, menuMode, menuCategories, addToCart, pdfMenuUrl }) {
+export default function CafeTheme({ cardId, siteData, siteColors, lang = "en", isMenuEnabled, menuMode, menuCategories, addToCart, pdfMenuUrl , showMenuImages }) {
   const primary = siteColors?.primary    || "#6B4226";
   const bgLight = siteColors?.background || "#FAFAF7";
   const isAr    = lang === "ar";
@@ -207,7 +207,7 @@ export default function CafeTheme({ cardId, siteData, siteColors, lang = "en", i
                     <div className="flex flex-col gap-4">
                       {cat.items.map((item, idx) => (
                         <div key={idx} className="flex justify-between items-center bg-[#1A1A1A] p-4 rounded-2xl border border-white/5 shadow-sm">
-                          {item.image && (
+                          {showMenuImages !== false && item.image && (
                               <div className="w-[70px] h-[70px] sm:w-20 sm:h-20 rounded-xl overflow-hidden flex-shrink-0 mr-3 ml-3 rtl:mr-0 rtl:ml-3 ltr:ml-0 ltr:mr-3 relative shadow-md border border-white/5">
                                 <img src={item.image} alt={item.name} className="absolute inset-0 w-full h-full object-cover" />
                               </div>

@@ -14,7 +14,7 @@ import ScrollReveal from "../ScrollReveal";
 
 const SOCIAL_KW = ["instagram","انستا","telegram","تيليغرام","whatsapp","واتس","tiktok","تيك","facebook","فيسبوك","twitter","تويتر","youtube","يوتيوب","vk","snapchat","سناب","linkedin"];
 
-export default function GastroBarTheme({ cardId, siteData, siteColors, lang = "en", isMenuEnabled, menuMode, menuCategories, addToCart, pdfMenuUrl }) {
+export default function GastroBarTheme({ cardId, siteData, siteColors, lang = "en", isMenuEnabled, menuMode, menuCategories, addToCart, pdfMenuUrl , showMenuImages }) {
   const accent  = siteColors?.primary    || "#F5C518";   // gastrobar yellow
   const bgColor = siteColors?.background || "#111111";   // near-black
   const isAr    = lang === "ar";
@@ -433,7 +433,7 @@ export default function GastroBarTheme({ cardId, siteData, siteColors, lang = "e
                     <div className="flex flex-col gap-4">
                       {cat.items.map((item, idx) => (
                         <div key={idx} className="flex justify-between items-center bg-[#1A1A1A] p-4 rounded-2xl border border-white/5 shadow-sm">
-                          {item.image && (
+                          {showMenuImages !== false && item.image && (
                               <div className="w-[70px] h-[70px] sm:w-20 sm:h-20 rounded-xl overflow-hidden flex-shrink-0 mr-3 ml-3 rtl:mr-0 rtl:ml-3 ltr:ml-0 ltr:mr-3 relative shadow-md border border-white/5">
                                 <img src={item.image} alt={item.name} className="absolute inset-0 w-full h-full object-cover" />
                               </div>
