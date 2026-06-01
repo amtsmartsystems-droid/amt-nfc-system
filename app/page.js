@@ -650,7 +650,6 @@ function PageContent() {
           {/* Tab Nav */}
           <div className="flex-shrink-0 flex flex-wrap gap-1 px-4 py-3 border-b border-white/5">
             {[
-              { id:"menu",   label:"المنيو",  icon:"Utensils"     },
               { id:"links",  label:"روابط",   icon:"Link2"        },
               { id:"events", label:"فعاليات", icon:"CalendarDays" },
               { id:"images", label:"صـور",    icon:"Image"        },
@@ -671,51 +670,6 @@ function PageContent() {
           {/* Scrollable Tab Content */}
           <div className="flex-1 overflow-y-auto px-5 py-5 space-y-4" style={{ scrollbarWidth:"thin", scrollbarColor:"rgba(255,255,255,.1) transparent" }}>
 
-            {/* ═══ TAB: MENU BUILDER ═══ */}
-            {adminTab==="menu" && (
-              <div className="space-y-4">
-                <div className="flex items-center justify-between p-4 bg-white/5 rounded-2xl border border-white/10">
-                  <Label className="flex items-center gap-2 mb-0">
-                    <LucideIcons.MenuSquare size={16} className="text-yellow-400" />
-                    تفعيل قائمة الطعام الذكية (المنيو)
-                  </Label>
-                  <label className="relative inline-flex items-center cursor-pointer">
-                    <input type="checkbox" className="sr-only peer" checked={isMenuEnabled} onChange={(e) => setIsMenuEnabled(e.target.checked)} />
-                    <div className="w-9 h-5 bg-white/10 peer-focus:outline-none rounded-full peer peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:right-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-yellow-500"></div>
-                  </label>
-                </div>
-
-                {isMenuEnabled && (
-                  <div className="space-y-4 animate-in fade-in slide-in-from-top-2">
-                    {/* Mode Selector */}
-                    <div className="flex gap-2 p-1 bg-white/5 rounded-xl border border-white/10">
-                      <button onClick={() => setMenuMode('interactive')} className={`flex-1 py-2 text-xs font-bold rounded-lg transition-colors ${menuMode === 'interactive' ? 'bg-yellow-500 text-black' : 'text-white/60 hover:text-white'}`}>
-                        قوائم تفاعلية ذكية
-                      </button>
-                      <button onClick={() => setMenuMode('pdf')} className={`flex-1 py-2 text-xs font-bold rounded-lg transition-colors ${menuMode === 'pdf' ? 'bg-yellow-500 text-black' : 'text-white/60 hover:text-white'}`}>
-                        ملف PDF جاهز
-                      </button>
-                    </div>
-
-                    {menuMode === 'pdf' ? (
-                      <div className="space-y-4 p-4 bg-white/5 border border-white/10 rounded-2xl">
-                        <Label className="text-xs text-white/70">رابط ملف المنيو (PDF أو صورة)</Label>
-                        <input type="text" value={pdfMenuUrl} onChange={e => setPdfMenuUrl(e.target.value)} placeholder="https://..." className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:border-yellow-500 outline-none" dir="ltr" />
-                        <div className="text-center">
-                          <span className="text-[10px] text-white/50">سيتم فتح هذا الملف مباشرة عندما يضغط الزبون على زر "عرض المنيو" أو View Menu في واجهة البطاقة.</span>
-                        </div>
-                      </div>
-                    ) : (
-                      <>
-                        {/* ═══ AI MENU GENERATOR ═══ */}
-                        <div className="p-4 bg-yellow-400/10 border border-yellow-400/20 rounded-2xl flex flex-col items-center justify-center gap-2 text-center relative overflow-hidden">
-                            <LucideIcons.Wand2 size={24} className="text-yellow-400 mb-1" />
-                            <h4 className="font-bold text-yellow-400 text-sm">بناء المنيو بالذكاء الاصطناعي ✨</h4>
-                            <p className="text-[10px] text-yellow-400/70 mb-2">ارفع ملف PDF أو صورة للمنيو الجاهز، وسيقوم النظام باستخراج الأصناف والأسعار تلقائياً.</p>
-                            <input type="file" accept="image/*,application/pdf" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" onChange={e => { if(e.target.files[0]) handleGenerateMenu(e.target.files[0]); }} disabled={loading} />
-                            <button disabled={loading} className="px-4 py-2 bg-yellow-400 text-black font-bold text-xs rounded-xl pointer-events-none flex items-center gap-2">
-                                {loading ? <LucideIcons.Loader2 size={14} className="animate-spin" /> : <LucideIcons.Upload size={14} />}
-                                {loading ? 'جاري التحليل...' : 'ارفع ملف المنيو'}
                             </button>
                         </div>
 
@@ -968,23 +922,98 @@ function PageContent() {
                         </div>
                         {/* Edit panel */}
                         {editing && (
-                          <div className="px-4 pb-4 pt-1 space-y-2 border-t border-white/5">
-                            <div className="grid grid-cols-2 gap-2">
+                          <div className="px-4 pb-4 pt-1 space-y-4 border-t border-white/5">
+                            <div className="grid grid-cols-2 gap-2 mt-2">
                               <div><Label>إنجليزي</Label><AdminInput value={lk.title} onChange={v=>updLink(lk.id,"title",v)} placeholder="View Menu" dir="ltr" /></div>
                               <div><Label>عربي</Label><AdminInput value={lk.titleAr||""} onChange={v=>updLink(lk.id,"titleAr",v)} placeholder="عرض القائمة" dir="rtl" /></div>
                             </div>
-                            <div>
-                              <Label>الرابط</Label>
-                              <div className="flex gap-2">
-                                <div className="flex-1">
-                                  <AdminInput value={lk.url} onChange={v=>updLink(lk.id,"url",v)} placeholder="https://..." type="url" dir="ltr" />
-                                </div>
-                                <label title="رفع ملف PDF بدلاً من الرابط" className={`flex-shrink-0 flex items-center justify-center w-10 h-10 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white cursor-pointer transition-all ${uploadingPdf === lk.id ? 'opacity-50 cursor-not-allowed' : ''}`}>
-                                  {uploadingPdf === lk.id ? <LucideIcons.Loader2 size={16} className="animate-spin" /> : <LucideIcons.UploadCloud size={16} />}
-                                  <input type="file" accept="application/pdf,image/*" className="hidden" disabled={uploadingPdf === lk.id} onChange={(e) => handlePdfUpload(e.target.files[0], lk.id)} />
+
+                            {/* Menu Integration Toggle inside Link Editor */}
+                            <div className="p-3 rounded-xl border border-yellow-500/30 bg-yellow-500/5">
+                              <div className="flex items-center justify-between mb-3">
+                                <Label className="flex items-center gap-2 mb-0 font-bold text-yellow-400 text-xs">
+                                  <LucideIcons.Utensils size={14} />
+                                  تحويل هذا الرابط إلى منيو
+                                </Label>
+                                <label className="relative inline-flex items-center cursor-pointer">
+                                  <input type="checkbox" className="sr-only peer" checked={isMenuEnabled} onChange={(e) => {
+                                      setIsMenuEnabled(e.target.checked);
+                                      if(e.target.checked) updLink(lk.id, "url", "#menu-section");
+                                  }} />
+                                  <div className="w-8 h-4 bg-white/10 peer-focus:outline-none rounded-full peer peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:right-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-yellow-500"></div>
                                 </label>
                               </div>
+
+                              {!isMenuEnabled ? (
+                                <div>
+                                  <Label className="text-slate-400 text-[10px]">الرابط العادي</Label>
+                                  <div className="flex gap-2">
+                                    <div className="flex-1">
+                                      <AdminInput value={lk.url} onChange={v=>updLink(lk.id,"url",v)} placeholder="https://..." type="url" dir="ltr" />
+                                    </div>
+                                    <label title="رفع ملف PDF بدلاً من الرابط" className={`flex-shrink-0 flex items-center justify-center w-10 h-10 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white cursor-pointer transition-all ${uploadingPdf === lk.id ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                                      {uploadingPdf === lk.id ? <LucideIcons.Loader2 size={16} className="animate-spin" /> : <LucideIcons.UploadCloud size={16} />}
+                                      <input type="file" accept="application/pdf,image/*" className="hidden" disabled={uploadingPdf === lk.id} onChange={(e) => handlePdfUpload(e.target.files[0], lk.id)} />
+                                    </label>
+                                  </div>
+                                </div>
+                              ) : (
+                                <div className="space-y-3 pt-2 border-t border-yellow-500/10 animate-in fade-in slide-in-from-top-2">
+                                  <div className="flex gap-2 p-1 bg-black/40 rounded-lg">
+                                    <button onClick={() => { setMenuMode('interactive'); updLink(lk.id, "url", "#menu-section"); }} className={`flex-1 py-1.5 text-[11px] font-bold rounded transition-colors ${menuMode === 'interactive' ? 'bg-yellow-500 text-black' : 'text-white/60 hover:text-white'}`}>قوائم تفاعلية</button>
+                                    <button onClick={() => setMenuMode('pdf')} className={`flex-1 py-1.5 text-[11px] font-bold rounded transition-colors ${menuMode === 'pdf' ? 'bg-yellow-500 text-black' : 'text-white/60 hover:text-white'}`}>ملف PDF جاهز</button>
+                                  </div>
+
+                                  {menuMode === 'pdf' ? (
+                                    <div className="space-y-2">
+                                      <Label className="text-[10px] text-white/70">رابط ملف المنيو PDF</Label>
+                                      <input type="text" value={pdfMenuUrl} onChange={e => { setPdfMenuUrl(e.target.value); updLink(lk.id, "url", e.target.value); }} placeholder="https://..." className="w-full bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-xs text-white outline-none focus:border-yellow-500" dir="ltr" />
+                                    </div>
+                                  ) : (
+                                    <>
+                                      <div className="p-3 bg-yellow-400/10 border border-yellow-400/20 rounded-xl text-center relative">
+                                        <h4 className="font-bold text-yellow-400 text-[11px]">بناء المنيو بالذكاء الاصطناعي ✨</h4>
+                                        <p className="text-[9px] text-yellow-400/70 mt-1 mb-2">ارفع PDF وسنقوم بتفريغه تلقائياً!</p>
+                                        <input type="file" accept="image/*,application/pdf" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" onChange={e => { if(e.target.files[0]) handleGenerateMenu(e.target.files[0]); }} disabled={loading} />
+                                        <button disabled={loading} className="w-full py-1.5 bg-yellow-400 text-black font-bold text-[10px] rounded-lg pointer-events-none flex items-center justify-center gap-1">
+                                          {loading ? <LucideIcons.Loader2 size={12} className="animate-spin" /> : <LucideIcons.Upload size={12} />}
+                                          {loading ? 'جاري التحليل...' : 'ارفع المنيو الآن'}
+                                        </button>
+                                      </div>
+                                      
+                                      <button onClick={() => setMenuCategories([...menuCategories, { id: Date.now().toString(), name: 'New Category', nameAr: 'تصنيف جديد', items: [] }])} className="w-full py-2 bg-white/5 border border-white/10 border-dashed rounded-lg text-yellow-500 font-bold text-[10px] hover:bg-white/10 flex items-center justify-center gap-1">
+                                        <LucideIcons.Plus size={12} /> إضافة تصنيف
+                                      </button>
+                                      
+                                      <div className="space-y-2">
+                                        {menuCategories.map((cat, cIdx) => (
+                                          <div key={cat.id} className="p-2 bg-black/40 border border-white/10 rounded-xl">
+                                            <div className="flex gap-1 mb-2">
+                                              <input type="text" value={cat.nameAr} onChange={e => { const newCat=[...menuCategories]; newCat[cIdx].nameAr=e.target.value; setMenuCategories(newCat); }} placeholder="عربي" className="flex-1 bg-white/5 border-none rounded px-2 py-1 text-[10px] text-white outline-none focus:ring-1 focus:ring-yellow-500" />
+                                              <input type="text" value={cat.name} onChange={e => { const newCat=[...menuCategories]; newCat[cIdx].name=e.target.value; setMenuCategories(newCat); }} placeholder="En" className="w-16 bg-white/5 border-none rounded px-2 py-1 text-[10px] text-white outline-none focus:ring-1 focus:ring-yellow-500" dir="ltr" />
+                                              <button onClick={() => setMenuCategories(menuCategories.filter(c=>c.id!==cat.id))} className="px-2 text-red-400 hover:bg-red-500/20 rounded"><LucideIcons.Trash2 size={10}/></button>
+                                            </div>
+                                            <div className="space-y-1">
+                                              {cat.items.map((item, iIdx) => (
+                                                <div key={item.id} className="flex gap-1 relative pl-4">
+                                                  <button onClick={() => { const newCat=[...menuCategories]; newCat[cIdx].items = newCat[cIdx].items.filter(i=>i.id!==item.id); setMenuCategories(newCat); }} className="absolute left-0 top-1.5 text-red-500"><LucideIcons.X size={10}/></button>
+                                                  <input type="text" value={item.nameAr} onChange={e => { const newCat=[...menuCategories]; newCat[cIdx].items[iIdx].nameAr=e.target.value; setMenuCategories(newCat); }} placeholder="الصنف" className="flex-1 bg-white/5 border-none rounded px-1.5 py-1 text-[9px] text-white outline-none" />
+                                                  <input type="text" value={item.price} onChange={e => { const newCat=[...menuCategories]; newCat[cIdx].items[iIdx].price=e.target.value; setMenuCategories(newCat); }} placeholder="السعر" className="w-10 bg-white/5 border-none rounded px-1.5 py-1 text-[9px] text-center text-white outline-none" dir="ltr" />
+                                                </div>
+                                              ))}
+                                            </div>
+                                            <button onClick={() => { const newCat=[...menuCategories]; newCat[cIdx].items.push({ id: Date.now().toString(), name: 'New Item', nameAr: 'صنف جديد', price: '0.00', desc: '', descAr: '' }); setMenuCategories(newCat); }} className="w-full mt-2 py-1 text-[9px] text-yellow-500 hover:bg-white/5 rounded">
+                                              + صنف
+                                            </button>
+                                          </div>
+                                        ))}
+                                      </div>
+                                    </>
+                                  )}
+                                </div>
+                              )}
                             </div>
+
                             <div className="flex items-center gap-2 pt-1">
                               <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background:bg }}><Ic size={14} color={color} /></div>
                               <p className="text-[9.5px] text-slate-600">الأيقونة تتغير تلقائياً بناءً على الاسم ✨</p>
