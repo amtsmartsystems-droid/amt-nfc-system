@@ -320,8 +320,8 @@ function PageContent() {
   // ── File Upload (Vercel Blob) ──
   const handlePdfUpload = async (file, linkId) => {
     if (!file) return;
-    if (file.size > 4.4 * 1024 * 1024) {
-      showToast("❌ حجم الملف كبير جداً! الحد الأقصى للرفع هو 4.5 ميجابايت. يرجى ضغط الـ PDF قبل رفعه.", false);
+    if (file.size > 20 * 1024 * 1024) {
+      showToast("❌ حجم الملف كبير جداً! الحد الأقصى للرفع هو 20 ميجابايت.", false);
       return;
     }
 

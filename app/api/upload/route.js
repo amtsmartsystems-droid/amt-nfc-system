@@ -1,6 +1,14 @@
 import { put } from '@vercel/blob';
 import { NextResponse } from 'next/server';
 
+// Allow larger file uploads (up to 20MB)
+export const config = {
+  api: {
+    bodyParser: false,
+    responseLimit: false,
+  },
+};
+
 export async function POST(request) {
   try {
     const formData = await request.formData();
@@ -15,10 +23,8 @@ export async function POST(request) {
       addRandomSuffix: true, 
     });
 
-    // Generate proxy URL instead of raw Vercel Storage URL
-    const proxyUrl = blob.url.replace('https://9vaqqf9s1c4ou0pk.public.blob.vercel-storage.com', '/blob');
-
-    return NextResponse.json({ url: proxyUrl });
+    // Return the direct blob URL (publicly accessible)
+    return NextResponse.json({ url: blob.url });
   } catch (error) {
     console.error('Error uploading file to blob:', error);
     return NextResponse.json({ error: 'حدث خطأ أثناء الرفع' }, { status: 500 });

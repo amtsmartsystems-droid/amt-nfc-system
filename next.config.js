@@ -6,10 +6,21 @@ const nextConfig = {
                 protocol: 'https',
                 hostname: 'images.unsplash.com',
             },
+            {
+                protocol: 'https',
+                hostname: '*.public.blob.vercel-storage.com',
+            },
         ],
     },
     experimental: {
         serverComponentsExternalPackages: ["mongoose"]
+    },
+    // Increase body size limit for file uploads
+    api: {
+        bodyParser: {
+            sizeLimit: '20mb',
+        },
+        responseLimit: '20mb',
     },
     async rewrites() {
         return [
