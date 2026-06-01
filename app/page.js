@@ -404,7 +404,7 @@ function PageContent() {
   };
 
   const renderTheme = () => {
-    const props = { siteData, siteColors, lang };
+    const props = { siteData, siteColors, lang, isMenuEnabled, menuMode, pdfMenuUrl, menuCategories };
     if (theme === 'business_card') return <AMTBusinessCard />;
     switch (theme) {
       case "cafe":   return <CafeTheme      {...props} />;
