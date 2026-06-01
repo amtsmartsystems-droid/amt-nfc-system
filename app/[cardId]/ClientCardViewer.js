@@ -20,6 +20,12 @@ export default function ClientCardViewer({ initialCard, cardId }) {
     const [lang,      setLang]      = useState('ar');
     const [wifiState, setWifiState] = useState('idle');
 
+    /* ── Cart State ── */
+    const [cart, setCart] = useState([]);
+    const [showCart, setShowCart] = useState(false);
+    const [showCliqModal, setShowCliqModal] = useState(false);
+    const [cartToast, setCartToast] = useState(null);
+
     /* ── Smart Waiter State (Server-Side Session) ── */
     const COOLDOWN_SECONDS     = 60;
 
@@ -235,6 +241,37 @@ export default function ClientCardViewer({ initialCard, cardId }) {
         setTimeout(() => setWaiterToast(null), 4000);
     };
 
+    /* ── Order Submission ── */
+    const submitOrder = async (paymentMethod) => {
+        if (!tableNumber || cart.length === 0) return;
+        setShowCliqModal(false);
+        setWaiterToast({ message: "جاري إرسال الطلب...", type: 'success' });
+        
+        try {
+            const res = await fetch('/api/order', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    restaurantId: cardId,
+                    tableNumber,
+                    cart,
+                    paymentMethod,
+                    total: cart.reduce((a, b) => a + (b.price * b.qty), 0)
+                })
+            });
+            const data = await res.json();
+            if (res.ok) {
+                setWaiterToast({ message: "تم إرسال الطلب بنجاح! 🚀", type: 'success' });
+                setCart([]);
+            } else {
+                setWaiterToast({ message: data.error || "عذراً، حدث خطأ أثناء إرسال الطلب", type: 'error' });
+            }
+        } catch(e) {
+            setWaiterToast({ message: "خطأ في الاتصال بالخادم", type: 'error' });
+        }
+        setTimeout(() => setWaiterToast(null), 4000);
+    };
+
     /* ── SWR ── */
     const { data: fetchedCard } = useSWR(`/api/cards/${cardId}`, fetcher, {
         fallbackData:       initialCard,
@@ -273,6 +310,21 @@ export default function ClientCardViewer({ initialCard, cardId }) {
         siteData,
         siteColors: { primary, background: card.background || '#F5EDD6' },
         lang,
+        isMenuEnabled: card.isMenuEnabled,
+        menuMode: card.menuMode || 'interactive',
+        pdfMenuUrl: card.pdfMenuUrl || '',
+        menuCategories: card.menuCategories || [],
+        cliqConfig: card.cliqConfig || { isEnabled: false, alias: '', message: '' },
+        tableNumber: tableNumber,
+        addToCart: (item) => {
+            setCart(prev => {
+                const existing = prev.find(i => i.id === item.id);
+                if (existing) return prev.map(i => i.id === item.id ? { ...i, qty: i.qty + 1 } : i);
+                return [...prev, { ...item, qty: 1 }];
+            });
+            setCartToast(`تمت إضافة ${lang==='ar' ? item.nameAr : item.name} للسلة`);
+            setTimeout(() => setCartToast(null), 2000);
+        }
     };
 
     const handleCopyWifi = () => {
@@ -487,6 +539,107 @@ export default function ClientCardViewer({ initialCard, cardId }) {
                     </div>
                 </div>
             </div>
+
+            {/* ════════ CART TOAST ════════ */}
+            {cartToast && (
+                <div style={{ position: 'fixed', top: 80, left: 0, right: 0, zIndex: 9999, display: 'flex', justifyContent: 'center', pointerEvents: 'none', animation: 'fadeInDown 0.3s ease-out' }}>
+                    <div style={{ background: '#10b981', color: '#fff', padding: '10px 20px', borderRadius: 999, fontSize: 13, fontWeight: 'bold', boxShadow: '0 4px 12px rgba(16,185,129,0.3)' }}>
+                        ✅ {cartToast}
+                    </div>
+                </div>
+            )}
+
+            {/* ════════ FLOATING CART BUTTON ════════ */}
+            {cart.length > 0 && !showCart && !showCliqModal && (
+                <button
+                    onClick={() => setShowCart(true)}
+                    style={{ position: 'fixed', bottom: 80, right: 20, zIndex: 9997, background: '#ea580c', color: '#fff', border: 'none', borderRadius: 999, padding: '12px 20px', display: 'flex', alignItems: 'center', gap: 10, fontWeight: 900, boxShadow: '0 8px 25px rgba(234,88,12,0.4)', animation: 'bounceIn 0.5s' }}
+                >
+                    <div style={{ background: '#fff', color: '#ea580c', width: 24, height: 24, borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14 }}>
+                        {cart.reduce((a, b) => a + b.qty, 0)}
+                    </div>
+                    <span>{lang === 'ar' ? 'السلة' : 'Cart'}</span>
+                    <span>{cart.reduce((a, b) => a + (b.price * b.qty), 0)} JOD</span>
+                </button>
+            )}
+
+            {/* ════════ CART SHEET MODAL ════════ */}
+            {showCart && (
+                <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 9999, background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'flex-end', justifyContent: 'center', fontFamily: 'Cairo, sans-serif' }} onClick={() => setShowCart(false)}>
+                    <div style={{ background: '#111827', width: '100%', maxWidth: 448, borderTopLeftRadius: 32, borderTopRightRadius: 32, padding: '24px 20px 40px', borderTop: '2px solid #ea580c', boxShadow: '0 -10px 40px rgba(0,0,0,0.6)', animation: 'slideUp 0.3s' }} onClick={e => e.stopPropagation()}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20, direction: lang === 'ar' ? 'rtl' : 'ltr' }}>
+                            <h3 style={{ margin: 0, color: '#f8fafc', fontSize: 20, fontWeight: 900 }}>🛒 {lang === 'ar' ? 'سلة الطلبات' : 'Your Cart'}</h3>
+                            <button onClick={() => setShowCart(false)} style={{ background: '#1f2937', border: 'none', color: '#9ca3af', width: 32, height: 32, borderRadius: 16, fontSize: 20, cursor: 'pointer' }}>×</button>
+                        </div>
+                        <div style={{ maxHeight: '40vh', overflowY: 'auto', marginBottom: 20, direction: lang === 'ar' ? 'rtl' : 'ltr' }}>
+                            {cart.map((item, idx) => (
+                                <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 0', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                                    <div>
+                                        <div style={{ color: '#fff', fontSize: 14, fontWeight: 'bold' }}>{lang === 'ar' ? item.nameAr : item.name}</div>
+                                        <div style={{ color: '#9ca3af', fontSize: 12 }}>{item.price} JOD</div>
+                                    </div>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: 12, background: '#1f2937', padding: '4px 8px', borderRadius: 8 }}>
+                                        <button onClick={() => setCart(cart.map(i => i.id === item.id ? { ...i, qty: i.qty - 1 } : i).filter(i => i.qty > 0))} style={{ background: 'transparent', border: 'none', color: '#fff', fontSize: 18, cursor: 'pointer' }}>-</button>
+                                        <span style={{ color: '#f5c518', fontWeight: 'bold', width: 20, textAlign: 'center' }}>{item.qty}</span>
+                                        <button onClick={() => setCart(cart.map(i => i.id === item.id ? { ...i, qty: i.qty + 1 } : i))} style={{ background: 'transparent', border: 'none', color: '#fff', fontSize: 18, cursor: 'pointer' }}>+</button>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20, direction: lang === 'ar' ? 'rtl' : 'ltr' }}>
+                            <span style={{ color: '#9ca3af', fontSize: 16 }}>{lang === 'ar' ? 'المجموع الإجمالي:' : 'Total:'}</span>
+                            <span style={{ color: '#10b981', fontSize: 24, fontWeight: 900 }}>{cart.reduce((a, b) => a + (b.price * b.qty), 0)} JOD</span>
+                        </div>
+                        <button
+                            onClick={() => {
+                                if (!tableNumber) return setWaiterToast({ message: "يرجى مسح الـ NFC للطاولة أولاً", type: 'error' });
+                                setShowCart(false);
+                                if (card.cliqConfig?.isEnabled) setShowCliqModal(true);
+                                else {
+                                    // Submit order directly
+                                    submitOrder('cash');
+                                }
+                            }}
+                            style={{ width: '100%', padding: '16px', borderRadius: 16, border: 'none', background: 'linear-gradient(135deg, #10b981, #059669)', color: '#fff', fontWeight: 900, fontSize: 16, cursor: 'pointer' }}
+                        >
+                            {lang === 'ar' ? 'إتمام الطلب' : 'Checkout'}
+                        </button>
+                    </div>
+                </div>
+            )}
+
+            {/* ════════ CLIQ CHECKOUT MODAL ════════ */}
+            {showCliqModal && (
+                <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 9999, background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Cairo, sans-serif' }}>
+                    <div style={{ background: '#111827', width: '90%', maxWidth: 400, borderRadius: 24, padding: '32px 20px', border: '1px solid #eab308', boxShadow: '0 20px 50px rgba(0,0,0,0.8)', textAlign: 'center', animation: 'zoomIn 0.3s' }}>
+                        <div style={{ width: 64, height: 64, borderRadius: 32, background: 'rgba(234,179,8,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px', fontSize: 32 }}>💳</div>
+                        <h3 style={{ color: '#f8fafc', fontSize: 22, fontWeight: 900, marginBottom: 12 }}>{lang === 'ar' ? 'الدفع عبر كليك' : 'Pay via CliQ'}</h3>
+                        <p style={{ color: '#9ca3af', fontSize: 14, marginBottom: 24, lineHeight: 1.6 }}>{card.cliqConfig?.message || 'لإتمام طلبك، يرجى تحويل المجموع عبر كليك'}</p>
+                        
+                        <div style={{ background: '#1f2937', padding: '16px', borderRadius: 16, marginBottom: 24, border: '1px dashed #eab308' }}>
+                            <div style={{ color: '#9ca3af', fontSize: 12, marginBottom: 4 }}>{lang === 'ar' ? 'المعرف (Alias)' : 'Alias'}</div>
+                            <div style={{ color: '#f8fafc', fontSize: 24, fontWeight: 900, letterSpacing: 2 }}>{card.cliqConfig?.alias}</div>
+                            <div style={{ marginTop: 12, borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: 12 }}>
+                                <div style={{ color: '#9ca3af', fontSize: 12, marginBottom: 4 }}>{lang === 'ar' ? 'المبلغ المطلوب' : 'Total Amount'}</div>
+                                <div style={{ color: '#10b981', fontSize: 28, fontWeight: 900 }}>{cart.reduce((a, b) => a + (b.price * b.qty), 0)} JOD</div>
+                            </div>
+                        </div>
+
+                        <button
+                            onClick={() => submitOrder('cliq')}
+                            style={{ width: '100%', padding: '16px', borderRadius: 16, border: 'none', background: 'linear-gradient(135deg, #f5c518, #ea580c)', color: '#111827', fontWeight: 900, fontSize: 16, cursor: 'pointer', marginBottom: 12 }}
+                        >
+                            {lang === 'ar' ? '✅ لقد قمت بالتحويل' : 'I have transferred'}
+                        </button>
+                        <button
+                            onClick={() => { setShowCliqModal(false); setShowCart(true); }}
+                            style={{ width: '100%', padding: '16px', borderRadius: 16, border: '1px solid #374151', background: 'transparent', color: '#9ca3af', fontWeight: 800, fontSize: 15, cursor: 'pointer' }}
+                        >
+                            {lang === 'ar' ? 'إلغاء' : 'Cancel'}
+                        </button>
+                    </div>
+                </div>
+            )}
 
             {/* ════════ SMART WAITER TOAST ════════ */}
             {waiterToast && (

@@ -10,7 +10,7 @@ import ScrollReveal from "../ScrollReveal";
 //  RestaurantTheme — Dark Elegant "Meaty Story" style
 //  Props: { siteData, siteColors, lang }
 // ══════════════════════════════════════════════════════════════════════
-export default function RestaurantTheme({ cardId, siteData, siteColors, lang = "en" }) {
+export default function RestaurantTheme({ cardId, siteData, siteColors, lang = "en", isMenuEnabled, menuMode, pdfMenuUrl, menuCategories, addToCart }) {
   const primary = siteColors?.primary    || "#EDD98A";
   const bgCream = siteColors?.background || "#F5EDD6";
   const isAr    = lang === "ar";
@@ -95,8 +95,15 @@ export default function RestaurantTheme({ cardId, siteData, siteColors, lang = "
           </h1>
           <p className="text-white/80 text-[14px] leading-relaxed max-w-[270px] mb-7">{sub}</p>
 
-          {/* First link as hero CTA */}
-          {links[0] ? (
+          {/* Primary CTA (View Menu) */}
+          {isMenuEnabled ? (
+            <a href={menuMode === 'pdf' ? (pdfMenuUrl || '#') : '#menu-section'} 
+               target={menuMode === 'pdf' && pdfMenuUrl ? "_blank" : undefined}
+               className="flex items-center justify-center w-full py-[17px] rounded-2xl font-bold text-[13px] uppercase tracking-[.15em] transition-all hover:brightness-110 active:scale-95"
+               style={{ background:primary, color:"#1C1C1C", boxShadow:`0 8px 28px rgba(var(--primary-rgb),.45)` }}>
+              {t("View Menu", "عرض المنيو")}
+            </a>
+          ) : links[0] ? (
             <a href={links[0].url||"#"} className="flex items-center justify-center w-full py-[17px] rounded-2xl font-bold text-[13px] uppercase tracking-[.15em] transition-all hover:brightness-110 active:scale-95"
                style={{ background:primary, color:"#1C1C1C", boxShadow:`0 8px 28px rgba(var(--primary-rgb),.45)` }}>
               {t(links[0].title, links[0].titleAr)}
@@ -139,6 +146,34 @@ export default function RestaurantTheme({ cardId, siteData, siteColors, lang = "
           </div>
         )}
       </section>
+
+      {/* ── MENU SECTION ── */}
+      {isMenuEnabled && menuMode === 'interactive' && menuCategories && menuCategories.length > 0 && (
+        <section id="menu-section" className="px-5 pt-9 pb-11 bg-white scroll-mt-6">
+          <STitle c>{t("Our Menu", "قائمة الطعام")}</STitle>
+          <div className="flex flex-col gap-8 mt-6">
+            {menuCategories.map((cat, i) => (
+              <div key={i}>
+                <h3 className="font-black text-[18px] text-[#1C1C1C] mb-4 border-b-2 border-gray-100 pb-2">{t(cat.name, cat.nameAr)}</h3>
+                <div className="flex flex-col gap-4">
+                  {cat.items.map((item, idx) => (
+                    <div key={idx} className="flex justify-between items-center bg-gray-50 p-4 rounded-2xl border border-gray-100 shadow-sm">
+                      <div className="flex-1">
+                        <h4 className="font-bold text-[15px] text-[#1C1C1C]">{t(item.name, item.nameAr)}</h4>
+                        {item.descAr && <p className="text-[12px] text-gray-500 mt-1 leading-relaxed max-w-[90%]">{t(item.desc, item.descAr)}</p>}
+                        <div className="text-[14px] font-black mt-2" style={{ color: primary }}>{item.price} JOD</div>
+                      </div>
+                      <button onClick={() => addToCart && addToCart(item)} className="w-10 h-10 rounded-xl bg-white border border-gray-200 shadow-sm flex items-center justify-center flex-shrink-0 hover:bg-gray-100 transition-colors">
+                        <LucideIcons.Plus size={18} color="#1C1C1C" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* ── PRINCIPLES ── */}
       <section className="px-5 pt-9 pb-11" style={{ background:bgCream }}>

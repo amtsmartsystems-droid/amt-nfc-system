@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect } from 'react';
-import { Plus, LayoutTemplate, Briefcase, ChevronRight, Loader2, Search } from 'lucide-react';
+import { Plus, LayoutTemplate, Briefcase, ChevronRight, Loader2, Search, Trash2, Key, X } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 export default function CardsDirectory() {
@@ -10,6 +10,13 @@ export default function CardsDirectory() {
   const [isCreating, setIsCreating] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [fetchError, setFetchError] = useState(null);
+
+  // Auth Modal State
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [authTenantId, setAuthTenantId] = useState('');
+  const [authEmail, setAuthEmail] = useState('');
+  const [authPassword, setAuthPassword] = useState('');
+  const [authLoading, setAuthLoading] = useState(false);
 
   // 1. Fetch Cards on Load
   const fetchCards = async () => {
@@ -56,14 +63,60 @@ export default function CardsDirectory() {
 
   // 3. Navigate to Editor
   const handleEditCard = (cardId) => {
-    // Navigate to the existing editor page and pass the cardId
     router.push(`/?id=${cardId}`);
+  };
+
+  // 4. Delete Card
+  const handleDeleteCard = async (e, dbId) => {
+    e.stopPropagation();
+    if (!confirm('هل أنت متأكد من حذف هذه البطاقة نهائياً؟')) return;
+    try {
+      const res = await fetch(`/api/admin/cards?id=${dbId}`, { method: 'DELETE' });
+      if (res.ok) {
+        setCards(cards.filter(c => c._id !== dbId));
+      } else {
+        alert('حدث خطأ أثناء الحذف');
+      }
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   const filteredCards = cards.filter(c => 
     c.title?.toLowerCase().includes(searchQuery.toLowerCase()) || 
     c.cardId?.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  // 5. Create Owner Account
+  const handleCreateOwnerAccount = async (e) => {
+    e.preventDefault();
+    setAuthLoading(true);
+    try {
+      const res = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: 'Owner',
+          email: authEmail,
+          password: authPassword,
+          tenantId: authTenantId
+        })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        alert('تم إنشاء حساب المطعم بنجاح!');
+        setShowAuthModal(false);
+        setAuthEmail('');
+        setAuthPassword('');
+      } else {
+        alert(data.error || 'فشل في إنشاء الحساب');
+      }
+    } catch (err) {
+      alert('خطأ في الاتصال بالخادم');
+    } finally {
+      setAuthLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-[#0A0A0A] text-white font-[Cairo,sans-serif] pb-24" dir="rtl">
@@ -141,9 +194,21 @@ export default function CardsDirectory() {
                         <div className="w-12 h-12 rounded-xl bg-black/40 border border-white/5 flex items-center justify-center text-yellow-500 group-hover:scale-110 transition-transform">
                           {card.cardType === 'business_card' ? <Briefcase size={22} /> : <LayoutTemplate size={22} />}
                         </div>
-                        <span className="bg-white/10 text-gray-300 text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-lg">
-                          ID: {card.cardId}
-                        </span>
+                        <div className="flex items-center gap-2 z-20">
+                          <span className="bg-white/10 text-gray-300 text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-lg">
+                            ID: {card.cardId}
+                          </span>
+                          <button 
+                            onClick={(e) => { e.stopPropagation(); setAuthTenantId(card.cardId); setShowAuthModal(true); }} 
+                            className="p-1.5 text-gray-400 hover:text-yellow-400 hover:bg-yellow-400/10 rounded-lg transition-colors"
+                            title="إنشاء حساب صاحب المطعم"
+                          >
+                            <Key size={16} />
+                          </button>
+                          <button onClick={(e) => handleDeleteCard(e, card._id)} className="p-1.5 text-gray-500 hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-colors">
+                            <Trash2 size={16} />
+                          </button>
+                        </div>
                       </div>
                       
                       <h3 className="font-bold text-lg text-white mb-1 truncate leading-tight">
@@ -165,6 +230,54 @@ export default function CardsDirectory() {
           </>
         )}
       </main>
+
+      {/* Auth Setup Modal */}
+      {showAuthModal && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-[#111] border border-white/10 rounded-3xl p-6 w-full max-w-sm relative">
+            <button onClick={() => setShowAuthModal(false)} className="absolute top-4 right-4 text-gray-500 hover:text-white">
+              <X size={20} />
+            </button>
+            <h2 className="text-xl font-bold text-white mb-1">إنشاء حساب المطعم</h2>
+            <p className="text-xs text-gray-400 mb-5">معرف البطاقة: <span className="text-yellow-400 font-mono">{authTenantId}</span></p>
+            
+            <form onSubmit={handleCreateOwnerAccount} className="space-y-4">
+              <div>
+                <label className="block text-xs font-bold text-gray-300 mb-1.5">البريد الإلكتروني (اسم المستخدم)</label>
+                <input 
+                  type="email" 
+                  required
+                  value={authEmail}
+                  onChange={e => setAuthEmail(e.target.value)}
+                  dir="ltr"
+                  className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-2.5 text-white outline-none focus:border-yellow-500/50"
+                  placeholder="admin@restaurant.com"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-gray-300 mb-1.5">كلمة المرور</label>
+                <input 
+                  type="text" 
+                  required
+                  value={authPassword}
+                  onChange={e => setAuthPassword(e.target.value)}
+                  dir="ltr"
+                  className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-2.5 text-white outline-none focus:border-yellow-500/50"
+                  placeholder="Secret123"
+                />
+              </div>
+              <button 
+                type="submit" 
+                disabled={authLoading}
+                className="w-full bg-yellow-500 hover:bg-yellow-400 text-black font-bold py-3 rounded-xl mt-2 transition-all flex items-center justify-center gap-2"
+              >
+                {authLoading ? <Loader2 size={18} className="animate-spin" /> : 'إنشاء وتفعيل الحساب'}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }

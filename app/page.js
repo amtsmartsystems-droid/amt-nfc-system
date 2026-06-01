@@ -96,6 +96,11 @@ function PageContent() {
   const [telegramConfig, setTelegramConfig] = useState({ botToken: "", chatId: "", isEnabled: false });
   const [nfcTableNum, setNfcTableNum] = useState("");
   const [uploadingPdf, setUploadingPdf] = useState(false);
+  const [isMenuEnabled, setIsMenuEnabled] = useState(false);
+  const [menuCategories, setMenuCategories] = useState([]);
+  const [menuMode, setMenuMode] = useState('interactive');
+  const [pdfMenuUrl, setPdfMenuUrl] = useState('');
+  const [cliqConfig, setCliqConfig] = useState({ isEnabled: false, alias: '', message: 'لإتمام طلبك، يرجى تحويل المجموع عبر كليك' });
   // Subscription gate state
   const [subscriptionStatus, setSubscriptionStatus] = useState('active');
   const [allowEditing,       setAllowEditing]       = useState(true);
@@ -173,6 +178,35 @@ function PageContent() {
     } finally { setLoading(false); }
   };
 
+  // ── AI Generate Menu ──
+  const handleGenerateMenu = async (file) => {
+    if (!file) return;
+    setLoading(true);
+    try {
+      const fileBase64 = await new Promise((res,rej)=>{ const r=new FileReader(); r.onload=()=>res(r.result); r.onerror=rej; r.readAsDataURL(file); });
+      const fileMimeType = file.type;
+      
+      const res  = await fetch("/api/generate-menu", { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({ fileBase64, fileMimeType }) });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error);
+
+      if (json.menuCategories && Array.isArray(json.menuCategories)) {
+          const cats = json.menuCategories.map((c, i) => ({
+              ...c,
+              id: Date.now().toString() + i,
+              items: (c.items || []).map((it, j) => ({
+                  ...it,
+                  id: Date.now().toString() + i + j
+              }))
+          }));
+          setMenuCategories(cats);
+          showToast("✅ تم استخراج المنيو بنجاح!");
+      }
+    } catch(e) {
+      showToast(`❌ ${e.message}`, false);
+    } finally { setLoading(false); }
+  };
+
   // ── Save & Publish ──
   const handleSavePublish = async () => {
     if (!targetCardId.trim()) return showToast("⚠️ يرجى إدخال رقم البطاقة (Card ID) أولاً", false);
@@ -192,11 +226,17 @@ function PageContent() {
           background: siteColors.background,
           wifi: { ssid: wifi.ssid.trim(), password: wifi.password.trim() },
           telegramConfig,
+          isMenuEnabled,
+          menuMode,
+          pdfMenuUrl,
+          menuCategories,
+          cliqConfig,
         })
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "فشل الحفظ");
-      setPublishedUrl(`${window.location.origin}/${targetCardId}`);
+      const baseUrl = typeof process !== 'undefined' && process.env.NEXT_PUBLIC_BASE_URL ? process.env.NEXT_PUBLIC_BASE_URL : 'https://amt-nfc-system.vercel.app';
+      setPublishedUrl(`${baseUrl}/${targetCardId}`);
       showToast("✅ تم حفظ ونشر التعديلات بنجاح!");
     } catch (e) {
       showToast(`❌ خطأ: ${e.message}`, false);
@@ -247,7 +287,14 @@ function PageContent() {
       else setWifi({ ssid: '', password: '' });
 
       if (data.telegramConfig) setTelegramConfig(data.telegramConfig);
-      else setTelegramConfig({ botToken: '', chatId: '', isEnabled: false });
+      else setTelegramConfig({ botToken: '', chatId: '', isEnabled: false, dashboardMessageId: '' });
+
+      if (data.isMenuEnabled !== undefined) setIsMenuEnabled(data.isMenuEnabled);
+      if (data.menuMode) setMenuMode(data.menuMode);
+      if (data.pdfMenuUrl) setPdfMenuUrl(data.pdfMenuUrl);
+      if (data.menuCategories) setMenuCategories(data.menuCategories);
+      if (data.cliqConfig) setCliqConfig(data.cliqConfig);
+      else setCliqConfig({ isEnabled: false, alias: '', message: 'لإتمام طلبك، يرجى تحويل المجموع عبر كليك' });
 
       showToast(`✅ تم تحميل بيانات البطاقة: ${cid}`);
     } catch {}
@@ -507,19 +554,27 @@ function PageContent() {
                 <Label>رقم البطاقة (Card ID)</Label>
               </div>
               <div className="flex gap-2">
-                <AdminInput
-                  value={targetCardId}
-                  onChange={v => { setTargetCardId(v); }}
-                  placeholder="مثال: c123"
-                  dir="ltr"
-                />
-                <button
-                  onClick={() => handleLoadCard()}
-                  title="تحميل بيانات البطاقة"
-                  className="flex-shrink-0 px-3 rounded-xl text-yellow-400 bg-yellow-400/10 border border-yellow-400/25 hover:bg-yellow-400/20 transition-all text-[11px] font-bold"
-                >
-                  تحميل
-                </button>
+                {currentUserRole === 'Super_Admin' ? (
+                  <>
+                    <AdminInput
+                      value={targetCardId}
+                      onChange={v => { setTargetCardId(v); }}
+                      placeholder="مثال: c123"
+                      dir="ltr"
+                    />
+                    <button
+                      onClick={() => handleLoadCard()}
+                      title="تحميل بيانات البطاقة"
+                      className="flex-shrink-0 px-3 rounded-xl text-yellow-400 bg-yellow-400/10 border border-yellow-400/25 hover:bg-yellow-400/20 transition-all text-[11px] font-bold"
+                    >
+                      تحميل
+                    </button>
+                  </>
+                ) : (
+                  <div className="w-full px-3 py-2.5 rounded-xl text-sm text-yellow-500 font-bold bg-yellow-500/10 border border-yellow-500/20 text-center uppercase tracking-wider" dir="ltr">
+                    {targetCardId}
+                  </div>
+                )}
               </div>
 
               {/* NEW: Card Type Selector */}
@@ -595,6 +650,7 @@ function PageContent() {
           {/* Tab Nav */}
           <div className="flex-shrink-0 flex flex-wrap gap-1 px-4 py-3 border-b border-white/5">
             {[
+              { id:"menu",   label:"المنيو",  icon:"Utensils"     },
               { id:"links",  label:"روابط",   icon:"Link2"        },
               { id:"events", label:"فعاليات", icon:"CalendarDays" },
               { id:"images", label:"صـور",    icon:"Image"        },
@@ -614,6 +670,89 @@ function PageContent() {
 
           {/* Scrollable Tab Content */}
           <div className="flex-1 overflow-y-auto px-5 py-5 space-y-4" style={{ scrollbarWidth:"thin", scrollbarColor:"rgba(255,255,255,.1) transparent" }}>
+
+            {/* ═══ TAB: MENU BUILDER ═══ */}
+            {adminTab==="menu" && (
+              <div className="space-y-4">
+                <div className="flex items-center justify-between p-4 bg-white/5 rounded-2xl border border-white/10">
+                  <Label className="flex items-center gap-2 mb-0">
+                    <LucideIcons.MenuSquare size={16} className="text-yellow-400" />
+                    تفعيل قائمة الطعام الذكية (المنيو)
+                  </Label>
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" className="sr-only peer" checked={isMenuEnabled} onChange={(e) => setIsMenuEnabled(e.target.checked)} />
+                    <div className="w-9 h-5 bg-white/10 peer-focus:outline-none rounded-full peer peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:right-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-yellow-500"></div>
+                  </label>
+                </div>
+
+                {isMenuEnabled && (
+                  <div className="space-y-4 animate-in fade-in slide-in-from-top-2">
+                    {/* Mode Selector */}
+                    <div className="flex gap-2 p-1 bg-white/5 rounded-xl border border-white/10">
+                      <button onClick={() => setMenuMode('interactive')} className={`flex-1 py-2 text-xs font-bold rounded-lg transition-colors ${menuMode === 'interactive' ? 'bg-yellow-500 text-black' : 'text-white/60 hover:text-white'}`}>
+                        قوائم تفاعلية ذكية
+                      </button>
+                      <button onClick={() => setMenuMode('pdf')} className={`flex-1 py-2 text-xs font-bold rounded-lg transition-colors ${menuMode === 'pdf' ? 'bg-yellow-500 text-black' : 'text-white/60 hover:text-white'}`}>
+                        ملف PDF جاهز
+                      </button>
+                    </div>
+
+                    {menuMode === 'pdf' ? (
+                      <div className="space-y-4 p-4 bg-white/5 border border-white/10 rounded-2xl">
+                        <Label className="text-xs text-white/70">رابط ملف المنيو (PDF أو صورة)</Label>
+                        <input type="text" value={pdfMenuUrl} onChange={e => setPdfMenuUrl(e.target.value)} placeholder="https://..." className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:border-yellow-500 outline-none" dir="ltr" />
+                        <div className="text-center">
+                          <span className="text-[10px] text-white/50">سيتم فتح هذا الملف مباشرة عندما يضغط الزبون على زر "عرض المنيو" أو View Menu في واجهة البطاقة.</span>
+                        </div>
+                      </div>
+                    ) : (
+                      <>
+                        {/* ═══ AI MENU GENERATOR ═══ */}
+                        <div className="p-4 bg-yellow-400/10 border border-yellow-400/20 rounded-2xl flex flex-col items-center justify-center gap-2 text-center relative overflow-hidden">
+                            <LucideIcons.Wand2 size={24} className="text-yellow-400 mb-1" />
+                            <h4 className="font-bold text-yellow-400 text-sm">بناء المنيو بالذكاء الاصطناعي ✨</h4>
+                            <p className="text-[10px] text-yellow-400/70 mb-2">ارفع ملف PDF أو صورة للمنيو الجاهز، وسيقوم النظام باستخراج الأصناف والأسعار تلقائياً.</p>
+                            <input type="file" accept="image/*,application/pdf" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" onChange={e => { if(e.target.files[0]) handleGenerateMenu(e.target.files[0]); }} disabled={loading} />
+                            <button disabled={loading} className="px-4 py-2 bg-yellow-400 text-black font-bold text-xs rounded-xl pointer-events-none flex items-center gap-2">
+                                {loading ? <LucideIcons.Loader2 size={14} className="animate-spin" /> : <LucideIcons.Upload size={14} />}
+                                {loading ? 'جاري التحليل...' : 'ارفع ملف المنيو'}
+                            </button>
+                        </div>
+
+                        <button onClick={() => setMenuCategories([...menuCategories, { id: Date.now().toString(), name: 'New Category', nameAr: 'تصنيف جديد', items: [] }])} className="w-full py-3 bg-white/5 border border-white/10 border-dashed rounded-xl text-yellow-500 font-bold text-xs hover:bg-white/10 flex items-center justify-center gap-2">
+                          <LucideIcons.Plus size={16} /> إضافة تصنيف جديد
+                        </button>
+                    {menuCategories.map((cat, cIdx) => (
+                      <div key={cat.id} className="p-4 bg-black/40 border border-white/10 rounded-2xl space-y-3">
+                        <div className="flex gap-2">
+                          <input type="text" value={cat.nameAr} onChange={e => { const newCat=[...menuCategories]; newCat[cIdx].nameAr=e.target.value; setMenuCategories(newCat); }} placeholder="اسم التصنيف بالعربي" className="flex-1 bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-xs text-white outline-none focus:border-yellow-500" />
+                          <input type="text" value={cat.name} onChange={e => { const newCat=[...menuCategories]; newCat[cIdx].name=e.target.value; setMenuCategories(newCat); }} placeholder="اسم التصنيف بالانجليزي" className="flex-1 bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-xs text-white outline-none focus:border-yellow-500" dir="ltr" />
+                          <button onClick={() => setMenuCategories(menuCategories.filter(c=>c.id!==cat.id))} className="px-3 bg-red-500/20 text-red-400 hover:bg-red-500/40 rounded-lg transition-colors"><LucideIcons.Trash2 size={14}/></button>
+                        </div>
+                        {/* Items */}
+                        <div className="space-y-2 pl-4 border-l-2 border-white/10">
+                          {cat.items.map((item, iIdx) => (
+                            <div key={item.id} className="p-3 bg-white/5 rounded-xl space-y-2">
+                              <div className="flex gap-2">
+                                <input type="text" value={item.nameAr} onChange={e => { const newCat=[...menuCategories]; newCat[cIdx].items[iIdx].nameAr=e.target.value; setMenuCategories(newCat); }} placeholder="اسم الوجبة بالعربي" className="flex-1 bg-black/40 border border-white/10 rounded-lg px-2 py-1.5 text-xs text-white outline-none focus:border-yellow-500" />
+                                <input type="number" value={item.price} onChange={e => { const newCat=[...menuCategories]; newCat[cIdx].items[iIdx].price=parseFloat(e.target.value); setMenuCategories(newCat); }} placeholder="السعر" className="w-20 bg-black/40 border border-white/10 rounded-lg px-2 py-1.5 text-xs text-white text-center outline-none focus:border-yellow-500" dir="ltr" />
+                                <button onClick={() => { const newCat=[...menuCategories]; newCat[cIdx].items = newCat[cIdx].items.filter(it=>it.id!==item.id); setMenuCategories(newCat); }} className="px-2 text-red-400 hover:text-red-300"><LucideIcons.X size={14}/></button>
+                              </div>
+                              <input type="text" value={item.descAr} onChange={e => { const newCat=[...menuCategories]; newCat[cIdx].items[iIdx].descAr=e.target.value; setMenuCategories(newCat); }} placeholder="وصف الوجبة" className="w-full bg-black/40 border border-white/10 rounded-lg px-2 py-1.5 text-xs text-white outline-none focus:border-yellow-500" />
+                            </div>
+                          ))}
+                          <button onClick={() => { const newCat=[...menuCategories]; newCat[cIdx].items.push({ id: Date.now().toString(), name: 'New Item', nameAr: '', desc: '', descAr: '', price: 0, image: '', available: true }); setMenuCategories(newCat); }} className="text-[10px] text-yellow-400 hover:text-yellow-300 font-bold py-2 flex items-center gap-1">
+                            <LucideIcons.Plus size={12} /> أضف وجبة للتصنيف
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                      </>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* ═══ TAB: IMAGES MANAGER ═══ */}
             {adminTab==="images" && (
@@ -703,6 +842,45 @@ function PageContent() {
                         </div>
                       </div>
                     </>
+                  )}
+                </div>
+
+                {/* ═══ CLIQ PAYMENT CONFIG ═══ */}
+                <div className="rounded-2xl p-4 mb-4 space-y-4" style={{ background:"rgba(234,179,8,0.08)", border:"1.5px dashed rgba(234,179,8,0.5)" }}>
+                  <div className="flex items-center justify-between">
+                    <Label className="font-bold flex items-center gap-2 text-yellow-400 text-[12px] mb-0">
+                      <LucideIcons.CreditCard size={15} />
+                      💳 نظام الدفع المباشر (CliQ كليك)
+                    </Label>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input type="checkbox" className="sr-only peer" checked={cliqConfig.isEnabled} onChange={(e) => setCliqConfig(p => ({ ...p, isEnabled: e.target.checked }))} />
+                      <div className="w-9 h-5 bg-white/10 peer-focus:outline-none rounded-full peer peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:right-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-yellow-500"></div>
+                    </label>
+                  </div>
+                  {cliqConfig.isEnabled && (
+                    <div className="space-y-4 pt-4 border-t border-white/10 animate-in fade-in slide-in-from-top-2">
+                      <p className="text-[10px] text-slate-400 leading-relaxed">
+                        عند تفعيل هذا الخيار، سيتمكن الزبائن من إضافة الوجبات للسلة والدفع لك مباشرة عبر كليك، وسيصلك إشعار بالطلب عبر تليغرام.
+                      </p>
+                      <div className="space-y-2">
+                        <Label className="text-[11px] text-slate-400">معرف كليك (Alias)</Label>
+                        <AdminInput
+                          value={cliqConfig.alias}
+                          onChange={(v) => setCliqConfig(p => ({ ...p, alias: v }))}
+                          placeholder="مثال: SHAMAKA"
+                          dir="ltr"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-[11px] text-slate-400">رسالة تعليمات الدفع للزبون</Label>
+                        <AdminInput
+                          value={cliqConfig.message}
+                          onChange={(v) => setCliqConfig(p => ({ ...p, message: v }))}
+                          placeholder="لإتمام طلبك، يرجى تحويل المجموع عبر كليك"
+                          dir="rtl"
+                        />
+                      </div>
+                    </div>
                   )}
                 </div>
 

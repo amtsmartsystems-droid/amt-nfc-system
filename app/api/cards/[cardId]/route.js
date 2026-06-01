@@ -49,6 +49,11 @@ export async function GET(req, { params }) {
             telegramConfig:     card.telegramConfig || { botToken: '', chatId: '', isEnabled: false },
             isWaiterEnabled:    card.telegramConfig?.isEnabled === true,
             tableMapping:       card.tableMapping || [],
+            isMenuEnabled:      card.isMenuEnabled || false,
+            menuMode:           card.menuMode || 'interactive',
+            pdfMenuUrl:         card.pdfMenuUrl || '',
+            menuCategories:     card.menuCategories || [],
+            cliqConfig:         card.cliqConfig || { isEnabled: false, alias: '', message: '' },
         });
     } catch (error) {
         return NextResponse.json({ error: 'خطأ في الخادم' }, { status: 500 });
@@ -136,6 +141,12 @@ export async function PUT(req, { params }) {
               })).filter(t => t.tagId && t.tableName) : [])
             : undefined;
 
+        const cleanMenuCategories = body.menuCategories;
+        const cleanCliqConfig     = body.cliqConfig;
+        const cleanIsMenuEnabled  = body.isMenuEnabled;
+        const cleanMenuMode       = body.menuMode;
+        const cleanPdfMenuUrl     = body.pdfMenuUrl;
+
         // ── 5. Save ────────────────────────────────────────────────
         if (!card) {
             // Create (Super_Admin only, already checked above)
@@ -151,6 +162,11 @@ export async function PUT(req, { params }) {
                 events:       cleanSiteData?.events || [],
                 isLocked:     false,
                 tableMapping: cleanTableMapping || [],
+                isMenuEnabled: cleanIsMenuEnabled || false,
+                menuMode:      cleanMenuMode || 'interactive',
+                pdfMenuUrl:    cleanPdfMenuUrl || '',
+                menuCategories: cleanMenuCategories || [],
+                cliqConfig:    cleanCliqConfig || { isEnabled: false, alias: '', message: '' },
             });
             await newCard.save();
             return NextResponse.json({ success: true, card: newCard });
@@ -163,6 +179,11 @@ export async function PUT(req, { params }) {
         if (cleanWifi !== undefined) card.wifi         = cleanWifi;
         if (cleanTelegram !== undefined) card.telegramConfig = cleanTelegram;
         if (cleanTableMapping !== undefined) card.tableMapping = cleanTableMapping;
+        if (cleanIsMenuEnabled !== undefined) card.isMenuEnabled = cleanIsMenuEnabled;
+        if (cleanMenuMode !== undefined) card.menuMode = cleanMenuMode;
+        if (cleanPdfMenuUrl !== undefined) card.pdfMenuUrl = cleanPdfMenuUrl;
+        if (cleanMenuCategories !== undefined) card.menuCategories = cleanMenuCategories;
+        if (cleanCliqConfig !== undefined) card.cliqConfig = cleanCliqConfig;
         if (cleanSiteData) {
             card.siteData     = cleanSiteData;
             card.markModified('siteData');

@@ -144,6 +144,47 @@ const cardSchema = new mongoose.Schema({
         default: true,
     },
 
+    // ── Optional Modules ───────────────────────────────────────────
+    isMenuEnabled: {
+        type: Boolean,
+        default: false,
+    },
+    menuMode: {
+        type: String,
+        enum: ['pdf', 'interactive'],
+        default: 'interactive',
+    },
+    pdfMenuUrl: {
+        type: String,
+        default: '',
+    },
+    menuCategories: {
+        type: [{
+            id: String,
+            name: String,
+            nameAr: String,
+            items: [{
+                id: String,
+                name: String,
+                nameAr: String,
+                desc: String,
+                descAr: String,
+                price: Number,
+                image: String,
+                available: { type: Boolean, default: true }
+            }]
+        }],
+        default: [],
+    },
+    cliqConfig: {
+        type: {
+            isEnabled: { type: Boolean, default: false },
+            alias: { type: String, default: '' },
+            message: { type: String, default: 'لإتمام طلبك، يرجى تحويل المجموع عبر كليك' }
+        },
+        default: { isEnabled: false, alias: '', message: 'لإتمام طلبك، يرجى تحويل المجموع عبر كليك' }
+    },
+
 }, { timestamps: true });
 
 module.exports = mongoose.models.Card || mongoose.model('Card', cardSchema);

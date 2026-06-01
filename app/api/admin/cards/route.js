@@ -59,3 +59,18 @@ export async function POST(req) {
         return NextResponse.json({ error: 'Failed to create card' }, { status: 500 });
     }
 }
+
+export async function DELETE(req) {
+    try {
+        const connectDB = (await import('../../../../backend/config/db')).default;
+        const Card = (await import('../../../../backend/models/Card')).default;
+        await connectDB();
+        const url = new URL(req.url);
+        const id = url.searchParams.get('id');
+        if (!id) return new Response(JSON.stringify({ error: 'ID is required' }), { status: 400 });
+        await Card.findByIdAndDelete(id);
+        return new Response(JSON.stringify({ success: true }));
+    } catch (error) {
+        return new Response(JSON.stringify({ error: 'Failed' }), { status: 500 });
+    }
+}
