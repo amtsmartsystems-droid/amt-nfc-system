@@ -15,13 +15,6 @@ const nextConfig = {
     experimental: {
         serverComponentsExternalPackages: ["mongoose"]
     },
-    // Increase body size limit for file uploads
-    api: {
-        bodyParser: {
-            sizeLimit: '20mb',
-        },
-        responseLimit: '20mb',
-    },
     async rewrites() {
         return [
             {

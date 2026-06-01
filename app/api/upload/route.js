@@ -1,14 +1,6 @@
 import { put } from '@vercel/blob';
 import { NextResponse } from 'next/server';
 
-// Allow larger file uploads (up to 20MB)
-export const config = {
-  api: {
-    bodyParser: false,
-    responseLimit: false,
-  },
-};
-
 export async function POST(request) {
   try {
     const formData = await request.formData();

@@ -3,13 +3,13 @@
 import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from 'next/navigation';
 import * as LucideIcons from "lucide-react";
+import { upload } from '@vercel/blob/client';
 import RestaurantTheme  from "../components/templates/RestaurantTheme";
 import CafeTheme        from "../components/templates/CafeTheme";
 import CafeTheme1       from "../components/templates/CafeTheme1";
 import GastroBarTheme   from "../components/templates/GastroBarTheme";
 import AMTBusinessCard  from "../components/templates/AMTBusinessCard";
 import { getIconForLink } from "../utils/icons";
-import { upload } from '@vercel/blob/client';
 
 // ─────────────────────────────────────────────────────────────────────
 // DEFAULT DATA
@@ -317,50 +317,38 @@ function PageContent() {
     setSiteData(p=>({...p,links:a}));
   };
 
-  // ── File Upload (Vercel Blob) ──
+  // ── File Upload (Vercel Blob — Client-Side, bypasses body size limit) ──
   const handlePdfUpload = async (file, linkId) => {
     if (!file) return;
-    if (file.size > 20 * 1024 * 1024) {
-      showToast("❌ حجم الملف كبير جداً! الحد الأقصى للرفع هو 20 ميجابايت.", false);
+    if (file.size > 50 * 1024 * 1024) {
+      showToast("❌ حجم الملف كبير جداً! الحد الأقصى 50 ميجابايت.", false);
       return;
     }
 
     setUploadingPdf(linkId);
     try {
-      const formData = new FormData();
-      formData.append('file', file);
-      const res = await fetch('/api/upload', {
-        method: 'POST',
-        body: formData,
+      // Upload directly from browser to Vercel Blob — no serverless size limit
+      const blob = await upload(`menus/${Date.now()}_${file.name}`, file, {
+        access: 'public',
+        handleUploadUrl: '/api/blob-token',
       });
 
-      if (!res.ok) {
-        if (res.status === 413) throw new Error("حجم الملف يتجاوز الحد الأقصى للسيرفر (4.5MB). يرجى ضغط الملف.");
-        const text = await res.text();
-        if (text.startsWith('<') || text.includes('Request Entity Too Large')) {
-            throw new Error("حجم الملف كبير جداً للسيرفر. يرجى تقليل حجم الملف إلى أقل من 4.5 ميجابايت.");
-        }
-        const data = JSON.parse(text);
-        throw new Error(data.error || 'فشل الرفع');
-      }
-
-      const data = await res.json();
-      
       if (linkId === 'menu') {
-        setPdfMenuUrl(data.url);
+        setPdfMenuUrl(blob.url);
       } else {
         setSiteData(p => ({
           ...p,
-          links: p.links.map(l => l.id === linkId ? { ...l, url: data.url } : l)
+          links: p.links.map(l => l.id === linkId ? { ...l, url: blob.url } : l)
         }));
       }
-      showToast("✅ تم رفع الملف وتحديث الرابط! (لا تنسَ الضغط على حفظ ونشر)");
+      showToast("✅ تم رفع الملف بنجاح! (لا تنسَ الضغط على حفظ ونشر)");
     } catch (e) {
-      showToast(`❌ خطأ: ${e.message}`, false);
+      showToast(`❌ خطأ في الرفع: ${e.message}`, false);
     } finally {
       setUploadingPdf(null);
     }
   };
+
 
   // ── Events CRUD ──
   const addEvent = () => {
