@@ -77,6 +77,24 @@ export async function POST(req) {
       
       const parsed = JSON.parse(text);
       if (typeof parsed !== 'object' || Array.isArray(parsed)) throw new Error('الرد ليس JSON صحيحاً');
+      
+      if (parsed.menuCategories) {
+        parsed.menuCategories.forEach((cat, cIdx) => {
+          cat.id = Date.now().toString() + cIdx.toString();
+          if (cat.items) {
+            cat.items.forEach((item, iIdx) => {
+              item.id = cat.id + iIdx.toString();
+              item.available = true;
+              if (item.name) {
+                 item.image = `https://image.pollinations.ai/prompt/delicious%20food%20${encodeURIComponent(item.name)}?width=400&height=400&nologo=true`;
+              } else {
+                 item.image = "";
+              }
+            });
+          }
+        });
+      }
+      
       return parsed;
     };
 
