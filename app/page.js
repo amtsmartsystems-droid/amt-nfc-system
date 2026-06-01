@@ -896,6 +896,19 @@ function PageContent() {
                               <div><Label>عربي</Label><AdminInput value={lk.titleAr||""} onChange={v=>updLink(lk.id,"titleAr",v)} placeholder="عرض القائمة" dir="rtl" /></div>
                             </div>
 
+                            <div>
+                              <Label className="text-slate-400 text-[10px]">الرابط</Label>
+                              <div className="flex gap-2">
+                                <div className="flex-1">
+                                  <AdminInput value={lk.url} onChange={v=>updLink(lk.id,"url",v)} placeholder="https://..." type="url" dir="ltr" />
+                                </div>
+                                <label title="رفع ملف PDF كمرجع للرابط" className={`flex-shrink-0 flex items-center justify-center w-10 h-10 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white cursor-pointer transition-all ${uploadingPdf === lk.id ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                                  {uploadingPdf === lk.id ? <LucideIcons.Loader2 size={16} className="animate-spin" /> : <LucideIcons.UploadCloud size={16} />}
+                                  <input type="file" accept="application/pdf,image/*" className="hidden" disabled={uploadingPdf === lk.id} onChange={(e) => handlePdfUpload(e.target.files[0], lk.id)} />
+                                </label>
+                              </div>
+                            </div>
+
 
 
                             <div className="flex items-center gap-2 pt-1">
