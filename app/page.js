@@ -670,43 +670,6 @@ function PageContent() {
           {/* Scrollable Tab Content */}
           <div className="flex-1 overflow-y-auto px-5 py-5 space-y-4" style={{ scrollbarWidth:"thin", scrollbarColor:"rgba(255,255,255,.1) transparent" }}>
 
-                            </button>
-                        </div>
-
-                        <button onClick={() => setMenuCategories([...menuCategories, { id: Date.now().toString(), name: 'New Category', nameAr: 'تصنيف جديد', items: [] }])} className="w-full py-3 bg-white/5 border border-white/10 border-dashed rounded-xl text-yellow-500 font-bold text-xs hover:bg-white/10 flex items-center justify-center gap-2">
-                          <LucideIcons.Plus size={16} /> إضافة تصنيف جديد
-                        </button>
-                    {menuCategories.map((cat, cIdx) => (
-                      <div key={cat.id} className="p-4 bg-black/40 border border-white/10 rounded-2xl space-y-3">
-                        <div className="flex gap-2">
-                          <input type="text" value={cat.nameAr} onChange={e => { const newCat=[...menuCategories]; newCat[cIdx].nameAr=e.target.value; setMenuCategories(newCat); }} placeholder="اسم التصنيف بالعربي" className="flex-1 bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-xs text-white outline-none focus:border-yellow-500" />
-                          <input type="text" value={cat.name} onChange={e => { const newCat=[...menuCategories]; newCat[cIdx].name=e.target.value; setMenuCategories(newCat); }} placeholder="اسم التصنيف بالانجليزي" className="flex-1 bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-xs text-white outline-none focus:border-yellow-500" dir="ltr" />
-                          <button onClick={() => setMenuCategories(menuCategories.filter(c=>c.id!==cat.id))} className="px-3 bg-red-500/20 text-red-400 hover:bg-red-500/40 rounded-lg transition-colors"><LucideIcons.Trash2 size={14}/></button>
-                        </div>
-                        {/* Items */}
-                        <div className="space-y-2 pl-4 border-l-2 border-white/10">
-                          {cat.items.map((item, iIdx) => (
-                            <div key={item.id} className="p-3 bg-white/5 rounded-xl space-y-2">
-                              <div className="flex gap-2">
-                                <input type="text" value={item.nameAr} onChange={e => { const newCat=[...menuCategories]; newCat[cIdx].items[iIdx].nameAr=e.target.value; setMenuCategories(newCat); }} placeholder="اسم الوجبة بالعربي" className="flex-1 bg-black/40 border border-white/10 rounded-lg px-2 py-1.5 text-xs text-white outline-none focus:border-yellow-500" />
-                                <input type="number" value={item.price} onChange={e => { const newCat=[...menuCategories]; newCat[cIdx].items[iIdx].price=parseFloat(e.target.value); setMenuCategories(newCat); }} placeholder="السعر" className="w-20 bg-black/40 border border-white/10 rounded-lg px-2 py-1.5 text-xs text-white text-center outline-none focus:border-yellow-500" dir="ltr" />
-                                <button onClick={() => { const newCat=[...menuCategories]; newCat[cIdx].items = newCat[cIdx].items.filter(it=>it.id!==item.id); setMenuCategories(newCat); }} className="px-2 text-red-400 hover:text-red-300"><LucideIcons.X size={14}/></button>
-                              </div>
-                              <input type="text" value={item.descAr} onChange={e => { const newCat=[...menuCategories]; newCat[cIdx].items[iIdx].descAr=e.target.value; setMenuCategories(newCat); }} placeholder="وصف الوجبة" className="w-full bg-black/40 border border-white/10 rounded-lg px-2 py-1.5 text-xs text-white outline-none focus:border-yellow-500" />
-                            </div>
-                          ))}
-                          <button onClick={() => { const newCat=[...menuCategories]; newCat[cIdx].items.push({ id: Date.now().toString(), name: 'New Item', nameAr: '', desc: '', descAr: '', price: 0, image: '', available: true }); setMenuCategories(newCat); }} className="text-[10px] text-yellow-400 hover:text-yellow-300 font-bold py-2 flex items-center gap-1">
-                            <LucideIcons.Plus size={12} /> أضف وجبة للتصنيف
-                          </button>
-                        </div>
-                      </div>
-                    ))}
-                      </>
-                    )}
-                  </div>
-                )}
-              </div>
-            )}
 
             {/* ═══ TAB: IMAGES MANAGER ═══ */}
             {adminTab==="images" && (
