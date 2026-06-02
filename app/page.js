@@ -144,6 +144,12 @@ function PageContent() {
   // ── AI Generate ──
   const handleAI = async () => {
     if (!aiText.trim() && !aiFile) return showToast("⚠️ أدخل نصاً أو ارفع ملفاً", false);
+    
+    if (aiFile && aiFile.size > 3.5 * 1024 * 1024) {
+      showToast("⚠️ عذراً، حجم الملف كبير جداً! يرجى رفع ملف بحجم أقل من 3.5 ميجابايت.", false);
+      return;
+    }
+    
     setLoading(true);
     try {
       let fileBase64=null, fileMimeType=null;
@@ -152,8 +158,20 @@ function PageContent() {
         fileMimeType = aiFile.type;
       }
       const res  = await fetch("/api/generate", { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({ promptText: aiText, fileBase64, fileMimeType }) });
-      const json = await res.json();
-      if (!res.ok) throw new Error(json.error);
+      
+      if (res.status === 413) {
+        throw new Error("حجم الملف كبير جداً للسيرفر. يرجى تصغير حجم الملف والمحاولة مرة أخرى.");
+      }
+      
+      const text = await res.text();
+      let json;
+      try {
+        json = JSON.parse(text);
+      } catch (err) {
+        throw new Error("حدث خطأ غير متوقع أثناء معالجة الملف.");
+      }
+      
+      if (!res.ok) throw new Error(json.error || "خطأ في السيرفر");
 
       setSiteData(prev => ({
         ...prev,
@@ -182,14 +200,33 @@ function PageContent() {
   // ── AI Generate Menu ──
   const handleGenerateMenu = async (file) => {
     if (!file) return;
+    
+    // Check file size (max ~3.5MB to stay under Vercel's 4.5MB limit after Base64 encoding)
+    if (file.size > 3.5 * 1024 * 1024) {
+      showToast("⚠️ عذراً، حجم الملف كبير جداً! يرجى رفع ملف بحجم أقل من 3.5 ميجابايت.", false);
+      return;
+    }
+    
     setLoading(true);
     try {
       const fileBase64 = await new Promise((res,rej)=>{ const r=new FileReader(); r.onload=()=>res(r.result); r.onerror=rej; r.readAsDataURL(file); });
       const fileMimeType = file.type;
       
       const res  = await fetch("/api/generate-menu", { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({ fileBase64, fileMimeType }) });
-      const json = await res.json();
-      if (!res.ok) throw new Error(json.error);
+      
+      if (res.status === 413) {
+        throw new Error("حجم الملف كبير جداً للسيرفر. يرجى تصغير حجم الملف والمحاولة مرة أخرى.");
+      }
+      
+      const text = await res.text();
+      let json;
+      try {
+        json = JSON.parse(text);
+      } catch (err) {
+        throw new Error("حدث خطأ غير متوقع أثناء معالجة الملف.");
+      }
+      
+      if (!res.ok) throw new Error(json.error || "خطأ في السيرفر");
 
       if (json.menuCategories && Array.isArray(json.menuCategories)) {
           const cats = json.menuCategories.map((c, i) => ({
