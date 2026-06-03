@@ -195,53 +195,6 @@ export default function MaroufCoffeeTheme({ cardId, siteData, siteColors, lang =
             </motion.div>
         )}
 
-        {/* ── FEATURED GALLERY SECTION ── */}
-        {(() => {
-          const userImages = [
-            sd.images?.hero1,
-            sd.images?.hero2,
-            sd.images?.hero3,
-            sd.images?.food1,
-            sd.images?.about1
-          ].filter(Boolean);
-          
-          const defaultGallery = [
-            "https://images.unsplash.com/photo-1559525839-b184a4d698c7?q=80&w=800&auto=format&fit=crop",
-            "https://images.unsplash.com/photo-1498804103079-a6351b050096?q=80&w=800&auto=format&fit=crop",
-            "https://images.unsplash.com/photo-1611162458324-aae1eb4129a4?q=80&w=800&auto=format&fit=crop"
-          ];
-
-          const displayImages = userImages.length > 0 ? userImages : defaultGallery;
-
-          if (displayImages.length === 0) return null;
-
-          return (
-            <motion.div variants={itemVariants} className="mt-16 overflow-hidden">
-                <div className="px-6 mb-6">
-                    <h3 className="font-bold text-[15px] tracking-[0.2em] uppercase flex items-center gap-4 text-[#B99146] drop-shadow-md">
-                        <span className="h-[2px] flex-1 bg-gradient-to-r from-transparent to-[#B99146]/40 rounded-full"></span>
-                        {t("Featured", "لقطات مميزة")}
-                        <span className="h-[2px] flex-1 bg-gradient-to-l from-transparent to-[#B99146]/40 rounded-full"></span>
-                    </h3>
-                </div>
-                
-                {/* Horizontal Swiping Carousel */}
-                <div className="flex overflow-x-auto gap-4 px-6 pb-8 snap-x snap-mandatory hide-scrollbar" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
-                    {displayImages.map((imgUrl, idx) => (
-                        <div key={idx} className="snap-center shrink-0 w-[85%] sm:w-[70%] h-[240px] rounded-3xl overflow-hidden relative group border border-white/10 hover:border-[#B99146]/50 shadow-2xl transition-all duration-500">
-                            <img 
-                                src={imgUrl} 
-                                alt={`Featured ${idx}`} 
-                                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out"
-                            />
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-60"></div>
-                        </div>
-                    ))}
-                </div>
-            </motion.div>
-          );
-        })()}
-
         {/* ── LINKS SECTION ── */}
         {links && links.length > 0 && (
             <div className="px-6 mt-14 flex flex-col gap-4 pb-12">
