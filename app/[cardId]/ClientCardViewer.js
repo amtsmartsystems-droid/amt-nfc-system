@@ -7,6 +7,8 @@ import RestaurantTheme  from '../../components/templates/RestaurantTheme';
 import CafeTheme        from '../../components/templates/CafeTheme';
 import CafeTheme1       from '../../components/templates/CafeTheme1';
 import GastroBarTheme   from '../../components/templates/GastroBarTheme';
+import CoffeeLuxuryTheme from '../../components/templates/CoffeeLuxuryTheme';
+import MaroufCoffeeTheme from '../../components/templates/MaroufCoffeeTheme';
 import AMTBusinessCard  from '../../components/templates/AMTBusinessCard';
 
 // Always bypass browser cache so we get the latest data from MongoDB
@@ -505,6 +507,8 @@ export default function ClientCardViewer({ initialCard, cardId }) {
                         if (tn === 'cafe' || tn === 'cafetheme')          return <CafeTheme      {...props} />;
                         if (tn === 'cafe1' || tn === 'cafetheme1')        return <CafeTheme1     {...props} />;
                         if (tn === 'gastro' || tn === 'gastrobartheme')   return <GastroBarTheme {...props} />;
+                        if (tn === 'coffee_luxury') return <CoffeeLuxuryTheme {...props} />;
+                        if (tn === 'marouf_coffee') return <MaroufCoffeeTheme {...props} />;
                         // 'restaurant', 'restauranttheme', 'luxury', default
                         return <RestaurantTheme {...props} />;
                     })()}

@@ -118,7 +118,7 @@ export async function PUT(req, { params }) {
         const body = await req.json();
 
         const cleanSiteData = body.siteData ? sanitizeSiteData(body.siteData) : undefined;
-        const VALID_THEMES = ['restaurant', 'cafe', 'cafe1', 'gastro', 'business_card'];
+        const VALID_THEMES = ['restaurant', 'cafe', 'cafe1', 'gastro', 'business_card', 'coffee_luxury', 'marouf_coffee'];
         const cleanTheme    = body.themeName && VALID_THEMES.includes(body.themeName)
             ? body.themeName : undefined;
         const cleanCardType = body.cardType && ['restaurant','business_card'].includes(body.cardType)
@@ -203,6 +203,6 @@ export async function PUT(req, { params }) {
 
     } catch (error) {
         console.error('[PUT /api/cards]', error.message);
-        return NextResponse.json({ error: 'خطأ في الخادم' }, { status: 500 });
+        return NextResponse.json({ error: 'خطأ: ' + error.message }, { status: 500 });
     }
 }
