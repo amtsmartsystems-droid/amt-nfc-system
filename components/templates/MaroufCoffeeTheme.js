@@ -10,7 +10,7 @@ import { motion, AnimatePresence, Reorder } from "framer-motion";
 //  True Black + Gold + Framer Motion + Moody Coffee Background
 // ══════════════════════════════════════════════════════════════════════
 
-export default function MaroufCoffeeTheme({ cardId, siteData, siteColors, lang = "en", isMenuEnabled, menuMode, menuCategories, addToCart, pdfMenuUrl, showMenuImages }) {
+export default function MaroufCoffeeTheme({ cardId, siteData, siteColors, lang = "en", isMenuEnabled, menuMode, menuCategories, addToCart, pdfMenuUrl, showMenuImages, isPreview, onUpdateLayoutBlocks }) {
   const accent  = "#B99146";     // Marouf Gold
   const isAr    = lang === "ar";
   const [isMenuModalOpen, setIsMenuModalOpen] = useState(false);
@@ -244,8 +244,8 @@ export default function MaroufCoffeeTheme({ cardId, siteData, siteColors, lang =
         initial="hidden"
         animate="show"
       >
-        {isPreview && props.onUpdateLayoutBlocks ? (
-            <Reorder.Group axis="y" values={layoutBlocks} onReorder={props.onUpdateLayoutBlocks} className="flex flex-col">
+        {isPreview && onUpdateLayoutBlocks ? (
+            <Reorder.Group axis="y" values={layoutBlocks} onReorder={onUpdateLayoutBlocks} className="flex flex-col">
                 {layoutBlocks.map((block) => (
                     <Reorder.Item key={block.id} value={block} dragListener={true}>
                         {renderBlock(block)}
