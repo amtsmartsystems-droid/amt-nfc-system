@@ -59,7 +59,15 @@ export default async function PublicCardPage({ params }) {
         businessName: card.businessName,
         primaryColor: card.primaryColor,
         background:   card.background,
-        siteData:  JSON.parse(JSON.stringify(card.siteData  || {})),
+        siteData: (() => {
+            const sd = JSON.parse(JSON.stringify(card.siteData || {}));
+            // Remove massive fields from SSR payload to prevent Next.js call stack size exceeded
+            delete sd.images;
+            if (sd.layoutBlocks) {
+                sd.layoutBlocks = sd.layoutBlocks.map(b => ({...b, url: undefined}));
+            }
+            return sd;
+        })(),
         links:     JSON.parse(JSON.stringify(card.links     || [])),
         events:    JSON.parse(JSON.stringify(card.events    || [])),
         telegramConfig: card.telegramConfig || { botToken: '', chatId: '', isEnabled: false },
