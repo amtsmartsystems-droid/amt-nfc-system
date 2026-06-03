@@ -1,44 +1,24 @@
 const mongoose = require('mongoose');
 
-async function testConnection() {
-  // Let's try specifying all 3 nodes without SRV, and without directConnection
-  const baseNodes = 'ac-b5pum75-shard-00-00.hvpgg7i.mongodb.net:27017,ac-b5pum75-shard-00-01.hvpgg7i.mongodb.net:27017,ac-b5pum75-shard-00-02.hvpgg7i.mongodb.net:27017';
-  const uri = `mongodb://AMTNFC:AMT12345@${baseNodes}/amt_nfc_db?ssl=true&authSource=admin&retryWrites=true&w=majority`;
+async function checkCard() {
+  const uri = 'mongodb://AMTNFC:AMT12345@ac-b5pum75-shard-00-00.hvpgg7i.mongodb.net:27017,ac-b5pum75-shard-00-01.hvpgg7i.mongodb.net:27017,ac-b5pum75-shard-00-02.hvpgg7i.mongodb.net:27017/amt_nfc_db?ssl=true&authSource=admin&retryWrites=true&w=majority';
   
   try {
-    console.log('Testing 3 nodes...');
-    // We can also try discovering replicaSet automatically or explicitly setting it to 'atlas-b5pum75-shard-0'
-    const conn = await mongoose.connect(uri, { serverSelectionTimeoutMS: 5000, replicaSet: 'atlas-b5pum75-shard-0' });
-    console.log('SUCCESS for 3 nodes');
+    await mongoose.connect(uri, { serverSelectionTimeoutMS: 5000 });
     
-    // Test write
-    const testSchema = new mongoose.Schema({ test: String });
-    const TestModel = mongoose.models.Test || mongoose.model('Test', testSchema);
-    await TestModel.create({ test: 'write_test' });
-    console.log('WRITE SUCCESS');
+    // Define minimal schema just to read
+    const cardSchema = new mongoose.Schema({}, { strict: false });
+    const Card = mongoose.models.Card || mongoose.model('Card', cardSchema);
     
-    await mongoose.disconnect();
-    return uri;
-  } catch (e) {
-    console.log('FAILED replicaSet atlas-b5pum75-shard-0:', e.message);
-  }
-
-  try {
-    console.log('Testing 3 nodes without explicit replicaSet param...');
-    const conn = await mongoose.connect(uri, { serverSelectionTimeoutMS: 5000 });
-    console.log('SUCCESS for 3 nodes NO REPLICASET');
-    
-    // Test write
-    const testSchema = new mongoose.Schema({ test: String });
-    const TestModel = mongoose.models.Test || mongoose.model('Test', testSchema);
-    await TestModel.create({ test: 'write_test' });
-    console.log('WRITE SUCCESS');
+    const card = await Card.findOne({ shortCode: '368781' }).lean();
+    console.log('--- CARD DATA FROM MONGODB ---');
+    console.log('themeName:', card.themeName);
+    console.log('businessName:', card.businessName);
     
     await mongoose.disconnect();
-    return uri;
   } catch (e) {
-    console.log('FAILED NO REPLICASET:', e.message);
+    console.log('Error:', e.message);
   }
 }
 
-testConnection();
+checkCard();
