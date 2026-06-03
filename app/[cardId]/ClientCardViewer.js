@@ -433,33 +433,57 @@ export default function ClientCardViewer({ initialCard, cardId }) {
                 >
                     {/* ════════ MODERN HEADER ════════ */}
                     <div style={{
-                        background: 'linear-gradient(to right, #ea580c, #f5c518)', // orange to yellow gradient
+                        background: props.siteColors.background,
                         padding: '16px 20px',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'space-between',
-                        borderBottom: '1px solid rgba(0,0,0,0.1)',
-                        boxShadow: '0 4px 20px rgba(0,0,0,0.15)',
+                        borderBottom: `1px solid ${props.siteColors.primary}33`,
+                        boxShadow: `0 4px 20px ${props.siteColors.primary}15`,
                         position: 'relative',
-                        zIndex: 50
+                        zIndex: 50,
+                        direction: lang === 'ar' ? 'rtl' : 'ltr'
                     }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                            <div style={{
-                                width: 40, height: 40,
-                                borderRadius: '50%',
-                                background: '#111827', // dark background for contrast against gradient
-                                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                color: '#f5c518', fontWeight: 900, fontSize: 18
-                            }}>
-                                {card.businessName ? card.businessName.charAt(0) : 'R'}
-                            </div>
+                            {card.siteData?.profileImage ? (
+                                <img 
+                                    src={card.siteData.profileImage} 
+                                    alt="Logo" 
+                                    style={{
+                                        width: 44, height: 44,
+                                        borderRadius: '50%',
+                                        objectFit: 'cover',
+                                        border: `2px solid ${props.siteColors.primary}`,
+                                        background: '#000',
+                                        padding: 2
+                                    }} 
+                                />
+                            ) : (
+                                <div style={{
+                                    width: 44, height: 44,
+                                    borderRadius: '50%',
+                                    background: props.siteColors.primary,
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                    color: '#ffffff', fontWeight: 900, fontSize: 20,
+                                    textShadow: '0 1px 2px rgba(0,0,0,0.3)'
+                                }}>
+                                    {card.businessName ? card.businessName.charAt(0).toUpperCase() : 'R'}
+                                </div>
+                            )}
+                            
                             <div>
-                                <h1 style={{ color: '#ffffff', fontSize: 16, fontWeight: 900, margin: 0, fontFamily: 'Cairo, sans-serif', textShadow: '0 1px 2px rgba(0,0,0,0.2)' }}>
-                                    {card.businessName || 'المطعم الذكي'}
+                                <h1 style={{ 
+                                    color: props.siteColors.background.toLowerCase() === '#ffffff' || props.siteColors.background.toLowerCase() === '#fafafa' ? '#111827' : '#ffffff', 
+                                    fontSize: 17, 
+                                    fontWeight: 900, 
+                                    margin: 0, 
+                                    fontFamily: 'Cairo, sans-serif'
+                                }}>
+                                    {card.siteData?.name || card.siteData?.nameAr || card.businessName || 'المطعم الذكي'}
                                 </h1>
                                 {tableNumber && (
-                                    <p style={{ color: '#ffffff', opacity: 0.9, fontSize: 13, margin: 0, fontWeight: 700, fontFamily: 'Cairo, sans-serif', textShadow: '0 1px 2px rgba(0,0,0,0.2)' }}>
-                                        الطاولة {tableNumber}
+                                    <p style={{ color: props.siteColors.primary, fontSize: 13, margin: 0, fontWeight: 700, fontFamily: 'Cairo, sans-serif' }}>
+                                        {lang === 'ar' ? 'الطاولة' : 'Table'} {tableNumber}
                                     </p>
                                 )}
                             </div>
@@ -470,11 +494,11 @@ export default function ClientCardViewer({ initialCard, cardId }) {
                                 <button
                                     onClick={handleCopyWifi}
                                     style={{
-                                        background: wifiState === 'copied' ? '#10b981' : '#1f2937',
-                                        color: wifiState === 'copied' ? '#fff' : '#f5c518',
-                                        border: `1px solid ${wifiState === 'copied' ? '#10b981' : '#f5c518'}`,
-                                        borderRadius: 8,
-                                        width: 36, height: 36,
+                                        background: wifiState === 'copied' ? '#10b981' : `${props.siteColors.primary}15`,
+                                        color: wifiState === 'copied' ? '#fff' : props.siteColors.primary,
+                                        border: `1px solid ${wifiState === 'copied' ? '#10b981' : props.siteColors.primary}40`,
+                                        borderRadius: 10,
+                                        width: 38, height: 38,
                                         display: 'flex', alignItems: 'center', justifyContent: 'center',
                                         transition: 'all 0.3s'
                                     }}
