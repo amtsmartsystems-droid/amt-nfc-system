@@ -5,13 +5,14 @@ import Image from "next/image";
 import { getIconForLink } from "../../utils/icons";
 import * as LucideIcons from "lucide-react";
 import ScrollReveal from "../ScrollReveal";
+import { motion, Reorder } from "framer-motion";
 
 // ══════════════════════════════════════════════════════════════════════
 //  CafeTheme1 — "Sticky Wicks" Style
 //  Dark espresso bg · circular logo badge · pill buttons · social icons
 //  Props: { siteData, siteColors, lang }
 // ══════════════════════════════════════════════════════════════════════
-export default function CafeTheme1({ cardId, siteData, siteColors, lang = "en", isMenuEnabled, menuMode, menuCategories, addToCart, pdfMenuUrl , showMenuImages }) {
+export default function CafeTheme1({ cardId, siteData, siteColors, lang = "en", isMenuEnabled, menuMode, menuCategories, addToCart, pdfMenuUrl, showMenuImages, isPreview, onUpdateLayoutBlocks }) {
   const primary    = siteColors?.primary    || "#C9A96E";   // warm gold
   const bgDark     = siteColors?.background || "#2C1503";   // espresso brown
   const isAr       = lang === "ar";
@@ -46,7 +47,7 @@ export default function CafeTheme1({ cardId, siteData, siteColors, lang = "en", 
   const PillBtn = ({ link }) => {
     const label = t(link.title, link.titleAr);
     const handleClick = (e) => {
-      if(cardId) fetch('/api/clicks', { method: 'POST', body: JSON.stringify({ cardId, linkId: link.id || link._id }) }).catch(()=>{});
+      if(cardId && !isPreview) fetch('/api/clicks', { method: 'POST', body: JSON.stringify({ cardId, linkId: link.id || link._id }) }).catch(()=>{});
       if (link.url === '#menu-section') {
           e.preventDefault();
           if (menuMode === 'pdf' && pdfMenuUrl) {
@@ -80,7 +81,7 @@ export default function CafeTheme1({ cardId, siteData, siteColors, lang = "en", 
   const SocialBtn = ({ link }) => {
     const { IconComponent } = getIconForLink(link.title || link.titleAr || "");
     const handleClick = (e) => {
-      if(cardId) fetch('/api/clicks', { method: 'POST', body: JSON.stringify({ cardId, linkId: link.id || link._id }) }).catch(()=>{});
+      if(cardId && !isPreview) fetch('/api/clicks', { method: 'POST', body: JSON.stringify({ cardId, linkId: link.id || link._id }) }).catch(()=>{});
       if (link.url === '#menu-section') {
         e.preventDefault();
         if (menuMode === 'pdf' && pdfMenuUrl) {
@@ -108,166 +109,153 @@ export default function CafeTheme1({ cardId, siteData, siteColors, lang = "en", 
     );
   };
 
+  // ════ LAYOUT BLOCKS SYSTEM ════
+  const defaultBlocks = [
+      { id: "header", type: "header" },
+      { id: "menu_button", type: "menu_button" },
+      { id: "links", type: "links" },
+      { id: "info", type: "info" } // info usually at bottom for this theme
+  ];
+  const layoutBlocks = (siteData.layoutBlocks && siteData.layoutBlocks.length > 0) ? siteData.layoutBlocks : defaultBlocks;
+
+  const renderBlock = (block) => {
+      switch (block.type) {
+          case 'header':
+              return (
+                  <div className="flex flex-col" style={{ cursor: isPreview ? 'grab' : 'default' }}>
+                      <section className="relative w-full h-[52vh] overflow-hidden pointer-events-none">
+                        <Image src={hero1} alt="Hero" fill priority style={{ objectFit: 'cover' }} draggable="false" />
+                        <div className="absolute inset-0" style={{ background: `linear-gradient(180deg, transparent 0%, transparent 45%, ${bgDark}CC 80%, ${bgDark} 100%)` }} />
+                        <div className="absolute inset-x-0 top-0 flex justify-center pt-10 z-10">
+                          <div className="w-[88px] h-[88px] rounded-full flex flex-col items-center justify-center shadow-2xl border-2 border-white/20"
+                               style={{ background: `radial-gradient(circle at 35% 35%, ${primary}EE, ${primary}AA)`, boxShadow: `0 8px 32px rgba(0,0,0,0.45), 0 0 0 3px rgba(var(--primary-rgb), 0.25)` }}>
+                            <span className="text-white font-black text-center leading-tight uppercase"
+                                  style={{ fontSize: name.length > 8 ? "9px" : "11px", textShadow: "0 1px 3px rgba(0,0,0,0.4)", maxWidth: "70px", wordBreak: "break-word", textAlign: "center" }}>
+                              {name}
+                            </span>
+                          </div>
+                        </div>
+                      </section>
+                      <section className="px-6 pt-5 pb-6 text-center pointer-events-none">
+                        <h1 className="font-black text-white text-[22px] mb-1 tracking-wide" style={{ fontFamily: "Cairo, sans-serif" }}>
+                          {name}
+                        </h1>
+                        <p className="text-[13.5px] font-medium" style={{ color: "rgba(255,255,255,0.50)", fontFamily: "Cairo, sans-serif" }}>
+                          {subtitle}
+                        </p>
+                      </section>
+                  </div>
+              );
+
+          case 'menu_button':
+              if (!isMenuEnabled && menuMode !== 'pdf') return null;
+              return (
+                  <section className="px-5 pb-6" style={{ cursor: isPreview ? 'grab' : 'default' }}>
+                    <button
+                      onClick={() => {
+                        if (menuMode === 'pdf' && pdfMenuUrl) {
+                          window.open(pdfMenuUrl, '_blank');
+                        } else {
+                          setIsMenuModalOpen(true);
+                        }
+                      }}
+                      className="flex items-center justify-center gap-3 w-full py-[18px] rounded-full font-bold text-[14px] transition-all duration-300 hover:brightness-110 active:scale-95"
+                      style={{ background: primary, color: "#fff", fontFamily: "Cairo, sans-serif", boxShadow: `0 6px 20px rgba(var(--primary-rgb), 0.35)` }}
+                    >
+                      <LucideIcons.UtensilsCrossed size={18} color="#fff" />
+                      {t("View Menu", "عرض القائمة")}
+                    </button>
+                  </section>
+              );
+
+          case 'links':
+              return (
+                  <section className="px-5 pb-6" style={{ cursor: isPreview ? 'grab' : 'default' }}>
+                      <div className="space-y-3 mb-6">
+                        {regularLinks.length > 0 ? (
+                          regularLinks.map((lk) => (
+                            <ScrollReveal key={lk.id} yOffset={30}>
+                              <PillBtn link={lk} />
+                            </ScrollReveal>
+                          ))
+                        ) : (
+                          ["القائمة", "احجز طاولة", "تواصل معنا"].map((txt, i) => (
+                            <div key={i} className="flex items-center justify-center w-full py-[18px] rounded-full text-[14px] font-semibold opacity-20 pointer-events-none"
+                                 style={{ background: "rgba(255,255,255,0.9)", color: bgDark }}>
+                              {txt}
+                            </div>
+                          ))
+                        )}
+                      </div>
+
+                      {socialLinks.length > 0 ? (
+                        <div className="flex justify-center gap-4">
+                          {socialLinks.map((lk) => (
+                            <ScrollReveal key={lk.id} yOffset={20}>
+                              <SocialBtn link={lk} />
+                            </ScrollReveal>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="flex justify-center gap-4">
+                          {[LucideIcons.Camera, LucideIcons.Music2, LucideIcons.Play].map((Ic, i) => (
+                            <div key={i} className="w-12 h-12 rounded-full flex items-center justify-center opacity-20 pointer-events-none"
+                                 style={{ background: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.15)" }}>
+                              <Ic size={20} color="#fff" />
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                  </section>
+              );
+
+          case 'info':
+              return (
+                  <section className="relative w-full h-[38vh] overflow-hidden" style={{ cursor: isPreview ? 'grab' : 'default' }}>
+                    <div className="absolute inset-x-0 top-0 h-16 z-10 pointer-events-none" style={{ background: `linear-gradient(180deg, ${bgDark} 0%, transparent 100%)` }} />
+                    <Image src={food1} alt="Coffee beans" fill style={{ objectFit: 'cover' }} draggable="false" />
+                  </section>
+              );
+
+          case 'image':
+              return (
+                  <div className="px-6 pb-6 flex justify-center" style={{ cursor: isPreview ? 'grab' : 'default' }}>
+                      <img 
+                          src={block.url} 
+                          alt="Layout Block" 
+                          style={{ width: block.size || 250, objectFit: 'contain' }}
+                          draggable="false"
+                      />
+                  </div>
+              );
+
+          default:
+              return null;
+      }
+  };
+
   return (
     <>
-      <div
-        className="w-full min-h-screen overflow-x-hidden"
-      dir={isAr ? "rtl" : "ltr"}
-      style={{ background: bgDark, fontFamily: "Cairo, sans-serif" }}
-    >
-      {/* ══════════════════════════════════════════
-          HERO SECTION — Full bleed coffee image
-      ══════════════════════════════════════════ */}
-      <section className="relative w-full h-[52vh] overflow-hidden">
-        {/* Background hero image */}
-        <Image
-          src={hero1}
-          alt="Hero"
-          fill
-          priority
-          style={{ objectFit: 'cover' }}
-        />
+      <div className="w-full min-h-screen overflow-x-hidden" dir={isAr ? "rtl" : "ltr"} style={{ background: bgDark, fontFamily: "Cairo, sans-serif" }}>
 
-        {/* Gradient: transparent top → dark bottom (matches reference) */}
-        <div
-          className="absolute inset-0"
-          style={{
-            background: `linear-gradient(180deg, transparent 0%, transparent 45%, ${bgDark}CC 80%, ${bgDark} 100%)`,
-          }}
-        />
-
-        {/* ── Logo Badge (centered on image) ── */}
-        <div className="absolute inset-x-0 top-0 flex justify-center pt-10 z-10">
-          <div
-            className="w-[88px] h-[88px] rounded-full flex flex-col items-center justify-center shadow-2xl border-2 border-white/20"
-            style={{
-              background: `radial-gradient(circle at 35% 35%, ${primary}EE, ${primary}AA)`,
-              boxShadow: `0 8px 32px rgba(0,0,0,0.45), 0 0 0 3px rgba(var(--primary-rgb), 0.25)`,
-            }}
-          >
-            <span
-              className="text-white font-black text-center leading-tight uppercase"
-              style={{
-                fontSize: name.length > 8 ? "9px" : "11px",
-                textShadow: "0 1px 3px rgba(0,0,0,0.4)",
-                maxWidth: "70px",
-                wordBreak: "break-word",
-                textAlign: "center",
-              }}
-            >
-              {name}
-            </span>
-          </div>
-        </div>
-      </section>
-
-      {/* ══════════════════════════════════════════
-          IDENTITY SECTION
-      ══════════════════════════════════════════ */}
-      <section className="px-6 pt-5 pb-6 text-center">
-        <h1
-          className="font-black text-white text-[22px] mb-1 tracking-wide"
-          style={{ fontFamily: "Cairo, sans-serif" }}
-        >
-          {name}
-        </h1>
-        <p
-          className="text-[13.5px] font-medium"
-          style={{ color: "rgba(255,255,255,0.50)", fontFamily: "Cairo, sans-serif" }}
-        >
-          {subtitle}
-        </p>
-      </section>
-
-      {/* ══════════════════════════════════════════
-          PILL BUTTONS — main links
-      ══════════════════════════════════════════ */}
-      <section className="px-5 pb-6 space-y-3">
-        {regularLinks.length > 0 ? (
-          regularLinks.map((lk) => (
-            <ScrollReveal key={lk.id} yOffset={30}>
-              <PillBtn link={lk} />
-            </ScrollReveal>
-          ))
+        {isPreview && onUpdateLayoutBlocks ? (
+            <Reorder.Group axis="y" values={layoutBlocks} onReorder={onUpdateLayoutBlocks} className="flex flex-col w-full h-full pb-10">
+                {layoutBlocks.map((block) => (
+                    <Reorder.Item key={block.id} value={block} dragListener={true} className="w-full">
+                        {renderBlock(block)}
+                    </Reorder.Item>
+                ))}
+            </Reorder.Group>
         ) : (
-          /* Empty state with placeholder pills */
-          ["القائمة", "احجز طاولة", "تواصل معنا"].map((txt, i) => (
-            <div
-              key={i}
-              className="flex items-center justify-center w-full py-[18px] rounded-full text-[14px] font-semibold opacity-20"
-              style={{ background: "rgba(255,255,255,0.9)", color: bgDark }}
-            >
-              {txt}
+            <div className="flex flex-col w-full h-full pb-10">
+                {layoutBlocks.map(block => (
+                    <div key={block.id} className="w-full">
+                        {renderBlock(block)}
+                    </div>
+                ))}
             </div>
-          ))
         )}
-
-        {/* ── DEDICATED MENU BUTTON (if isMenuEnabled) ── */}
-        {isMenuEnabled && (
-          <ScrollReveal yOffset={30}>
-            <button
-              onClick={() => {
-                if (menuMode === 'pdf' && pdfMenuUrl) {
-                  window.open(pdfMenuUrl, '_blank');
-                } else {
-                  setIsMenuModalOpen(true);
-                }
-              }}
-              className="flex items-center justify-center gap-3 w-full py-[18px] rounded-full font-bold text-[14px] transition-all duration-300 hover:brightness-110 active:scale-95"
-              style={{ background: primary, color: "#fff", fontFamily: "Cairo, sans-serif", boxShadow: `0 6px 20px rgba(var(--primary-rgb), 0.35)` }}
-            >
-              <LucideIcons.UtensilsCrossed size={18} color="#fff" />
-              {t("View Menu", "عرض القائمة")}
-            </button>
-          </ScrollReveal>
-        )}
-      </section>
-
-      {/* ══════════════════════════════════════════
-          SOCIAL ICONS ROW
-      ══════════════════════════════════════════ */}
-      {socialLinks.length > 0 && (
-        <section className="flex justify-center gap-4 pb-8">
-          {socialLinks.map((lk) => (
-            <ScrollReveal key={lk.id} yOffset={20}>
-              <SocialBtn link={lk} />
-            </ScrollReveal>
-          ))}
-        </section>
-      )}
-
-      {/* ── If no social links, show placeholder icons ── */}
-      {socialLinks.length === 0 && (
-        <section className="flex justify-center gap-4 pb-8">
-          {[LucideIcons.Camera, LucideIcons.Music2, LucideIcons.Play].map((Ic, i) => (
-            <div
-              key={i}
-              className="w-12 h-12 rounded-full flex items-center justify-center opacity-20"
-              style={{ background: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.15)" }}
-            >
-              <Ic size={20} color="#fff" />
-            </div>
-          ))}
-        </section>
-      )}
-
-      {/* ══════════════════════════════════════════
-          BOTTOM IMAGE SECTION
-      ══════════════════════════════════════════ */}
-      <section className="relative w-full h-[38vh] overflow-hidden">
-        {/* Gradient fade from dark at top into image */}
-        <div
-          className="absolute inset-x-0 top-0 h-16 z-10 pointer-events-none"
-          style={{ background: `linear-gradient(180deg, ${bgDark} 0%, transparent 100%)` }}
-        />
-        <Image
-          src={food1}
-          alt="Coffee beans"
-          fill
-          style={{ objectFit: 'cover' }}
-        />
-      </section>
-    </div>
+      </div>
       
       {/* ── MENU MODAL ── */}
       {isMenuModalOpen && (

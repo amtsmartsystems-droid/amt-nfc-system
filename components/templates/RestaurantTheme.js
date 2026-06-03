@@ -5,12 +5,13 @@ import Image from "next/image";
 import { getIconForLink } from "../../utils/icons";
 import * as LucideIcons from "lucide-react";
 import ScrollReveal from "../ScrollReveal";
+import { motion, Reorder } from "framer-motion";
 
 // ══════════════════════════════════════════════════════════════════════
 //  RestaurantTheme — Dark Elegant "Meaty Story" style
 //  Props: { siteData, siteColors, lang }
 // ══════════════════════════════════════════════════════════════════════
-export default function RestaurantTheme({ cardId, siteData, siteColors, lang = "en", isMenuEnabled, menuMode, pdfMenuUrl, menuCategories, addToCart , showMenuImages }) {
+export default function RestaurantTheme({ cardId, siteData, siteColors, lang = "en", isMenuEnabled, menuMode, pdfMenuUrl, menuCategories, addToCart, showMenuImages, isPreview, onUpdateLayoutBlocks }) {
   const primary = siteColors?.primary    || "#EDD98A";
   const bgCream = siteColors?.background || "#F5EDD6";
   const isAr    = lang === "ar";
@@ -30,29 +31,20 @@ export default function RestaurantTheme({ cardId, siteData, siteColors, lang = "
   const name    = t(sd.name || "", sd.nameAr || "");
   const sub     = t(sd.subtitle || "", sd.subtitleAr || "");
   const about   = t(sd.about || "", sd.aboutAr || "");
-  const prinT   = t(sd.principlesTitle || "", sd.principlesTitleAr || "");
-  const prinSub = t(sd.principlesSubtitle || "", sd.principlesSubtitleAr || "");
-  const contactT= t(sd.contactsTitle || "", sd.contactsTitleAr || "");
   const address = sd.address || "";
   const hours   = sd.hours || "";
   const links   = sd.links   || [];
-  const principles = sd.principles || [
-    { num:"I",   title:"HONEST PRESENTATION", titleAr:"تقديم صادق",   desc:"Exactly as served.",          descAr:"كما يُقدَّم تماماً." },
-    { num:"II",  title:"STREAMLINED PROCESS",  titleAr:"عملية مبسّطة", desc:"Clear, minimal waiting.",     descAr:"واضحة وانتظار أقل." },
-    { num:"III", title:"ON-TIME DELIVERY",     titleAr:"توصيل في وقته",desc:"Always on schedule.",          descAr:"دائماً في موعده." },
-  ];
 
   const imgs = sd.images || {};
   const hero1 = imgs.hero1 || "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?q=80&w=800&auto=format&fit=crop";
   const about1 = imgs.about1 || "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?q=80&w=800&auto=format&fit=crop";
-  const chef1 = imgs.chef1 || "https://images.unsplash.com/photo-1614777735417-4040049e05d7?q=80&w=800&auto=format&fit=crop";
 
   // ── Dynamic Link Button ──
   const LinkBtn = ({ link, i }) => {
     const label = t(link.title, link.titleAr);
     const { IconComponent, color, bg } = getIconForLink(link.title || link.titleAr || "");
     const handleClick = (e) => {
-      if(cardId) fetch('/api/clicks', { method: 'POST', body: JSON.stringify({ cardId, linkId: link.id || link._id }) }).catch(()=>{});
+      if(cardId && !isPreview) fetch('/api/clicks', { method: 'POST', body: JSON.stringify({ cardId, linkId: link.id || link._id }) }).catch(()=>{});
       if (link.url === '#menu-section') {
         e.preventDefault();
         if (menuMode === 'pdf' && pdfMenuUrl) {
@@ -69,7 +61,7 @@ export default function RestaurantTheme({ cardId, siteData, siteColors, lang = "
         target={link.url && link.url !== "#" ? "_blank" : undefined}
         rel="noopener noreferrer"
         className="group flex items-center gap-4 w-full px-5 py-4 rounded-2xl font-bold text-[13.5px] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl active:scale-[0.98]"
-        style={{ background:"#1C1C1C", color:"#fff", boxShadow:"0 4px 16px rgba(0,0,0,0.22)", fontFamily:"Cairo,sans-serif", animationDelay:`${i*60}ms` }}
+        style={{ background:"#1C1C1C", color:"#fff", boxShadow:"0 4px 16px rgba(0,0,0,0.22)", fontFamily:"Cairo,sans-serif" }}
       >
         <div className="w-9 h-9 rounded-xl flex-shrink-0 flex items-center justify-center transition-transform duration-300 group-hover:scale-110" style={{ background: bg }}>
           <IconComponent size={17} color={color} />
@@ -90,84 +82,135 @@ export default function RestaurantTheme({ cardId, siteData, siteColors, lang = "
     <p className={`text-[#555] text-[14px] leading-[1.8] ${c?"text-center":""}`} style={{ fontFamily:"Cairo,sans-serif" }}>{children}</p>
   );
 
-  return (
-    <div className="w-full bg-white overflow-y-auto" dir={isAr?"rtl":"ltr"} style={{ fontFamily:"Cairo,sans-serif" }}>
+  // ════ LAYOUT BLOCKS SYSTEM ════
+  const defaultBlocks = [
+      { id: "header", type: "header" },
+      { id: "menu_button", type: "menu_button" },
+      { id: "info", type: "info" },
+      { id: "links", type: "links" }
+  ];
+  const layoutBlocks = (siteData.layoutBlocks && siteData.layoutBlocks.length > 0) ? siteData.layoutBlocks : defaultBlocks;
 
-      {/* ── HERO ── */}
-      <section className="relative min-h-[500px] flex flex-col justify-end overflow-hidden">
-        <Image src={hero1}
-             alt="hero" fill priority style={{ objectFit: 'cover' }} className="absolute inset-0" />
-        <div className="absolute inset-0" style={{ background:"linear-gradient(180deg,rgba(0,0,0,.5) 0%,rgba(0,0,0,.15) 38%,rgba(0,0,0,.70) 100%)" }} />
-        <div className="relative z-10 px-6 pb-6 pt-16">
-          <h1 className="text-[50px] font-black text-white leading-none tracking-tight mb-3 drop-shadow-lg uppercase" style={{ fontFamily:"Cairo,sans-serif" }}>
-            {name}
-          </h1>
-          <p className="text-white/80 text-[14px] leading-relaxed max-w-[270px] mb-7">{sub}</p>
+  const renderBlock = (block) => {
+      switch (block.type) {
+          case 'header':
+              return (
+                  <section className="relative min-h-[500px] flex flex-col justify-end overflow-hidden" style={{ cursor: isPreview ? 'grab' : 'default' }}>
+                      <Image src={hero1} alt="hero" fill priority style={{ objectFit: 'cover' }} className="absolute inset-0" draggable="false" />
+                      <div className="absolute inset-0 pointer-events-none" style={{ background:"linear-gradient(180deg,rgba(0,0,0,.5) 0%,rgba(0,0,0,.15) 38%,rgba(0,0,0,.70) 100%)" }} />
+                      <div className="relative z-10 px-6 pb-12 pt-16 pointer-events-none">
+                        <h1 className="text-[50px] font-black text-white leading-none tracking-tight mb-3 drop-shadow-lg uppercase" style={{ fontFamily:"Cairo,sans-serif" }}>
+                          {name}
+                        </h1>
+                        <p className="text-white/80 text-[14px] leading-relaxed max-w-[270px] drop-shadow-md">{sub}</p>
+                      </div>
+                  </section>
+              );
 
-          {/* Primary CTA (View Menu / First Link) */}
-          {isMenuEnabled ? (
-            <button
-              onClick={(e) => {
-                if (menuMode === 'pdf' && pdfMenuUrl) {
-                  window.open(pdfMenuUrl, '_blank');
-                } else {
-                  setIsMenuModalOpen(true);
+          case 'menu_button':
+              if (!isMenuEnabled && menuMode !== 'pdf' && !links[0]) return null;
+              
+              const primaryBtnAction = (e) => {
+                if (isMenuEnabled) {
+                  if (menuMode === 'pdf' && pdfMenuUrl) { window.open(pdfMenuUrl, '_blank'); } 
+                  else { setIsMenuModalOpen(true); }
+                } else if (links[0]) {
+                  if (cardId && !isPreview) fetch('/api/clicks', { method: 'POST', body: JSON.stringify({ cardId, linkId: links[0].id || links[0]._id }) }).catch(()=>{});
+                  if (links[0].url && links[0].url !== '#') window.open(links[0].url, '_blank');
                 }
-              }}
-              className="flex items-center justify-center w-full py-[17px] rounded-2xl font-bold text-[13px] uppercase tracking-[.15em] transition-all hover:brightness-110 active:scale-95"
-              style={{ background:primary, color:"#1C1C1C", boxShadow:`0 8px 28px rgba(var(--primary-rgb),.45)` }}>
-              {t("View Menu", "عرض القائمة")}
-            </button>
-          ) : links[0] ? (
-            <a href={links[0].url || '#'}
-               target={links[0].url && links[0].url !== '#' && !links[0].url.startsWith('#') ? "_blank" : undefined}
-               onClick={(e) => {
-                   if (cardId) fetch('/api/clicks', { method: 'POST', body: JSON.stringify({ cardId, linkId: links[0].id || links[0]._id }) }).catch(()=>{});
-               }}
-               className="flex items-center justify-center w-full py-[17px] rounded-2xl font-bold text-[13px] uppercase tracking-[.15em] transition-all hover:brightness-110 active:scale-95"
-               style={{ background:primary, color:"#1C1C1C", boxShadow:`0 8px 28px rgba(var(--primary-rgb),.45)` }}>
-              {t(links[0].title, links[0].titleAr)}
-            </a>
-          ) : (
-            <div className="w-full py-[17px] rounded-2xl text-center font-bold text-[13px] opacity-30 uppercase"
-                 style={{ background:primary, color:"#1C1C1C" }}>
-              {t("Add your first link", "أضف رابطك الأول")}
-            </div>
-          )}
-        </div>
-      </section>
+              };
+              const primaryBtnText = isMenuEnabled ? t("View Menu", "عرض القائمة") : (links[0] ? t(links[0].title, links[0].titleAr) : t("View Menu", "عرض القائمة"));
 
-      {/* ── ABOUT + LINKS ── */}
-      <section className="bg-white px-5 pt-9 pb-10 food-pattern">
-        <div className="relative rounded-[20px] overflow-hidden mb-7 shadow-card h-[190px]">
-          <Image src={about1}
-               alt="interior" fill style={{ objectFit: 'cover' }} />
-          <button className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-deep hover:scale-110 transition-transform">
-            <LucideIcons.ChevronRight size={18} color="#1C1C1C" />
-          </button>
-        </div>
+              return (
+                  <div className="px-6 -mt-6 relative z-20 mb-6" style={{ cursor: isPreview ? 'grab' : 'default' }}>
+                    <button
+                      onClick={primaryBtnAction}
+                      className="flex items-center justify-center w-full py-[17px] rounded-2xl font-bold text-[13px] uppercase tracking-[.15em] transition-all hover:brightness-110 active:scale-95 shadow-xl"
+                      style={{ background:primary, color:"#1C1C1C", boxShadow:`0 8px 28px rgba(var(--primary-rgb),.45)` }}>
+                      {primaryBtnText}
+                    </button>
+                  </div>
+              );
 
-        <STitle>{name}</STitle>
-        <div className="mb-8"><Body>{about}</Body></div>
+          case 'info':
+              if (!about && !address && !hours) return null;
+              return (
+                  <div className="px-5 mb-8" style={{ cursor: isPreview ? 'grab' : 'default' }}>
+                      <div className="relative rounded-[20px] overflow-hidden mb-7 shadow-card h-[190px]">
+                        <Image src={about1} alt="interior" fill style={{ objectFit: 'cover' }} draggable="false" />
+                      </div>
+                      <STitle>{name}</STitle>
+                      <div className="mb-4"><Body>{about}</Body></div>
+                      
+                      {(hours || address) && (
+                        <div className="flex flex-col gap-3 mt-6 p-5 rounded-2xl bg-gray-50 border border-gray-100">
+                           {address && (
+                             <div className="flex items-start gap-3">
+                               <LucideIcons.MapPin size={18} className="text-[#555] mt-0.5" />
+                               <span className="text-[14px] text-[#444] font-medium leading-relaxed font-[Cairo]">{address}</span>
+                             </div>
+                           )}
+                           {hours && (
+                             <div className="flex items-start gap-3">
+                               <LucideIcons.Clock size={18} className="text-[#555] mt-0.5" />
+                               <span className="text-[14px] text-[#444] font-medium leading-relaxed font-[Cairo]">{hours}</span>
+                             </div>
+                           )}
+                        </div>
+                      )}
+                  </div>
+              );
 
-        {links.length > 0 ? (
-          <div className="flex flex-col gap-3">
-            {links.slice(1).map((lk, i) => (
-                <ScrollReveal key={lk.id || i} yOffset={30}>
-                    <LinkBtn link={lk} i={i} />
-                </ScrollReveal>
-            ))}
+          case 'links':
+              const displayLinks = isMenuEnabled ? links : links.slice(1);
+              if (!displayLinks || displayLinks.length === 0) return null;
+              return (
+                  <div className="px-5 mb-10 flex flex-col gap-3" style={{ cursor: isPreview ? 'grab' : 'default' }}>
+                      {displayLinks.map((lk, i) => (
+                          <ScrollReveal key={lk.id || i} yOffset={30}>
+                              <LinkBtn link={lk} i={i} />
+                          </ScrollReveal>
+                      ))}
+                  </div>
+              );
+
+          case 'image':
+              return (
+                  <div className="px-6 mb-8 flex justify-center" style={{ cursor: isPreview ? 'grab' : 'default' }}>
+                      <img 
+                          src={block.url} 
+                          alt="Layout Block" 
+                          style={{ width: block.size || 250, objectFit: 'contain' }}
+                          draggable="false"
+                      />
+                  </div>
+              );
+
+          default:
+              return null;
+      }
+  };
+
+  return (
+    <div className="w-full bg-white min-h-screen overflow-hidden pb-10" dir={isAr?"rtl":"ltr"} style={{ fontFamily:"Cairo,sans-serif" }}>
+
+      {isPreview && onUpdateLayoutBlocks ? (
+          <Reorder.Group axis="y" values={layoutBlocks} onReorder={onUpdateLayoutBlocks} className="flex flex-col w-full h-full">
+              {layoutBlocks.map((block) => (
+                  <Reorder.Item key={block.id} value={block} dragListener={true} className="w-full">
+                      {renderBlock(block)}
+                  </Reorder.Item>
+              ))}
+          </Reorder.Group>
+      ) : (
+          <div className="flex flex-col w-full h-full">
+              {layoutBlocks.map(block => (
+                  <div key={block.id} className="w-full">
+                      {renderBlock(block)}
+                  </div>
+              ))}
           </div>
-        ) : (
-          <div className="flex flex-col items-center gap-3 py-10 rounded-2xl text-center"
-               style={{ background:"rgba(0,0,0,.03)", border:"2px dashed rgba(0,0,0,.08)" }}>
-            <LucideIcons.Link2 size={28} color="#ccc" />
-            <p className="text-[13px] text-gray-400">{t("No links yet","لا توجد روابط بعد")}</p>
-          </div>
-        )}
-      </section>
-
-
+      )}
 
       {/* ── MENU MODAL ── */}
       {isMenuModalOpen && (

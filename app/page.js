@@ -436,9 +436,13 @@ function PageContent() {
         canvas.width = width;
         canvas.height = height;
         const ctx = canvas.getContext('2d');
+        // Clear canvas to preserve transparency (prevents black background on PNG/WebP)
+        ctx.clearRect(0, 0, width, height);
         ctx.drawImage(img, 0, 0, width, height);
 
-        const dataUrl = canvas.toDataURL('image/jpeg', 0.6); // Compress
+        // Use PNG for images with transparency, WebP otherwise
+        const isPng = file.type === 'image/png';
+        const dataUrl = isPng ? canvas.toDataURL('image/png') : canvas.toDataURL('image/webp', 0.85);
         setSiteData(p => ({
           ...p,
           images: { ...(p.images || {}), [slot]: dataUrl }
@@ -463,7 +467,7 @@ function PageContent() {
       isPreview: true,
       onUpdateLayoutBlocks: (newBlocks) => setSiteData(p => ({ ...p, layoutBlocks: newBlocks }))
     };
-    if (theme === 'business_card') return <AMTBusinessCard />;
+    if (theme === 'business_card') return <AMTBusinessCard {...props} />;
     switch (theme) {
       case "cafe":   return <CafeTheme      {...props} />;
       case "cafe1":  return <CafeTheme1     {...props} />;
@@ -878,8 +882,11 @@ function PageContent() {
                               canvas.width = width;
                               canvas.height = height;
                               const ctx = canvas.getContext('2d');
+                              // Clear to preserve PNG transparency
+                              ctx.clearRect(0, 0, width, height);
                               ctx.drawImage(img, 0, 0, width, height);
-                              const compressedUrl = canvas.toDataURL('image/jpeg', 0.8);
+                              const isPng = file.type === 'image/png';
+                              const compressedUrl = isPng ? canvas.toDataURL('image/png') : canvas.toDataURL('image/webp', 0.85);
                               
                               setSiteData(p => {
                                   const currentBlocks = p.layoutBlocks || [

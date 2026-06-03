@@ -5,6 +5,7 @@ import Image from "next/image";
 import { getIconForLink } from "../../utils/icons";
 import * as LucideIcons from "lucide-react";
 import ScrollReveal from "../ScrollReveal";
+import { motion, Reorder } from "framer-motion";
 
 // ══════════════════════════════════════════════════════════════════════
 //  GastroBarTheme — "TARTROOM" Gastrobar Style
@@ -14,7 +15,7 @@ import ScrollReveal from "../ScrollReveal";
 
 const SOCIAL_KW = ["instagram","انستا","telegram","تيليغرام","whatsapp","واتس","tiktok","تيك","facebook","فيسبوك","twitter","تويتر","youtube","يوتيوب","vk","snapchat","سناب","linkedin"];
 
-export default function GastroBarTheme({ cardId, siteData, siteColors, lang = "en", isMenuEnabled, menuMode, menuCategories, addToCart, pdfMenuUrl , showMenuImages }) {
+export default function GastroBarTheme({ cardId, siteData, siteColors, lang = "en", isMenuEnabled, menuMode, menuCategories, addToCart, pdfMenuUrl, showMenuImages, isPreview, onUpdateLayoutBlocks }) {
   const accent  = siteColors?.primary    || "#F5C518";   // gastrobar yellow
   const bgColor = siteColors?.background || "#111111";   // near-black
   const isAr    = lang === "ar";
@@ -53,7 +54,7 @@ export default function GastroBarTheme({ cardId, siteData, siteColors, lang = "e
     const label = t(link.title, link.titleAr);
     const { IconComponent } = getIconForLink(link.title || link.titleAr || "");
     const handleClick = (e) => { 
-      if(cardId) fetch('/api/clicks', { method: 'POST', body: JSON.stringify({ cardId, linkId: link.id || link._id }) }).catch(()=>{}); 
+      if(cardId && !isPreview) fetch('/api/clicks', { method: 'POST', body: JSON.stringify({ cardId, linkId: link.id || link._id }) }).catch(()=>{}); 
       if (link.url === '#menu-section') {
           e.preventDefault();
           if (menuMode === 'pdf' && pdfMenuUrl) {
@@ -80,7 +81,7 @@ export default function GastroBarTheme({ cardId, siteData, siteColors, lang = "e
     const label = t(link.title, link.titleAr);
     const { IconComponent } = getIconForLink(link.title || link.titleAr || "");
     const handleClick = (e) => { 
-      if(cardId) fetch('/api/clicks', { method: 'POST', body: JSON.stringify({ cardId, linkId: link.id || link._id }) }).catch(()=>{}); 
+      if(cardId && !isPreview) fetch('/api/clicks', { method: 'POST', body: JSON.stringify({ cardId, linkId: link.id || link._id }) }).catch(()=>{}); 
       if (link.url === '#menu-section') {
         e.preventDefault();
         if (menuMode === 'pdf' && pdfMenuUrl) {
@@ -108,295 +109,271 @@ export default function GastroBarTheme({ cardId, siteData, siteColors, lang = "e
     </h2>
   );
 
-  // Feature list item
-  const FeatureItem = ({ text }) => (
-    <div className="flex items-start gap-3 mb-4">
-      <div className="w-7 h-7 rounded-full flex-shrink-0 flex items-center justify-center mt-0.5" style={{ background: accent }}>
-        <LucideIcons.ArrowRight size={14} color="#111" />
-      </div>
-      <p className="text-[13.5px] leading-relaxed text-white/75" style={{ fontFamily:"Cairo,sans-serif" }}>
-        {text}
-      </p>
-    </div>
-  );
+  // ════ LAYOUT BLOCKS SYSTEM ════
+  const defaultBlocks = [
+      { id: "header", type: "header" },
+      { id: "menu_button", type: "menu_button" },
+      { id: "info", type: "info" },
+      { id: "links", type: "links" },
+      { id: "contact", type: "contact" }
+  ];
+  const layoutBlocks = (siteData.layoutBlocks && siteData.layoutBlocks.length > 0) ? siteData.layoutBlocks : defaultBlocks;
+
+  const renderBlock = (block) => {
+      switch (block.type) {
+          case 'header':
+              return (
+                  <div className="flex flex-col flex-shrink-0" style={{ cursor: isPreview ? 'grab' : 'default' }}>
+                      <section className="relative w-full" style={{ isolation: "isolate" }}>
+                        <div className="relative w-full overflow-hidden pointer-events-none" style={{ height: "260px" }}>
+                          <div className="grid grid-cols-2 gap-[3px] w-full h-full">
+                            <div className="relative overflow-hidden">
+                              <Image src={hero1} alt="" fill priority style={{ objectFit: 'cover' }} draggable="false" />
+                            </div>
+                            <div className="grid grid-rows-2 gap-[3px] overflow-hidden">
+                              <div className="relative overflow-hidden">
+                                <Image src={hero2} alt="" fill style={{ objectFit: 'cover' }} draggable="false" />
+                              </div>
+                              <div className="relative overflow-hidden">
+                                <Image src={hero3} alt="" fill style={{ objectFit: 'cover' }} draggable="false" />
+                              </div>
+                            </div>
+                          </div>
+                          <div className="absolute inset-x-0 bottom-0 h-16 pointer-events-none" style={{ background: `linear-gradient(transparent, ${bgColor})` }} />
+                        </div>
+
+                        <div className="absolute top-0 inset-x-0 z-10 flex justify-center pointer-events-none">
+                          <div className="mt-4 px-5 py-3 rounded-b-2xl text-center pointer-events-auto shadow-lg"
+                               style={{ background: "rgba(255,255,255,0.2)", backdropFilter: "blur(12px)", border: "1px solid rgba(255,255,255,0.3)", borderTop: "none" }}>
+                            <div className="flex items-center gap-2 justify-center">
+                              <LucideIcons.UtensilsCrossed size={18} style={{ color: "#ffffff", filter: "drop-shadow(0px 1px 2px rgba(0,0,0,0.5))" }} />
+                              <span className="font-black text-white text-[15px] uppercase tracking-[0.2em]" style={{ textShadow: "0 1px 3px rgba(0,0,0,0.8)" }}>{name}</span>
+                            </div>
+                            <p className="text-[10px] uppercase tracking-[0.25em] mt-0.5 text-white" style={{ textShadow: "0 1px 2px rgba(0,0,0,0.8)" }}>{tagline}</p>
+                          </div>
+                        </div>
+                      </section>
+
+                      <section className="relative z-10 px-5 pt-5 pb-7 pointer-events-none">
+                        <h1 className="text-white font-black uppercase leading-tight mb-3" style={{ fontSize: "clamp(20px,6.5vw,28px)", fontFamily: "Cairo,sans-serif" }}>
+                          {about.substring(0, 60)}{about.length > 60 ? "…" : ""}
+                        </h1>
+                        {address && (
+                          <div className="flex items-center gap-2 mb-2">
+                            <LucideIcons.MapPin size={14} style={{ color: accent }} className="flex-shrink-0" />
+                            <p className="text-[12.5px] text-white/50" style={{ fontFamily: "Cairo,sans-serif" }}>{address}</p>
+                          </div>
+                        )}
+                      </section>
+                  </div>
+              );
+
+          case 'menu_button':
+              if (!isMenuEnabled && !primaryLinks[0]) return null;
+              return (
+                  <section className="px-5 pb-6" style={{ cursor: isPreview ? 'grab' : 'default' }}>
+                      {isMenuEnabled ? (
+                        <div className="relative z-10">
+                          <button
+                            onClick={(e) => {
+                              if (menuMode === 'pdf' && pdfMenuUrl) { window.open(pdfMenuUrl, '_blank'); } 
+                              else { setIsMenuModalOpen(true); }
+                            }}
+                            className="flex items-center justify-center gap-3 w-full py-4 rounded-xl font-black text-[14px] uppercase tracking-wider transition-all duration-300 hover:brightness-110 active:scale-95 hover:shadow-[0_0_24px_rgba(var(--primary-rgb),0.45)]"
+                            style={{ background: accent, color: "#111", boxShadow: `0 4px 20px rgba(var(--primary-rgb),0.30)`, fontFamily:"Cairo,sans-serif" }}
+                          >
+                            <LucideIcons.UtensilsCrossed size={18} color="#111" />
+                            {t("View Menu", "عرض القائمة")}
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="relative z-10">
+                          <YellowBtn link={primaryLinks[0]} />
+                        </div>
+                      )}
+                  </section>
+              );
+
+          case 'info':
+              // Contains what to eat + events
+              return (
+                  <div style={{ cursor: isPreview ? 'grab' : 'default' }}>
+                      <section className="pb-8" style={{ borderTop:`1px solid rgba(255,255,255,0.06)` }}>
+                        <div className="px-5 pt-7 mb-5 pointer-events-none">
+                          <STitle center>{t("WHAT TO EAT", "ماذا تأكل")}</STitle>
+                        </div>
+                        <div className="relative mx-5 rounded-2xl overflow-hidden mb-5 shadow-[0_8px_32px_rgba(0,0,0,0.5)] h-[190px] pointer-events-none">
+                          <Image src={food1} alt="food" fill style={{ objectFit: 'cover' }} draggable="false" />
+                          <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
+                            {[0,1,2].map(i=>( <div key={i} className="rounded-full transition-all" style={{ width: i===0?"18px":"6px", height:"6px", background: i===0?accent:"rgba(255,255,255,0.4)" }} /> ))}
+                          </div>
+                        </div>
+                        {(() => {
+                          const menuLink = primaryLinks.find(l => l.url === '#menu-section');
+                          const fallbackMenuLink = links.find(l => l.url === '#menu-section');
+                          const linkToShow = menuLink || primaryLinks[1] || fallbackMenuLink;
+                          if (linkToShow) return <div className="px-5"><YellowBtn link={linkToShow} /></div>;
+                          return null;
+                        })()}
+                      </section>
+
+                      <section className="px-5 pb-8" style={{ borderTop: `1px solid rgba(255,255,255,0.06)` }}>
+                        <div className="pt-7 mb-5 pointer-events-none">
+                          <STitle>{t("EVENTS", "الفعاليات")}</STitle>
+                        </div>
+
+                        {(!sd.events || sd.events.length === 0) ? (
+                          <div className="flex flex-col items-center gap-3 py-10 rounded-2xl text-center pointer-events-none" style={{ background: "rgba(255,255,255,0.03)", border: `1px dashed ${accent}33` }}>
+                            <LucideIcons.CalendarDays size={28} style={{ color: accent, opacity: 0.3 }} />
+                            <p className="text-[13px] text-white/30" style={{ fontFamily: "Cairo,sans-serif" }}>
+                              {t("No events yet — add them from the admin panel", "لا توجد فعاليات بعد — أضفها من لوحة التحكم")}
+                            </p>
+                          </div>
+                        ) : (
+                          <div className="flex flex-col gap-4 pointer-events-none">
+                            {sd.events.map((ev) => (
+                              <div key={ev.id} className="rounded-2xl overflow-hidden" style={{ background: "rgba(255,255,255,0.05)", border: `1px solid ${accent}33` }}>
+                                <div className="px-4 py-4" style={{ background: `${accent}18`, borderBottom: `1px solid ${accent}22` }}>
+                                  <h3 className="font-black text-white uppercase text-[14px]" style={{ fontFamily: "Cairo,sans-serif" }}>
+                                    {t(ev.titleEn || ev.title, ev.title)}
+                                  </h3>
+                                </div>
+                                <div className="px-4 py-4">
+                                  {(t(ev.descEn || ev.desc, ev.desc) || "").split("،").filter(Boolean).map((line, i) => (
+                                    <div key={i} className="flex items-start gap-2.5 mb-2">
+                                      <div className="w-4 h-4 rounded-full flex-shrink-0 mt-0.5 flex items-center justify-center" style={{ background: accent }}>
+                                        <div className="w-1.5 h-1.5 rounded-full bg-black" />
+                                      </div>
+                                      <p className="text-[12.5px] text-white/65 leading-relaxed" style={{ fontFamily: "Cairo,sans-serif" }}>{line.trim()}</p>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </section>
+                  </div>
+              );
+
+          case 'links':
+              if (socialLinks.length === 0 && primaryLinks.length <= (isMenuEnabled ? 1 : 2)) return null;
+              return (
+                  <section className="px-5 pb-8" style={{ borderTop:`1px solid rgba(255,255,255,0.06)`, cursor: isPreview ? 'grab' : 'default' }}>
+                      <div className="pt-7 mb-2 pointer-events-none"><STitle center>{t("OUR CHANNELS", "قنواتنا")}</STitle></div>
+                      <p className="text-center text-[13px] text-white/45 mb-6 pointer-events-none" style={{ fontFamily:"Cairo,sans-serif" }}>
+                        {t("Stay up to date with news and events.", "تابع أحدث أخبارنا وفعالياتنا.")}
+                      </p>
+                      
+                      {socialLinks.length > 0 ? (
+                        <div className="flex flex-col gap-3">
+                          {socialLinks.map(lk => (
+                            <ScrollReveal key={lk.id} yOffset={30}>
+                              <OutlineBtn link={lk} />
+                            </ScrollReveal>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="flex justify-center gap-4 pointer-events-none">
+                          <div className="w-[52px] h-[52px] rounded-full flex items-center justify-center opacity-20" style={{ background: accent }}>
+                            <LucideIcons.Send size={22} color="#111" />
+                          </div>
+                          <div className="w-[52px] h-[52px] rounded-full flex items-center justify-center opacity-20" style={{ background: accent }}>
+                            <LucideIcons.Camera size={22} color="#111" />
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Remaining primary links */}
+                      {primaryLinks.length > 2 && (
+                        <div className="flex flex-col gap-3 mt-3">
+                          {primaryLinks.slice(2).map(lk => (
+                            <ScrollReveal key={lk.id} yOffset={30}>
+                              <YellowBtn link={lk} />
+                            </ScrollReveal>
+                          ))}
+                        </div>
+                      )}
+                  </section>
+              );
+
+          case 'contact':
+              return (
+                  <section className="px-5 pb-12" style={{ borderTop:`1px solid rgba(255,255,255,0.06)`, cursor: isPreview ? 'grab' : 'default' }}>
+                      <div className="pt-7 mb-5 pointer-events-none"><STitle>{t("CONTACTS", "التواصل")}</STitle></div>
+                      <div className="rounded-2xl overflow-hidden" style={{ background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.08)" }}>
+                        <div className="relative h-[130px] overflow-hidden pointer-events-none">
+                          <Image src="https://images.unsplash.com/photo-1524661135-423995f22d0b?q=80&w=800&auto=format&fit=crop"
+                               alt="map" fill style={{ objectFit: 'cover' }} className="opacity-60" draggable="false" />
+                          <div className="absolute inset-0 flex items-center justify-center">
+                            <LucideIcons.MapPin size={32} style={{ color: accent }} className="drop-shadow-xl -mt-2" />
+                          </div>
+                        </div>
+                        <div className="p-4 space-y-3">
+                          {address && (
+                            <div className="flex items-start gap-3 pointer-events-none">
+                              <LucideIcons.MapPin size={15} style={{ color: accent }} className="flex-shrink-0 mt-0.5" />
+                              <p className="text-[13px] text-white/70" style={{ fontFamily:"Cairo,sans-serif" }}>{address}</p>
+                            </div>
+                          )}
+                          {hours && (
+                            <div className="flex items-start gap-3 pointer-events-none">
+                              <LucideIcons.Clock size={15} style={{ color: accent }} className="flex-shrink-0 mt-0.5" />
+                              <p className="text-[13px] text-white/70" style={{ fontFamily:"Cairo,sans-serif" }}>{hours}</p>
+                            </div>
+                          )}
+                          {phone && (
+                            <div className="flex items-start gap-3">
+                              <LucideIcons.Phone size={15} style={{ color: accent }} className="flex-shrink-0 mt-0.5" />
+                              <a href={`tel:${phone}`} className="text-[13px] transition-colors hover:opacity-100"
+                                 style={{ color: accent, fontFamily:"Cairo,sans-serif" }}>{phone}</a>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                  </section>
+              );
+
+          case 'image':
+              return (
+                  <div className="px-6 pb-6 flex justify-center" style={{ cursor: isPreview ? 'grab' : 'default' }}>
+                      <img 
+                          src={block.url} 
+                          alt="Layout Block" 
+                          style={{ width: block.size || 250, objectFit: 'contain' }}
+                          draggable="false"
+                      />
+                  </div>
+              );
+
+          default:
+              return null;
+      }
+  };
 
   return (
     <>
-      <div
-        className="w-full min-h-screen flex flex-col overflow-x-hidden"
-      dir={isAr ? "rtl" : "ltr"}
-      style={{ background: bgColor, fontFamily: "Cairo,sans-serif" }}
-    >
-      {/* ══════════════════════════════════════════
-          HERO — Logo + photo collage + headline
-      ══════════════════════════════════════════ */}
-      <section className="relative w-full flex-shrink-0" style={{ isolation: "isolate" }}>
+      <div className="w-full min-h-screen flex flex-col overflow-x-hidden pb-10" dir={isAr ? "rtl" : "ltr"} style={{ background: bgColor, fontFamily: "Cairo,sans-serif" }}>
 
-        {/* Image Grid — strict height, all images absolute-filled, overflow-hidden wrapper */}
-        <div className="relative w-full overflow-hidden" style={{ height: "260px" }}>
-          <div className="grid grid-cols-2 gap-[3px] w-full h-full">
-            <div className="relative overflow-hidden">
-              <Image
-                src={hero1}
-                alt="" fill priority style={{ objectFit: 'cover' }}
-              />
-            </div>
-            <div className="grid grid-rows-2 gap-[3px] overflow-hidden">
-              <div className="relative overflow-hidden">
-                <Image
-                  src={hero2}
-                  alt="" fill style={{ objectFit: 'cover' }}
-                />
-              </div>
-              <div className="relative overflow-hidden">
-                <Image
-                  src={hero3}
-                  alt="" fill style={{ objectFit: 'cover' }}
-                />
-              </div>
-            </div>
-          </div>
-          {/* Gradient — contained inside the 260px height box */}
-          <div
-            className="absolute inset-x-0 bottom-0 h-16 pointer-events-none"
-            style={{ background: `linear-gradient(transparent, ${bgColor})` }}
-          />
-        </div>
-
-        {/* Logo badge — z-10, pointer-events preserved for the badge only */}
-        <div className="absolute top-0 inset-x-0 z-10 flex justify-center pointer-events-none">
-          <div
-            className="mt-4 px-5 py-3 rounded-b-2xl text-center pointer-events-auto shadow-lg"
-            style={{
-              background: "rgba(255,255,255,0.2)",
-              backdropFilter: "blur(12px)",
-              border: "1px solid rgba(255,255,255,0.3)",
-              borderTop: "none",
-            }}
-          >
-            <div className="flex items-center gap-2 justify-center">
-              <LucideIcons.UtensilsCrossed size={18} style={{ color: "#ffffff", filter: "drop-shadow(0px 1px 2px rgba(0,0,0,0.5))" }} />
-              <span className="font-black text-white text-[15px] uppercase tracking-[0.2em]" style={{ textShadow: "0 1px 3px rgba(0,0,0,0.8)" }}>{name}</span>
-            </div>
-            <p className="text-[10px] uppercase tracking-[0.25em] mt-0.5 text-white" style={{ textShadow: "0 1px 2px rgba(0,0,0,0.8)" }}>{tagline}</p>
-          </div>
-        </div>
-      </section>
-
-      {/* Headline + Address — relative z-10 so always above any stacking context */}
-      <section className="relative z-10 flex-shrink-0 px-5 pt-5 pb-7">
-        <h1
-          className="text-white font-black uppercase leading-tight mb-3"
-          style={{ fontSize: "clamp(20px,6.5vw,28px)", fontFamily: "Cairo,sans-serif" }}
-        >
-          {about.substring(0, 60)}{about.length > 60 ? "…" : ""}
-        </h1>
-        {address && (
-          <div className="flex items-center gap-2 mb-6">
-            <LucideIcons.MapPin size={14} style={{ color: accent }} className="flex-shrink-0" />
-            <p className="text-[12.5px] text-white/50" style={{ fontFamily: "Cairo,sans-serif" }}>{address}</p>
-          </div>
-        )}
-        {/* CTA button — relative z-10 makes it always clickable */}
-        {isMenuEnabled ? (
-          <div className="relative z-10">
-            <button
-              onClick={(e) => {
-                if (menuMode === 'pdf' && pdfMenuUrl) {
-                  window.open(pdfMenuUrl, '_blank');
-                } else {
-                  setIsMenuModalOpen(true);
-                }
-              }}
-              className="flex items-center justify-center gap-3 w-full py-4 rounded-xl font-black text-[14px] uppercase tracking-wider transition-all duration-300 hover:brightness-110 active:scale-95 hover:shadow-[0_0_24px_rgba(var(--primary-rgb),0.45)]"
-              style={{ background: accent, color: "#111", boxShadow: `0 4px 20px rgba(var(--primary-rgb),0.30)`, fontFamily:"Cairo,sans-serif" }}
-            >
-              <LucideIcons.UtensilsCrossed size={18} color="#111" />
-              {t("View Menu", "عرض القائمة")}
-            </button>
-          </div>
-        ) : primaryLinks[0] && (
-          <div className="relative z-10">
-            <YellowBtn link={primaryLinks[0]} />
-          </div>
-        )}
-      </section>
-
-
-
-
-      {/* ══════════════════════════════════════════
-          FOOD SECTION — photo + menu button
-      ══════════════════════════════════════════ */}
-      <section className="pb-8" style={{ borderTop:`1px solid rgba(255,255,255,0.06)` }}>
-        <div className="px-5 pt-7 mb-5">
-          <STitle center>{t("WHAT TO EAT", "ماذا تأكل")}</STitle>
-        </div>
-        {/* Photo carousel-style */}
-        <div className="relative mx-5 rounded-2xl overflow-hidden mb-5 shadow-[0_8px_32px_rgba(0,0,0,0.5)] h-[190px]">
-          <Image src={food1}
-               alt="food" fill style={{ objectFit: 'cover' }} />
-          {/* Dot indicators */}
-          <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
-            {[0,1,2].map(i=>(
-              <div key={i} className="rounded-full transition-all" style={{ width: i===0?"18px":"6px", height:"6px", background: i===0?accent:"rgba(255,255,255,0.4)" }} />
-            ))}
-          </div>
-        </div>
-        {/* ── SECONDARY MENU LINK (Fallback) ── */}
-        {(() => {
-          const menuLink = primaryLinks.find(l => l.url === '#menu-section');
-          const fallbackMenuLink = links.find(l => l.url === '#menu-section');
-          const linkToShow = menuLink || primaryLinks[1] || fallbackMenuLink;
-          if (linkToShow) return <div className="px-5"><YellowBtn link={linkToShow} /></div>;
-          return null;
-        })()}
-      </section>
-
-      {/* ══════════════════════════════════════════
-          EVENTS SECTION — fully dynamic from siteData.events
-      ══════════════════════════════════════════ */}
-      <section className="px-5 pb-8" style={{ borderTop: `1px solid rgba(255,255,255,0.06)` }}>
-        <div className="pt-7 mb-5">
-          <STitle>{t("EVENTS", "الفعاليات")}</STitle>
-        </div>
-
-        {(!sd.events || sd.events.length === 0) ? (
-          /* Empty state */
-          <div
-            className="flex flex-col items-center gap-3 py-10 rounded-2xl text-center"
-            style={{ background: "rgba(255,255,255,0.03)", border: `1px dashed ${accent}33` }}
-          >
-            <LucideIcons.CalendarDays size={28} style={{ color: accent, opacity: 0.3 }} />
-            <p className="text-[13px] text-white/30" style={{ fontFamily: "Cairo,sans-serif" }}>
-              {t("No events yet — add them from the admin panel", "لا توجد فعاليات بعد — أضفها من لوحة التحكم")}
-            </p>
-          </div>
+        {isPreview && onUpdateLayoutBlocks ? (
+            <Reorder.Group axis="y" values={layoutBlocks} onReorder={onUpdateLayoutBlocks} className="flex flex-col w-full h-full">
+                {layoutBlocks.map((block) => (
+                    <Reorder.Item key={block.id} value={block} dragListener={true} className="w-full">
+                        {renderBlock(block)}
+                    </Reorder.Item>
+                ))}
+            </Reorder.Group>
         ) : (
-          <div className="flex flex-col gap-4">
-            {sd.events.map((ev) => (
-              <div
-                key={ev.id}
-                className="rounded-2xl overflow-hidden"
-                style={{ background: "rgba(255,255,255,0.05)", border: `1px solid ${accent}33` }}
-              >
-                {/* Event header */}
-                <div
-                  className="px-4 py-4"
-                  style={{ background: `${accent}18`, borderBottom: `1px solid ${accent}22` }}
-                >
-                  <h3
-                    className="font-black text-white uppercase text-[14px]"
-                    style={{ fontFamily: "Cairo,sans-serif" }}
-                  >
-                    {t(ev.titleEn || ev.title, ev.title)}
-                  </h3>
-                </div>
-                {/* Event body */}
-                <div className="px-4 py-4">
-                  {(t(ev.descEn || ev.desc, ev.desc) || "").split("،").filter(Boolean).map((line, i) => (
-                    <div key={i} className="flex items-start gap-2.5 mb-2">
-                      <div
-                        className="w-4 h-4 rounded-full flex-shrink-0 mt-0.5 flex items-center justify-center"
-                        style={{ background: accent }}
-                      >
-                        <div className="w-1.5 h-1.5 rounded-full bg-black" />
-                      </div>
-                      <p className="text-[12.5px] text-white/65 leading-relaxed" style={{ fontFamily: "Cairo,sans-serif" }}>
-                        {line.trim()}
-                      </p>
+            <div className="flex flex-col w-full h-full">
+                {layoutBlocks.map(block => (
+                    <div key={block.id} className="w-full">
+                        {renderBlock(block)}
                     </div>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
+                ))}
+            </div>
         )}
-      </section>
 
-      {/* ══════════════════════════════════════════
-          SOCIAL CHANNELS SECTION
-      ══════════════════════════════════════════ */}
-      {(socialLinks.length > 0 || primaryLinks.length > 2) && (
-        <section className="px-5 pb-8" style={{ borderTop:`1px solid rgba(255,255,255,0.06)` }}>
-          <div className="pt-7 mb-2"><STitle center>{t("OUR CHANNELS", "قنواتنا")}</STitle></div>
-          <p className="text-center text-[13px] text-white/45 mb-6" style={{ fontFamily:"Cairo,sans-serif" }}>
-            {t("Stay up to date with news and events.", "تابع أحدث أخبارنا وفعالياتنا.")}
-          </p>
-          
-          {/* Social links as wide buttons */}
-          {socialLinks.length > 0 ? (
-            <div className="flex flex-col gap-3">
-              {socialLinks.map(lk => (
-                <ScrollReveal key={lk.id} yOffset={30}>
-                  <OutlineBtn link={lk} />
-                </ScrollReveal>
-              ))}
-            </div>
-          ) : (
-            <div className="flex justify-center gap-4">
-              <div className="w-[52px] h-[52px] rounded-full flex items-center justify-center opacity-20" style={{ background: accent }}>
-                <LucideIcons.Send size={22} color="#111" />
-              </div>
-              <div className="w-[52px] h-[52px] rounded-full flex items-center justify-center opacity-20" style={{ background: accent }}>
-                <LucideIcons.Camera size={22} color="#111" />
-              </div>
-            </div>
-          )}
-
-          {/* Remaining primary links */}
-          {primaryLinks.length > 2 && (
-            <div className="flex flex-col gap-3 mt-3">
-              {primaryLinks.slice(2).map(lk => (
-                <ScrollReveal key={lk.id} yOffset={30}>
-                  <YellowBtn link={lk} />
-                </ScrollReveal>
-              ))}
-            </div>
-          )}
-        </section>
-      )}
-
-      {/* ══════════════════════════════════════════
-          CONTACTS SECTION
-      ══════════════════════════════════════════ */}
-      <section className="px-5 pb-12" style={{ borderTop:`1px solid rgba(255,255,255,0.06)` }}>
-        <div className="pt-7 mb-5"><STitle>{t("CONTACTS", "التواصل")}</STitle></div>
-        <div className="rounded-2xl overflow-hidden" style={{ background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.08)" }}>
-          {/* Map image */}
-          <div className="relative h-[130px] overflow-hidden">
-            <Image src="https://images.unsplash.com/photo-1524661135-423995f22d0b?q=80&w=800&auto=format&fit=crop"
-                 alt="map" fill style={{ objectFit: 'cover' }} className="opacity-60" />
-            <div className="absolute inset-0 flex items-center justify-center">
-              <LucideIcons.MapPin size={32} style={{ color: accent }} className="drop-shadow-xl -mt-2" />
-            </div>
-          </div>
-          {/* Info rows */}
-          <div className="p-4 space-y-3">
-            {address && (
-              <div className="flex items-start gap-3">
-                <LucideIcons.MapPin size={15} style={{ color: accent }} className="flex-shrink-0 mt-0.5" />
-                <p className="text-[13px] text-white/70" style={{ fontFamily:"Cairo,sans-serif" }}>{address}</p>
-              </div>
-            )}
-            {hours && (
-              <div className="flex items-start gap-3">
-                <LucideIcons.Clock size={15} style={{ color: accent }} className="flex-shrink-0 mt-0.5" />
-                <p className="text-[13px] text-white/70" style={{ fontFamily:"Cairo,sans-serif" }}>{hours}</p>
-              </div>
-            )}
-            {phone && (
-              <div className="flex items-start gap-3">
-                <LucideIcons.Phone size={15} style={{ color: accent }} className="flex-shrink-0 mt-0.5" />
-                <a href={`tel:${phone}`} className="text-[13px] transition-colors hover:opacity-100"
-                   style={{ color: accent, fontFamily:"Cairo,sans-serif" }}>{phone}</a>
-              </div>
-            )}
-          </div>
-        </div>
-      </section>
-
-    </div>
+      </div>
       
       {/* ── MENU MODAL ── */}
       {isMenuModalOpen && (

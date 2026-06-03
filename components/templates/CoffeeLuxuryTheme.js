@@ -5,6 +5,7 @@ import Image from "next/image";
 import { getIconForLink } from "../../utils/icons";
 import * as LucideIcons from "lucide-react";
 import ScrollReveal from "../ScrollReveal";
+import { motion, Reorder } from "framer-motion";
 
 // ══════════════════════════════════════════════════════════════════════
 //  CoffeeLuxuryTheme — "Marouf Coffee" Bespoke Style
@@ -12,7 +13,7 @@ import ScrollReveal from "../ScrollReveal";
 //  Props: { siteData, siteColors, lang }
 // ══════════════════════════════════════════════════════════════════════
 
-export default function CoffeeLuxuryTheme({ cardId, siteData, siteColors, lang = "en", isMenuEnabled, menuMode, menuCategories, addToCart, pdfMenuUrl, showMenuImages }) {
+export default function CoffeeLuxuryTheme({ cardId, siteData, siteColors, lang = "en", isMenuEnabled, menuMode, menuCategories, addToCart, pdfMenuUrl, showMenuImages, isPreview, onUpdateLayoutBlocks }) {
   // Use explicitly requested colors or fallbacks from siteColors if they match
   const accent  = siteColors?.primary    || "#C59B4D";   // Warm Gold
   const bgColor = siteColors?.background || "#050505";   // Deep Pitch Black
@@ -58,7 +59,7 @@ export default function CoffeeLuxuryTheme({ cardId, siteData, siteColors, lang =
     const label = t(link.title, link.titleAr);
     const { IconComponent } = getIconForLink(link.title || link.titleAr || "");
     const handleClick = (e) => { 
-      if(cardId) fetch('/api/clicks', { method: 'POST', body: JSON.stringify({ cardId, linkId: link.id || link._id }) }).catch(()=>{}); 
+      if(cardId && !isPreview) fetch('/api/clicks', { method: 'POST', body: JSON.stringify({ cardId, linkId: link.id || link._id }) }).catch(()=>{}); 
       if (link.url === '#menu-section') {
         e.preventDefault();
         handleMenuClick(e);
@@ -67,10 +68,7 @@ export default function CoffeeLuxuryTheme({ cardId, siteData, siteColors, lang =
     return (
       <a href={link.url || "#"} onClick={handleClick} target={link.url && link.url !== "#" && !link.url.startsWith('#') ? "_blank" : undefined} rel="noopener noreferrer"
         className="flex items-center gap-4 w-full p-4 rounded-xl transition-all duration-500 hover:-translate-y-1 group relative overflow-hidden"
-        style={{ 
-            background: "#111", 
-            border: `1px solid rgba(197, 155, 77, 0.3)`, 
-        }}>
+        style={{ background: "#111", border: `1px solid rgba(197, 155, 77, 0.3)` }}>
         {/* Glow effect on hover */}
         <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" 
              style={{ boxShadow: `inset 0 0 20px rgba(197, 155, 77, 0.15)` }} />
@@ -85,117 +83,166 @@ export default function CoffeeLuxuryTheme({ cardId, siteData, siteColors, lang =
     );
   };
 
+  // ════ LAYOUT BLOCKS SYSTEM ════
+  const defaultBlocks = [
+      { id: "header", type: "header" },
+      { id: "menu_button", type: "menu_button" },
+      { id: "info", type: "info" },
+      { id: "links", type: "links" }
+  ];
+  const layoutBlocks = (siteData.layoutBlocks && siteData.layoutBlocks.length > 0) ? siteData.layoutBlocks : defaultBlocks;
+
+  const renderBlock = (block) => {
+      switch (block.type) {
+          case 'header':
+              return (
+                  <div className="flex flex-col items-center pt-16 px-6 text-center pb-2" style={{ cursor: isPreview ? 'grab' : 'default' }}>
+                      <ScrollReveal animation="fade-up" duration={700}>
+                          <div className="relative mb-6 group pointer-events-none">
+                              <div className="absolute inset-0 rounded-full bg-[#C59B4D] blur-md opacity-20 group-hover:opacity-40 transition-opacity duration-700"></div>
+                              <div className="w-32 h-32 rounded-full overflow-hidden border-[2px] border-[#C59B4D] relative z-10 p-1 bg-[#050505]">
+                                  <img src={profileImg} alt={name} className="w-full h-full object-cover rounded-full" draggable="false" />
+                              </div>
+                          </div>
+                      </ScrollReveal>
+
+                      <ScrollReveal animation="fade-up" duration={700} delay={100}>
+                          <h1 className="text-3xl font-black mb-2 tracking-wide text-white uppercase drop-shadow-md pointer-events-none" style={{ fontFamily:"Cairo,sans-serif" }}>
+                              {name}
+                          </h1>
+                          {tagline && (
+                              <p className="text-[#C59B4D] font-medium tracking-widest text-[13px] uppercase mb-5 pointer-events-none" style={{ fontFamily:"Cairo,sans-serif" }}>
+                                  {tagline}
+                              </p>
+                          )}
+                      </ScrollReveal>
+
+                      <ScrollReveal animation="fade-up" duration={700} delay={200}>
+                          {about && (
+                              <p className="text-gray-300 text-[15px] leading-relaxed max-w-[90%] mx-auto font-light pointer-events-none" style={{ fontFamily:"Cairo,sans-serif" }}>
+                                  {about}
+                              </p>
+                          )}
+                      </ScrollReveal>
+                  </div>
+              );
+
+          case 'menu_button':
+              if (!isMenuEnabled && menuMode !== 'pdf') return null;
+              return (
+                  <div className="px-6 mt-8" style={{ cursor: isPreview ? 'grab' : 'default' }}>
+                      <ScrollReveal animation="fade-up" duration={700}>
+                          <button 
+                              onClick={handleMenuClick}
+                              className="w-full py-4 rounded-xl font-black text-[#050505] text-[15px] tracking-[0.2em] uppercase relative overflow-hidden group transition-all duration-500 hover:scale-[1.02] shadow-[0_4px_20px_rgba(197,155,77,0.25)] hover:shadow-[0_4px_30px_rgba(197,155,77,0.4)]"
+                              style={{ backgroundColor: "#C59B4D", fontFamily:"Cairo,sans-serif" }}
+                          >
+                              <span className="relative z-10 flex items-center justify-center gap-3">
+                                  <LucideIcons.BookOpen size={18} strokeWidth={2.5} />
+                                  {t("VIEW MENU", "عرض قائمة الطعام")}
+                              </span>
+                              <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out"></div>
+                          </button>
+                      </ScrollReveal>
+                  </div>
+              );
+
+          case 'info':
+              if (!hours && !address) return null;
+              return (
+                  <div className="px-6 mt-8" style={{ cursor: isPreview ? 'grab' : 'default' }}>
+                      <ScrollReveal animation="fade-up" duration={700}>
+                          <div className="bg-[#111]/80 backdrop-blur-sm border border-white/5 rounded-2xl p-5 flex flex-col gap-4 pointer-events-none">
+                              {address && (
+                                  <div className="flex items-start gap-4">
+                                      <div className="w-10 h-10 rounded-full flex items-center justify-center bg-[#C59B4D]/10 flex-shrink-0">
+                                          <LucideIcons.MapPin size={18} className="text-[#C59B4D]" />
+                                      </div>
+                                      <div className="flex-1 pt-2 text-gray-300 text-[14px] leading-relaxed" style={{ fontFamily:"Cairo,sans-serif" }}>
+                                          {address}
+                                      </div>
+                                  </div>
+                              )}
+                              {hours && (
+                                  <div className="flex items-start gap-4">
+                                      <div className="w-10 h-10 rounded-full flex items-center justify-center bg-[#C59B4D]/10 flex-shrink-0">
+                                          <LucideIcons.Clock size={18} className="text-[#C59B4D]" />
+                                      </div>
+                                      <div className="flex-1 pt-2 text-gray-300 text-[14px] leading-relaxed" style={{ fontFamily:"Cairo,sans-serif" }}>
+                                          {hours}
+                                      </div>
+                                  </div>
+                              )}
+                          </div>
+                      </ScrollReveal>
+                  </div>
+              );
+
+          case 'links':
+              if (!links || links.length === 0) return null;
+              return (
+                  <div className="px-6 mt-8 flex flex-col gap-4 pb-2" style={{ cursor: isPreview ? 'grab' : 'default' }}>
+                      <ScrollReveal animation="fade-up" duration={700}>
+                          <h3 className="text-center text-[#C59B4D] font-bold text-[14px] tracking-widest uppercase mb-4 flex items-center justify-center gap-4 pointer-events-none">
+                              <span className="h-[1px] w-12 bg-[#C59B4D]/30"></span>
+                              {t("Connect With Us", "تواصل معنا")}
+                              <span className="h-[1px] w-12 bg-[#C59B4D]/30"></span>
+                          </h3>
+                      </ScrollReveal>
+                      
+                      {links.map((link, idx) => (
+                          <ScrollReveal key={link.id || idx} animation="fade-up" duration={500}>
+                              <LinkCard link={link} />
+                          </ScrollReveal>
+                      ))}
+                  </div>
+              );
+
+          case 'image':
+              return (
+                  <div className="px-6 pb-6 mt-8 flex justify-center" style={{ cursor: isPreview ? 'grab' : 'default' }}>
+                      <img 
+                          src={block.url} 
+                          alt="Layout Block" 
+                          style={{ width: block.size || 250, objectFit: 'contain' }}
+                          draggable="false"
+                      />
+                  </div>
+              );
+
+          default:
+              return null;
+      }
+  };
+
   return (
     <div className="min-h-screen text-white font-sans selection:bg-[#C59B4D]/30" style={{ backgroundColor: bgColor }} dir={isAr ? "rtl" : "ltr"}>
       
       {/* Background Texture/Gradient */}
-      <div className="fixed inset-0 pointer-events-none z-0" style={{
-        background: `radial-gradient(circle at 50% 0%, rgba(197, 155, 77, 0.08) 0%, transparent 60%)`
-      }}></div>
+      <div className="fixed inset-0 pointer-events-none z-0" style={{ background: `radial-gradient(circle at 50% 0%, rgba(197, 155, 77, 0.08) 0%, transparent 60%)` }} />
 
-      <div className="relative z-10 max-w-[480px] mx-auto min-h-screen pb-24">
+      <div className="relative z-10 max-w-[480px] mx-auto min-h-screen pb-24 flex flex-col">
         
-        {/* HEADER SECTION */}
-        <div className="flex flex-col items-center pt-16 px-6 text-center">
-            <ScrollReveal animation="fade-up" duration={700}>
-                <div className="relative mb-6 group">
-                    <div className="absolute inset-0 rounded-full bg-[#C59B4D] blur-md opacity-20 group-hover:opacity-40 transition-opacity duration-700"></div>
-                    <div className="w-32 h-32 rounded-full overflow-hidden border-[2px] border-[#C59B4D] relative z-10 p-1 bg-[#050505]">
-                        <img src={profileImg} alt={name} className="w-full h-full object-cover rounded-full" />
+        {isPreview && onUpdateLayoutBlocks ? (
+            <Reorder.Group axis="y" values={layoutBlocks} onReorder={onUpdateLayoutBlocks} className="flex flex-col w-full h-full">
+                {layoutBlocks.map((block) => (
+                    <Reorder.Item key={block.id} value={block} dragListener={true} className="w-full">
+                        {renderBlock(block)}
+                    </Reorder.Item>
+                ))}
+            </Reorder.Group>
+        ) : (
+            <div className="flex flex-col w-full h-full">
+                {layoutBlocks.map(block => (
+                    <div key={block.id} className="w-full">
+                        {renderBlock(block)}
                     </div>
-                </div>
-            </ScrollReveal>
-
-            <ScrollReveal animation="fade-up" duration={700} delay={100}>
-                <h1 className="text-3xl font-black mb-2 tracking-wide text-white uppercase drop-shadow-md" style={{ fontFamily:"Cairo,sans-serif" }}>
-                    {name}
-                </h1>
-                {tagline && (
-                    <p className="text-[#C59B4D] font-medium tracking-widest text-[13px] uppercase mb-5" style={{ fontFamily:"Cairo,sans-serif" }}>
-                        {tagline}
-                    </p>
-                )}
-            </ScrollReveal>
-
-            <ScrollReveal animation="fade-up" duration={700} delay={200}>
-                {about && (
-                    <p className="text-gray-300 text-[15px] leading-relaxed max-w-[90%] mx-auto font-light" style={{ fontFamily:"Cairo,sans-serif" }}>
-                        {about}
-                    </p>
-                )}
-            </ScrollReveal>
-        </div>
-
-        {/* MAIN MENU BUTTON */}
-        {(isMenuEnabled || menuMode === 'pdf') && (
-            <div className="px-6 mt-10">
-                <ScrollReveal animation="fade-up" duration={700} delay={300}>
-                    <button 
-                        onClick={handleMenuClick}
-                        className="w-full py-4 rounded-xl font-black text-[#050505] text-[15px] tracking-[0.2em] uppercase relative overflow-hidden group transition-all duration-500 hover:scale-[1.02] shadow-[0_4px_20px_rgba(197,155,77,0.25)] hover:shadow-[0_4px_30px_rgba(197,155,77,0.4)]"
-                        style={{ backgroundColor: "#C59B4D", fontFamily:"Cairo,sans-serif" }}
-                    >
-                        <span className="relative z-10 flex items-center justify-center gap-3">
-                            <LucideIcons.BookOpen size={18} strokeWidth={2.5} />
-                            {t("VIEW MENU", "عرض قائمة الطعام")}
-                        </span>
-                        <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out"></div>
-                    </button>
-                </ScrollReveal>
-            </div>
-        )}
-
-        {/* INFO SECTION (Hours & Address) */}
-        {(hours || address) && (
-            <div className="px-6 mt-10">
-                <ScrollReveal animation="fade-up" duration={700} delay={400}>
-                    <div className="bg-[#111]/80 backdrop-blur-sm border border-white/5 rounded-2xl p-5 flex flex-col gap-4">
-                        {address && (
-                            <div className="flex items-start gap-4">
-                                <div className="w-10 h-10 rounded-full flex items-center justify-center bg-[#C59B4D]/10 flex-shrink-0">
-                                    <LucideIcons.MapPin size={18} className="text-[#C59B4D]" />
-                                </div>
-                                <div className="flex-1 pt-2 text-gray-300 text-[14px] leading-relaxed" style={{ fontFamily:"Cairo,sans-serif" }}>
-                                    {address}
-                                </div>
-                            </div>
-                        )}
-                        {hours && (
-                            <div className="flex items-start gap-4">
-                                <div className="w-10 h-10 rounded-full flex items-center justify-center bg-[#C59B4D]/10 flex-shrink-0">
-                                    <LucideIcons.Clock size={18} className="text-[#C59B4D]" />
-                                </div>
-                                <div className="flex-1 pt-2 text-gray-300 text-[14px] leading-relaxed" style={{ fontFamily:"Cairo,sans-serif" }}>
-                                    {hours}
-                                </div>
-                            </div>
-                        )}
-                    </div>
-                </ScrollReveal>
-            </div>
-        )}
-
-        {/* LINKS SECTION */}
-        {links && links.length > 0 && (
-            <div className="px-6 mt-10 flex flex-col gap-4 pb-10">
-                <ScrollReveal animation="fade-up" duration={700} delay={500}>
-                    <h3 className="text-center text-[#C59B4D] font-bold text-[14px] tracking-widest uppercase mb-6 flex items-center justify-center gap-4">
-                        <span className="h-[1px] w-12 bg-[#C59B4D]/30"></span>
-                        {t("Connect With Us", "تواصل معنا")}
-                        <span className="h-[1px] w-12 bg-[#C59B4D]/30"></span>
-                    </h3>
-                </ScrollReveal>
-                
-                {links.map((link, idx) => (
-                    <ScrollReveal key={link.id || idx} animation="fade-up" duration={500} delay={600 + (idx*50)}>
-                        <LinkCard link={link} />
-                    </ScrollReveal>
                 ))}
             </div>
         )}
 
         {/* WATERMARK */}
-        <div className="text-center pb-8 pt-8">
+        <div className="text-center pb-8 pt-8 mt-auto">
             <p className="text-[11px] text-gray-500 font-medium tracking-widest uppercase" style={{ fontFamily:"Cairo,sans-serif" }}>
                 Powered by AMT Smart Systems
             </p>
