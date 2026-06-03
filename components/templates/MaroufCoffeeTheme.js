@@ -402,31 +402,53 @@ export default function MaroufCoffeeTheme({ cardId, siteData, siteColors, lang =
         );
 
       case 'image':
+        if (!block.url) return null;
         return (
           <BlockReveal delay={0}>
             <div
-              className="px-6 mt-8 flex justify-center"
-              style={{ cursor: isPreview ? 'grab' : 'default' }}
+              className="mt-6 relative overflow-hidden group"
+              style={{
+                cursor: isPreview ? 'grab' : 'default',
+                width: "100%",
+              }}
             >
+              {/* Full-width cinematic image section */}
               <div
-                className="rounded-2xl overflow-hidden"
                 style={{
-                  maxWidth: block.size || 280,
+                  position: "relative",
                   width: "100%",
-                  boxShadow: "0 8px 40px rgba(0,0,0,0.5)",
-                  border: "1px solid rgba(255,255,255,0.08)",
+                  maxHeight: block.size ? `${block.size}px` : "320px",
+                  overflow: "hidden",
                 }}
               >
+                {/* Top fade from black */}
+                <div
+                  className="absolute inset-x-0 top-0 h-16 pointer-events-none z-10"
+                  style={{ background: "linear-gradient(180deg, #050505 0%, transparent 100%)" }}
+                />
+                {/* Bottom fade to black */}
+                <div
+                  className="absolute inset-x-0 bottom-0 h-16 pointer-events-none z-10"
+                  style={{ background: "linear-gradient(0deg, #050505 0%, transparent 100%)" }}
+                />
+                {/* Gold vignette sides */}
+                <div
+                  className="absolute inset-0 pointer-events-none z-10"
+                  style={{ boxShadow: "inset 0 0 60px rgba(185,145,70,0.08)" }}
+                />
                 <img
                   src={block.url}
-                  alt="Layout Block"
+                  alt="Image"
                   style={{
                     width: "100%",
                     height: "auto",
-                    objectFit: "contain",
+                    maxHeight: block.size ? `${block.size}px` : "320px",
+                    objectFit: "cover",
                     display: "block",
                     backgroundColor: "transparent",
+                    transition: "transform 0.8s ease",
                   }}
+                  className="group-hover:scale-105"
                   draggable="false"
                 />
               </div>

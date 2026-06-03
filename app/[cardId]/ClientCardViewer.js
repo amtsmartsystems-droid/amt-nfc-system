@@ -306,6 +306,7 @@ export default function ClientCardViewer({ initialCard, cardId }) {
     const siteData = { ...(card.siteData || {}) };
     if (card.links?.length  > 0) siteData.links  = card.links;
     if (card.events?.length > 0) siteData.events = card.events;
+    if (card.siteData?.layoutBlocks) siteData.layoutBlocks = card.siteData.layoutBlocks;
 
     const props = {
         cardId:     card.shortCode || cardId,
@@ -316,6 +317,7 @@ export default function ClientCardViewer({ initialCard, cardId }) {
         menuMode: card.menuMode || 'interactive',
         pdfMenuUrl: card.pdfMenuUrl || '',
         menuCategories: card.menuCategories || [],
+        showMenuImages: card.showMenuImages !== false,
         cliqConfig: card.cliqConfig || { isEnabled: false, alias: '', message: '' },
         tableNumber: tableNumber,
         addToCart: (item) => {
@@ -419,136 +421,62 @@ export default function ClientCardViewer({ initialCard, cardId }) {
             )}
 
             {/* ════════ PAGE WRAPPER ════════ */}
-            <div style={{ background: props.siteColors.background, minHeight: '100vh' }}>
-                <div
-                    style={{
-                        maxWidth:  448,
-                        margin:    '0 auto',
-                        minHeight: '100vh',
-                        background: '#fff',
-                        boxShadow: '0 0 80px rgba(0,0,0,0.16)',
-                        position:  'relative',   // ← key: absolute children anchor here
-                        overflowX: 'hidden',
-                    }}
-                >
-                    {/* ════════ MODERN HEADER ════════ */}
-                    <div style={{
-                        background: props.siteColors.background,
-                        padding: '16px 20px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
-                        borderBottom: `1px solid ${props.siteColors.primary}33`,
-                        boxShadow: `0 4px 20px ${props.siteColors.primary}15`,
-                        position: 'relative',
-                        zIndex: 50,
-                        direction: lang === 'ar' ? 'rtl' : 'ltr'
-                    }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                            {card.siteData?.profileImage ? (
-                                <img 
-                                    src={card.siteData.profileImage} 
-                                    alt="Logo" 
-                                    style={{
-                                        width: 44, height: 44,
-                                        borderRadius: '50%',
-                                        objectFit: 'cover',
-                                        border: `2px solid ${props.siteColors.primary}`,
-                                        background: '#000',
-                                        padding: 2
-                                    }} 
-                                />
-                            ) : (
-                                <div style={{
-                                    width: 44, height: 44,
-                                    borderRadius: '50%',
-                                    background: props.siteColors.primary,
-                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                    color: '#ffffff', fontWeight: 900, fontSize: 20,
-                                    textShadow: '0 1px 2px rgba(0,0,0,0.3)'
-                                }}>
-                                    {card.businessName ? card.businessName.charAt(0).toUpperCase() : 'R'}
-                                </div>
-                            )}
-                            
-                            <div>
-                                <h1 style={{ 
-                                    color: props.siteColors.background.toLowerCase() === '#ffffff' || props.siteColors.background.toLowerCase() === '#fafafa' ? '#111827' : '#ffffff', 
-                                    fontSize: 17, 
-                                    fontWeight: 900, 
-                                    margin: 0, 
-                                    fontFamily: 'Cairo, sans-serif'
-                                }}>
-                                    {card.siteData?.name || card.siteData?.nameAr || card.businessName || 'المطعم الذكي'}
-                                </h1>
-                                {tableNumber && (
-                                    <p style={{ color: props.siteColors.primary, fontSize: 13, margin: 0, fontWeight: 700, fontFamily: 'Cairo, sans-serif' }}>
-                                        {lang === 'ar' ? 'الطاولة' : 'Table'} {tableNumber}
-                                    </p>
-                                )}
-                            </div>
-                        </div>
+            {(() => {
+                const tn = (card.themeName || '').toLowerCase().trim();
 
-                        <div style={{ display: 'flex', gap: 8 }}>
-                            {hasWifi && (
+                // ── Full-screen themes (no white wrapper, no generic header) ──
+                const isFullScreen = tn === 'marouf_coffee' || tn === 'coffee_luxury';
+
+                if (isFullScreen) {
+                    return (
+                        <div style={{ minHeight: '100vh', position: 'relative', overflowX: 'hidden' }}>
+                            {/* Floating language button */}
+                            <div style={{
+                                position: 'fixed', top: 16, right: lang === 'ar' ? 'auto' : 16, left: lang === 'ar' ? 16 : 'auto',
+                                zIndex: 200, display: 'flex', gap: 8
+                            }}>
+                                {hasWifi && (
+                                    <button
+                                        onClick={handleCopyWifi}
+                                        style={{
+                                            background: wifiState === 'copied' ? 'rgba(16,185,129,0.9)' : 'rgba(0,0,0,0.6)',
+                                            color: wifiState === 'copied' ? '#fff' : '#B99146',
+                                            border: '1px solid rgba(185,145,70,0.3)',
+                                            borderRadius: 10, width: 38, height: 38,
+                                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                            backdropFilter: 'blur(12px)', cursor: 'pointer', transition: 'all 0.3s'
+                                        }}
+                                    >
+                                        {wifiState === 'copied' ? <Check size={16} /> : <Wifi size={16} />}
+                                    </button>
+                                )}
                                 <button
-                                    onClick={handleCopyWifi}
+                                    onClick={() => setLang(l => l === 'ar' ? 'en' : 'ar')}
                                     style={{
-                                        background: wifiState === 'copied' ? '#10b981' : `${props.siteColors.primary}15`,
-                                        color: wifiState === 'copied' ? '#fff' : props.siteColors.primary,
-                                        border: `1px solid ${wifiState === 'copied' ? '#10b981' : props.siteColors.primary}40`,
-                                        borderRadius: 10,
-                                        width: 38, height: 38,
+                                        background: 'rgba(0,0,0,0.6)',
+                                        color: '#B99146',
+                                        border: '1px solid rgba(185,145,70,0.3)',
+                                        borderRadius: 8, width: 36, height: 36,
                                         display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                        transition: 'all 0.3s'
+                                        fontWeight: 900, fontSize: 13, fontFamily: 'Cairo,sans-serif',
+                                        backdropFilter: 'blur(12px)', cursor: 'pointer', transition: 'all 0.3s'
                                     }}
                                 >
-                                    {wifiState === 'copied' ? <Check size={18} /> : <Wifi size={18} />}
+                                    {lang === 'ar' ? 'EN' : 'ع'}
                                 </button>
-                            )}
-                            <button
-                                onClick={() => setLang(l => l === 'ar' ? 'en' : 'ar')}
-                                style={{
-                                    background: '#1f2937',
-                                    color: '#f5c518',
-                                    border: '1px solid #f5c518',
-                                    borderRadius: 8,
-                                    width: 36, height: 36,
-                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                    fontWeight: 900, fontSize: 13,
-                                    transition: 'all 0.3s'
-                                }}
-                            >
-                                {lang === 'ar' ? 'EN' : 'ع'}
-                            </button>
+                            </div>
+                            {/* Full-screen theme */}
+                            {tn === 'marouf_coffee' && <MaroufCoffeeTheme {...props} />}
+                            {tn === 'coffee_luxury' && <CoffeeLuxuryTheme {...props} />}
                         </div>
-                    </div>
+                    );
+                }
 
-                    {/* ════════ Restaurant / Cafe Theme Content ════════ */}
-                    {(() => {
-                        const tn = (card.themeName || '').toLowerCase().trim();
-                        console.log("ClientCardViewer Render -> Current Theme:", tn);
-                        if (tn === 'cafe' || tn === 'cafetheme')          return <CafeTheme      {...props} />;
-                        if (tn === 'cafe1' || tn === 'cafetheme1')        return <CafeTheme1     {...props} />;
-                        if (tn === 'gastro' || tn === 'gastrobartheme')   return <GastroBarTheme {...props} />;
-                        if (tn === 'coffee_luxury') return <CoffeeLuxuryTheme {...props} />;
-                        if (tn === 'marouf_coffee') return <MaroufCoffeeTheme {...props} />;
-                        // 'restaurant', 'restauranttheme', 'luxury', default
-                        return <RestaurantTheme {...props} />;
-                    })()}
-
-                    {/* ════════ AMT Branding Footer ════════ */}
-                    <div style={{
-                        textAlign:  'center',
-                        padding:    '18px 16px 22px',
-                        borderTop:  '1px solid rgba(0,0,0,0.06)',
-                        background: 'rgba(0,0,0,0.02)',
-                    }}>
-                        <a
-                            href="/amt"
+                // ── Standard themes with white wrapper + header ──
+                return (
+                    <div style={{ background: props.siteColors.background, minHeight: '100vh' }}>
+                        <div
                             style={{
-                                display:        'inline-flex',
-                                alignItems:     'center',
                                 gap:            5,
                                 fontSize:       11,
                                 fontWeight:     700,
