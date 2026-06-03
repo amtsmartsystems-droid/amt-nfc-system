@@ -431,24 +431,6 @@ export default function ClientCardViewer({ initialCard, cardId }) {
                         overflowX: 'hidden',
                     }}
                 >
-                    {/* ════════ FLOATING IMAGES ════════ */}
-                    {(card.siteData?.floatingImages || []).map(img => (
-                        <img 
-                            key={img.id}
-                            src={img.url}
-                            alt="Floating Element"
-                            style={{
-                                position: 'absolute',
-                                left: img.x,
-                                top: img.y,
-                                width: img.size || 150,
-                                zIndex: 9999,
-                                objectFit: 'contain',
-                                pointerEvents: 'none' // Do not block clicks on actual UI elements
-                            }}
-                        />
-                    ))}
-
                     {/* ════════ MODERN HEADER ════════ */}
                     <div style={{
                         background: props.siteColors.background,

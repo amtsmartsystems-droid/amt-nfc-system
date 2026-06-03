@@ -450,96 +450,6 @@ function PageContent() {
     reader.readAsDataURL(file);
   };
 
-  const handleFloatingImageUpload = (file) => {
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const img = new window.Image();
-      img.onload = () => {
-        const canvas = document.createElement('canvas');
-        const MAX_WIDTH = 800;
-        const MAX_HEIGHT = 800;
-        let width = img.width;
-        let height = img.height;
-
-        if (width > height) {
-          if (width > MAX_WIDTH) {
-            height = Math.round((height * MAX_WIDTH) / width);
-            width = MAX_WIDTH;
-          }
-        } else {
-          if (height > MAX_HEIGHT) {
-            width = Math.round((width * MAX_HEIGHT) / height);
-            height = MAX_HEIGHT;
-          }
-        }
-
-        canvas.width = width;
-        canvas.height = height;
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(img, 0, 0, width, height);
-
-        const dataUrl = canvas.toDataURL('image/png'); // PNG to preserve transparency
-        setSiteData(p => ({
-          ...p,
-          floatingImages: [...(p.floatingImages || []), { id: Date.now().toString(), url: dataUrl, x: 50, y: 50, size: 150 }]
-        }));
-        showToast(`✅ تم إضافة صورة عائمة`);
-      };
-      img.src = e.target.result;
-    };
-    reader.readAsDataURL(file);
-  };
-
-  const DraggableImage = ({ img, onUpdate }) => {
-    const [pos, setPos] = useState({ x: img.x || 50, y: img.y || 50 });
-    
-    // Update local state when parent state changes (e.g., resizing)
-    useEffect(() => {
-        setPos(prev => ({ ...prev, size: img.size })); // just force re-render if needed, but size is read directly from img.size
-    }, [img.size]);
-
-    return (
-      <img
-        src={img.url}
-        style={{
-          position: 'absolute',
-          left: pos.x,
-          top: pos.y,
-          width: img.size || 150,
-          zIndex: 9999,
-          cursor: 'move',
-          touchAction: 'none',
-          objectFit: 'contain'
-        }}
-        onPointerDown={(e) => {
-          e.preventDefault(); // Prevent native drag
-          const startX = e.clientX;
-          const startY = e.clientY;
-          const startPosX = pos.x;
-          const startPosY = pos.y;
-          
-          const handlePointerMove = (ev) => {
-            setPos({
-              x: startPosX + (ev.clientX - startX),
-              y: startPosY + (ev.clientY - startY)
-            });
-          };
-          
-          const handlePointerUp = (ev) => {
-            document.removeEventListener('pointermove', handlePointerMove);
-            document.removeEventListener('pointerup', handlePointerUp);
-            onUpdate(startPosX + (ev.clientX - startX), startPosY + (ev.clientY - startY));
-          };
-          
-          document.addEventListener('pointermove', handlePointerMove);
-          document.addEventListener('pointerup', handlePointerUp);
-        }}
-        alt="Floating"
-      />
-    );
-  };
-
   const renderTheme = () => {
     const props = { 
       siteData, 
@@ -551,12 +461,7 @@ function PageContent() {
       menuCategories, 
       showMenuImages,
       isPreview: true,
-      onUpdateFloatingImage: (id, x, y) => {
-        setSiteData(p => ({
-          ...p,
-          floatingImages: (p.floatingImages || []).map(img => img.id === id ? { ...img, x, y } : img)
-        }));
-      }
+      onUpdateLayoutBlocks: (newBlocks) => setSiteData(p => ({ ...p, layoutBlocks: newBlocks }))
     };
     if (theme === 'business_card') return <AMTBusinessCard />;
     switch (theme) {
@@ -648,20 +553,6 @@ function PageContent() {
               {/* Scrollable content */}
               <div className="w-full h-full overflow-y-auto overflow-x-hidden pt-8 relative" style={{ scrollbarWidth:"none" }}>
                 {renderTheme()}
-                
-                {/* ════ FLOATING IMAGES IN PREVIEW ════ */}
-                {(siteData.floatingImages || []).map(img => (
-                  <DraggableImage 
-                    key={img.id} 
-                    img={img} 
-                    onUpdate={(newX, newY) => {
-                      setSiteData(p => ({
-                        ...p,
-                        floatingImages: p.floatingImages.map(f => f.id === img.id ? { ...f, x: newX, y: newY } : f)
-                      }));
-                    }}
-                  />
-                ))}
               </div>
             </div>
             {/* Live badge */}
@@ -876,40 +767,82 @@ function PageContent() {
                   );
                 })}
                 
-                {/* ═══ FLOATING IMAGES EDITOR ═══ */}
+                {/* ═══ BLOCK IMAGES EDITOR (Drag & Drop Blocks) ═══ */}
                 <div className="mt-8 border-t border-white/10 pt-6">
-                  <h3 className="font-bold text-[13px] mb-2 flex items-center gap-2">
-                    <LucideIcons.Move size={14} className="text-yellow-400" />
-                    الصور العائمة (حركها بحرية في المعاينة!)
-                  </h3>
+                  <div className="flex items-center justify-between mb-4">
+                      <h3 className="font-bold text-[13px] flex items-center gap-2">
+                        <LucideIcons.LayoutList size={14} className="text-yellow-400" />
+                        صور البلوكات (اسحب ورتب!)
+                      </h3>
+                      <button 
+                        onClick={() => {
+                          const blocks = siteData.layoutBlocks || [
+                            { id: "header", type: "header" },
+                            { id: "menu_button", type: "menu_button" },
+                            { id: "info", type: "info" },
+                            { id: "links", type: "links" }
+                          ];
+                          // Separate images from core blocks
+                          const coreBlocks = blocks.filter(b => b.type !== 'image');
+                          const imageBlocks = blocks.filter(b => b.type === 'image');
+                          
+                          if (imageBlocks.length === 0) {
+                              alert("أضف بعض الصور أولاً لتوزيعها!");
+                              return;
+                          }
+                          
+                          // Smart distribute: interleaving images evenly
+                          let newLayout = [];
+                          let coreIdx = 0;
+                          let imgIdx = 0;
+                          
+                          // Always put header first
+                          newLayout.push(coreBlocks[coreIdx++]);
+                          
+                          while (coreIdx < coreBlocks.length || imgIdx < imageBlocks.length) {
+                              if (imgIdx < imageBlocks.length) {
+                                  newLayout.push(imageBlocks[imgIdx++]);
+                              }
+                              if (coreIdx < coreBlocks.length) {
+                                  newLayout.push(coreBlocks[coreIdx++]);
+                              }
+                          }
+                          
+                          setSiteData(p => ({ ...p, layoutBlocks: newLayout }));
+                        }}
+                        className="bg-yellow-400/10 text-yellow-400 border border-yellow-400/30 px-3 py-1.5 rounded-lg text-[10px] font-bold flex items-center gap-2 hover:bg-yellow-400 hover:text-black transition-all"
+                      >
+                        <LucideIcons.Sparkles size={12} /> توزيع ذكي AI
+                      </button>
+                  </div>
                   <p className="text-[11px] text-slate-400 mb-4 leading-relaxed">
-                    اضغط لإضافة صورة، ثم اسحبها بالماوس في شاشة الهاتف على اليمين لتغيير مكانها، واستخدم الشريط أدناه لتكبيرها وتصغيرها.
+                    هذه الصور ستصبح "بلوكات" حرة بين أزرار القالب. يمكنك تغيير ترتيبها بسحبها لأعلى ولأسفل في واجهة المعاينة المباشرة!
                   </p>
                   
-                  {(siteData.floatingImages || []).map((fImg) => (
-                    <div key={fImg.id} className="rounded-2xl p-4 space-y-3 mb-3 relative group" style={{ background:"rgba(255,255,255,0.03)", border:"1px solid rgba(255,255,255,0.07)" }}>
+                  {((siteData.layoutBlocks || []).filter(b => b.type === 'image')).map((imgBlock) => (
+                    <div key={imgBlock.id} className="rounded-2xl p-4 space-y-3 mb-3 relative group" style={{ background:"rgba(255,255,255,0.03)", border:"1px solid rgba(255,255,255,0.07)" }}>
                       <button 
-                        onClick={() => setSiteData(p => ({...p, floatingImages: p.floatingImages.filter(img => img.id !== fImg.id)}))}
+                        onClick={() => setSiteData(p => ({...p, layoutBlocks: p.layoutBlocks.filter(b => b.id !== imgBlock.id)}))}
                         className="absolute top-2 right-2 w-6 h-6 rounded-full bg-red-500/10 text-red-400 flex items-center justify-center hover:bg-red-500 hover:text-white transition-all z-10"
                       >
                         <LucideIcons.X size={12} />
                       </button>
                       <div className="flex gap-4 items-center pr-2">
-                        <img src={fImg.url} alt="floating" className="w-14 h-14 rounded-lg object-contain border border-white/10 bg-black/40" />
+                        <img src={imgBlock.url} alt="block" className="w-14 h-14 rounded-lg object-contain border border-white/10 bg-black/40" />
                         <div className="flex-1">
                            <Label className="text-[10px] text-slate-400 mb-2 flex justify-between">
-                             <span>الحجم (التكبير/التصغير)</span>
-                             <span className="text-yellow-400">{fImg.size}px</span>
+                             <span>الحجم التقريبي (العرض)</span>
+                             <span className="text-yellow-400">{imgBlock.size}px</span>
                            </Label>
                            <input 
                               type="range" 
-                              min="20" max="400" 
-                              value={fImg.size || 150}
+                              min="50" max="400" 
+                              value={imgBlock.size || 250}
                               onChange={(e) => {
                                 const val = parseInt(e.target.value);
                                 setSiteData(p => ({
                                   ...p,
-                                  floatingImages: p.floatingImages.map(img => img.id === fImg.id ? {...img, size: val} : img)
+                                  layoutBlocks: p.layoutBlocks.map(b => b.id === imgBlock.id ? {...b, size: val} : b)
                                 }));
                               }}
                               className="w-full h-1.5 bg-white/10 rounded-lg appearance-none cursor-pointer accent-yellow-400"
@@ -923,13 +856,55 @@ function PageContent() {
                     <input
                       type="file"
                       accept="image/*"
-                      id="upload-floating"
+                      id="upload-block-img"
                       className="hidden"
-                      onChange={(e) => handleFloatingImageUpload(e.target.files[0])}
+                      onChange={(e) => {
+                        const file = e.target.files[0];
+                        if (!file) return;
+                        const reader = new FileReader();
+                        reader.onload = (ev) => {
+                          const url = ev.target.result;
+                          // Standard max dimensions to prevent huge base64 strings
+                          const img = new window.Image();
+                          img.onload = () => {
+                              const canvas = document.createElement('canvas');
+                              const MAX_WIDTH = 500;
+                              let width = img.width;
+                              let height = img.height;
+                              if (width > MAX_WIDTH) {
+                                  height = Math.round((height * MAX_WIDTH) / width);
+                                  width = MAX_WIDTH;
+                              }
+                              canvas.width = width;
+                              canvas.height = height;
+                              const ctx = canvas.getContext('2d');
+                              ctx.drawImage(img, 0, 0, width, height);
+                              const compressedUrl = canvas.toDataURL('image/jpeg', 0.8);
+                              
+                              setSiteData(p => {
+                                  const currentBlocks = p.layoutBlocks || [
+                                      { id: "header", type: "header" },
+                                      { id: "menu_button", type: "menu_button" },
+                                      { id: "info", type: "info" },
+                                      { id: "links", type: "links" }
+                                  ];
+                                  const newImageBlock = {
+                                      id: `img_${Date.now()}`,
+                                      type: 'image',
+                                      url: compressedUrl,
+                                      size: 250
+                                  };
+                                  return { ...p, layoutBlocks: [...currentBlocks, newImageBlock] };
+                              });
+                          };
+                          img.src = url;
+                        };
+                        reader.readAsDataURL(file);
+                      }}
                     />
-                    <label htmlFor="upload-floating" className="cursor-pointer flex flex-col items-center justify-center gap-2">
+                    <label htmlFor="upload-block-img" className="cursor-pointer flex flex-col items-center justify-center gap-2">
                        <LucideIcons.PlusCircle size={20} className="text-yellow-400" />
-                       <span className="text-[11px] font-bold text-slate-300">إضافة صورة عائمة جديدة</span>
+                       <span className="text-[11px] font-bold text-slate-300">إضافة بلوك صورة جديد</span>
                     </label>
                   </div>
                 </div>

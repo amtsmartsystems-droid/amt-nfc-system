@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import * as LucideIcons from "lucide-react";
 import { getIconForLink } from "../../utils/icons";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, Reorder } from "framer-motion";
 
 // ══════════════════════════════════════════════════════════════════════
 //  MaroufCoffeeTheme — Ultra Premium Animated Edition
@@ -86,6 +86,141 @@ export default function MaroufCoffeeTheme({ cardId, siteData, siteColors, lang =
     );
   };
 
+  // ════ LAYOUT BLOCKS SYSTEM ════
+  const defaultBlocks = [
+      { id: "header", type: "header" },
+      { id: "menu_button", type: "menu_button" },
+      { id: "info", type: "info" },
+      { id: "links", type: "links" }
+  ];
+  const layoutBlocks = (siteData.layoutBlocks && siteData.layoutBlocks.length > 0) ? siteData.layoutBlocks : defaultBlocks;
+
+  const renderBlock = (block) => {
+      switch (block.type) {
+          case 'header':
+              return (
+                  <div className="flex flex-col items-center pt-20 px-6 text-center" style={{ cursor: isPreview ? 'grab' : 'default' }}>
+                      <motion.div variants={itemVariants} className="relative mb-8 group">
+                          <motion.div 
+                            className="absolute inset-0 rounded-full bg-[#B99146] blur-2xl opacity-30"
+                            animate={{ scale: [1, 1.1, 1], opacity: [0.3, 0.5, 0.3] }}
+                            transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                          />
+                          <div className="w-40 h-40 rounded-full overflow-hidden border-2 border-[#B99146]/60 relative z-10 bg-black p-[3px] shadow-[0_0_40px_rgba(185,145,70,0.25)] group-hover:scale-105 transition-transform duration-700">
+                              <img src={profileImg} alt={name} className="w-full h-full object-contain rounded-full bg-black" draggable="false" />
+                          </div>
+                      </motion.div>
+
+                      <motion.div variants={itemVariants}>
+                          <h1 className="text-[34px] font-black mb-3 tracking-wide uppercase drop-shadow-xl text-white" style={{ fontFamily:"Cairo,sans-serif" }}>
+                              {name}
+                          </h1>
+                          {tagline && (
+                              <div className="inline-block px-5 py-2 rounded-full bg-[#B99146]/10 border border-[#B99146]/30 mb-6 backdrop-blur-sm">
+                                <p className="font-bold tracking-widest text-[13px] uppercase text-[#B99146]" style={{ fontFamily:"Cairo,sans-serif" }}>
+                                    {tagline}
+                                </p>
+                              </div>
+                          )}
+                      </motion.div>
+
+                      <motion.div variants={itemVariants}>
+                          {about && (
+                              <p className={`text-[17px] leading-relaxed max-w-[90%] mx-auto text-gray-300 drop-shadow-md ${about === defaultAbout ? 'italic text-[#B99146]/90 font-medium' : 'font-light'}`} style={{ fontFamily:"Cairo,sans-serif" }}>
+                                  "{about}"
+                              </p>
+                          )}
+                      </motion.div>
+                  </div>
+              );
+
+          case 'menu_button':
+              if (!isMenuEnabled && menuMode !== 'pdf') return null;
+              return (
+                  <motion.div variants={itemVariants} className="px-6 mt-12" style={{ cursor: isPreview ? 'grab' : 'default' }}>
+                      <button 
+                          onClick={handleMenuClick}
+                          className="w-full py-6 rounded-3xl font-black text-black text-[22px] tracking-[0.2em] uppercase relative overflow-hidden group transition-all duration-500 hover:-translate-y-1 shadow-[0_8px_40px_rgba(185,145,70,0.5)] hover:shadow-[0_15px_50px_rgba(185,145,70,0.7)]"
+                          style={{ backgroundColor: accent, fontFamily:"Cairo,sans-serif" }}
+                      >
+                          <span className="relative z-10 flex items-center justify-center gap-4">
+                              <LucideIcons.Coffee size={28} strokeWidth={2.5} className="group-hover:rotate-12 transition-transform duration-500" />
+                              {t("VIEW MENU", "عرض قائمة الطعام")}
+                          </span>
+                          <div className="absolute top-0 -left-[100%] w-1/2 h-full bg-gradient-to-r from-transparent via-white/40 to-transparent skew-x-[-20deg] group-hover:left-[200%] transition-all duration-1000 ease-in-out"></div>
+                      </button>
+                  </motion.div>
+              );
+
+          case 'info':
+              if (!hours && !address) return null;
+              return (
+                  <motion.div variants={itemVariants} className="px-6 mt-12" style={{ cursor: isPreview ? 'grab' : 'default' }}>
+                      <div className="bg-black/40 backdrop-blur-md border border-white/10 rounded-3xl p-6 flex flex-col gap-6 shadow-2xl relative overflow-hidden">
+                          <div className="absolute top-0 right-0 w-32 h-32 bg-[#B99146]/5 rounded-full blur-3xl"></div>
+                          
+                          {address && (
+                              <div className="flex items-start gap-4 relative z-10 group">
+                                  <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-black/60 border border-white/5 flex-shrink-0 group-hover:border-[#B99146]/40 transition-colors">
+                                      <LucideIcons.MapPin size={20} className="text-[#B99146] group-hover:scale-110 transition-transform" />
+                                  </div>
+                                  <div className="flex-1 pt-2.5 text-[15px] leading-relaxed text-gray-300 font-medium" style={{ fontFamily:"Cairo,sans-serif" }}>
+                                      {address}
+                                  </div>
+                              </div>
+                          )}
+                          
+                          {hours && (
+                              <div className="flex items-start gap-4 relative z-10 group">
+                                  <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-black/60 border border-white/5 flex-shrink-0 group-hover:border-[#B99146]/40 transition-colors">
+                                      <LucideIcons.Clock size={20} className="text-[#B99146] group-hover:scale-110 transition-transform" />
+                                  </div>
+                                  <div className="flex-1 pt-2.5 text-[15px] leading-relaxed text-gray-300 font-medium" style={{ fontFamily:"Cairo,sans-serif" }}>
+                                      {hours}
+                                  </div>
+                              </div>
+                          )}
+                      </div>
+                  </motion.div>
+              );
+
+          case 'links':
+              if (!links || links.length === 0) return null;
+              return (
+                  <div className="px-6 mt-14 flex flex-col gap-4 pb-4" style={{ cursor: isPreview ? 'grab' : 'default' }}>
+                      <motion.div variants={itemVariants}>
+                          <h3 className="text-center font-bold text-[14px] tracking-[0.3em] uppercase mb-8 flex items-center justify-center gap-4 text-[#B99146] drop-shadow-md">
+                              <span className="h-[2px] w-14 bg-gradient-to-r from-transparent to-[#B99146]/60 rounded-full"></span>
+                              {t("Connect With Us", "تواصل معنا")}
+                              <span className="h-[2px] w-14 bg-gradient-to-l from-transparent to-[#B99146]/60 rounded-full"></span>
+                          </h3>
+                      </motion.div>
+                      
+                      {links.map((link, idx) => (
+                          <motion.div key={link.id || idx} variants={itemVariants}>
+                              <LinkCard link={link} />
+                          </motion.div>
+                      ))}
+                  </div>
+              );
+
+          case 'image':
+              return (
+                  <motion.div variants={itemVariants} className="px-6 mt-12 flex justify-center" style={{ cursor: isPreview ? 'grab' : 'default' }}>
+                      <img 
+                          src={block.url} 
+                          alt="Layout Block" 
+                          style={{ width: block.size || 250, objectFit: 'contain' }}
+                          draggable="false"
+                      />
+                  </motion.div>
+              );
+
+          default:
+              return null;
+      }
+  };
+
   return (
     <div className="min-h-screen text-white font-sans selection:bg-[#B99146]/30 bg-black relative overflow-hidden" dir={isAr ? "rtl" : "ltr"}>
       
@@ -109,107 +244,20 @@ export default function MaroufCoffeeTheme({ cardId, siteData, siteColors, lang =
         initial="hidden"
         animate="show"
       >
-        
-        {/* ── HEADER SECTION ── */}
-        <div className="flex flex-col items-center pt-20 px-6 text-center">
-            
-            <motion.div variants={itemVariants} className="relative mb-8 group">
-                <motion.div 
-                  className="absolute inset-0 rounded-full bg-[#B99146] blur-2xl opacity-30"
-                  animate={{ scale: [1, 1.1, 1], opacity: [0.3, 0.5, 0.3] }}
-                  transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-                />
-                <div className="w-40 h-40 rounded-full overflow-hidden border-2 border-[#B99146]/60 relative z-10 bg-black p-[3px] shadow-[0_0_40px_rgba(185,145,70,0.25)] group-hover:scale-105 transition-transform duration-700">
-                    <img src={profileImg} alt={name} className="w-full h-full object-contain rounded-full bg-black" />
-                </div>
-            </motion.div>
-
-            <motion.div variants={itemVariants}>
-                <h1 className="text-[34px] font-black mb-3 tracking-wide uppercase drop-shadow-xl text-white" style={{ fontFamily:"Cairo,sans-serif" }}>
-                    {name}
-                </h1>
-                {tagline && (
-                    <div className="inline-block px-5 py-2 rounded-full bg-[#B99146]/10 border border-[#B99146]/30 mb-6 backdrop-blur-sm">
-                      <p className="font-bold tracking-widest text-[13px] uppercase text-[#B99146]" style={{ fontFamily:"Cairo,sans-serif" }}>
-                          {tagline}
-                      </p>
+        {isPreview && props.onUpdateLayoutBlocks ? (
+            <Reorder.Group axis="y" values={layoutBlocks} onReorder={props.onUpdateLayoutBlocks} className="flex flex-col">
+                {layoutBlocks.map((block) => (
+                    <Reorder.Item key={block.id} value={block} dragListener={true}>
+                        {renderBlock(block)}
+                    </Reorder.Item>
+                ))}
+            </Reorder.Group>
+        ) : (
+            <div className="flex flex-col">
+                {layoutBlocks.map((block) => (
+                    <div key={block.id}>
+                        {renderBlock(block)}
                     </div>
-                )}
-            </motion.div>
-
-            <motion.div variants={itemVariants}>
-                {about && (
-                    <p className={`text-[17px] leading-relaxed max-w-[90%] mx-auto text-gray-300 drop-shadow-md ${about === defaultAbout ? 'italic text-[#B99146]/90 font-medium' : 'font-light'}`} style={{ fontFamily:"Cairo,sans-serif" }}>
-                        "{about}"
-                    </p>
-                )}
-            </motion.div>
-        </div>
-
-        {/* ── MAIN MENU BUTTON ── */}
-        {(isMenuEnabled || menuMode === 'pdf') && (
-            <motion.div variants={itemVariants} className="px-6 mt-12">
-                <button 
-                    onClick={handleMenuClick}
-                    className="w-full py-6 rounded-3xl font-black text-black text-[22px] tracking-[0.2em] uppercase relative overflow-hidden group transition-all duration-500 hover:-translate-y-1 shadow-[0_8px_40px_rgba(185,145,70,0.5)] hover:shadow-[0_15px_50px_rgba(185,145,70,0.7)]"
-                    style={{ backgroundColor: accent, fontFamily:"Cairo,sans-serif" }}
-                >
-                    <span className="relative z-10 flex items-center justify-center gap-4">
-                        <LucideIcons.Coffee size={28} strokeWidth={2.5} className="group-hover:rotate-12 transition-transform duration-500" />
-                        {t("VIEW MENU", "عرض قائمة الطعام")}
-                    </span>
-                    {/* Button Shine Effect */}
-                    <div className="absolute top-0 -left-[100%] w-1/2 h-full bg-gradient-to-r from-transparent via-white/40 to-transparent skew-x-[-20deg] group-hover:left-[200%] transition-all duration-1000 ease-in-out"></div>
-                </button>
-            </motion.div>
-        )}
-
-        {/* ── INFO SECTION (Hours & Address) ── */}
-        {(hours || address) && (
-            <motion.div variants={itemVariants} className="px-6 mt-12">
-                <div className="bg-black/40 backdrop-blur-md border border-white/10 rounded-3xl p-6 flex flex-col gap-6 shadow-2xl relative overflow-hidden">
-                    <div className="absolute top-0 right-0 w-32 h-32 bg-[#B99146]/5 rounded-full blur-3xl"></div>
-                    
-                    {address && (
-                        <div className="flex items-start gap-4 relative z-10 group">
-                            <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-black/60 border border-white/5 flex-shrink-0 group-hover:border-[#B99146]/40 transition-colors">
-                                <LucideIcons.MapPin size={20} className="text-[#B99146] group-hover:scale-110 transition-transform" />
-                            </div>
-                            <div className="flex-1 pt-2.5 text-[15px] leading-relaxed text-gray-300 font-medium" style={{ fontFamily:"Cairo,sans-serif" }}>
-                                {address}
-                            </div>
-                        </div>
-                    )}
-                    
-                    {hours && (
-                        <div className="flex items-start gap-4 relative z-10 group">
-                            <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-black/60 border border-white/5 flex-shrink-0 group-hover:border-[#B99146]/40 transition-colors">
-                                <LucideIcons.Clock size={20} className="text-[#B99146] group-hover:scale-110 transition-transform" />
-                            </div>
-                            <div className="flex-1 pt-2.5 text-[15px] leading-relaxed text-gray-300 font-medium" style={{ fontFamily:"Cairo,sans-serif" }}>
-                                {hours}
-                            </div>
-                        </div>
-                    )}
-                </div>
-            </motion.div>
-        )}
-
-        {/* ── LINKS SECTION ── */}
-        {links && links.length > 0 && (
-            <div className="px-6 mt-14 flex flex-col gap-4 pb-12">
-                <motion.div variants={itemVariants}>
-                    <h3 className="text-center font-bold text-[14px] tracking-[0.3em] uppercase mb-8 flex items-center justify-center gap-4 text-[#B99146] drop-shadow-md">
-                        <span className="h-[2px] w-14 bg-gradient-to-r from-transparent to-[#B99146]/60 rounded-full"></span>
-                        {t("Connect With Us", "تواصل معنا")}
-                        <span className="h-[2px] w-14 bg-gradient-to-l from-transparent to-[#B99146]/60 rounded-full"></span>
-                    </h3>
-                </motion.div>
-                
-                {links.map((link, idx) => (
-                    <motion.div key={link.id || idx} variants={itemVariants}>
-                        <LinkCard link={link} />
-                    </motion.div>
                 ))}
             </div>
         )}
