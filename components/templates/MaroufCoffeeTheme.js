@@ -161,7 +161,7 @@ export default function MaroufCoffeeTheme({ cardId, siteData, siteColors, lang =
   const hours   = sd.hours   || "";
   const links   = sd.links   || [];
 
-  const profileImg = sd.profileImage || "https://maroufcoffee.com/wp-content/uploads/2022/11/Marouf-Coffee-Logo-4.png";
+  const profileImg = sd.images?.profile || sd.profileImage || "https://maroufcoffee.com/wp-content/uploads/2022/11/Marouf-Coffee-Logo-4.png";
 
   const handleMenuClick = (e) => {
     if (menuMode === 'pdf' && pdfMenuUrl) {

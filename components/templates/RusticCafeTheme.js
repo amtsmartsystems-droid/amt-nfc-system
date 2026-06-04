@@ -156,7 +156,7 @@ export default function RusticCafeTheme({ cardId, siteData, siteColors, lang = "
   const hours   = sd.hours   || "";
   const links   = sd.links   || [];
 
-  const profileImg = sd.profileImage || "https://images.unsplash.com/photo-1554118811-1e0d58224f24?q=80&w=400&auto=format&fit=crop";
+  const profileImg = sd.images?.profile || sd.profileImage || "https://images.unsplash.com/photo-1554118811-1e0d58224f24?q=80&w=400&auto=format&fit=crop";
 
   const handleMenuClick = (e) => {
     if (menuMode === 'pdf' && pdfMenuUrl) {
