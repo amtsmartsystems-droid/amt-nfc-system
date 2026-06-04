@@ -151,7 +151,14 @@ export default function MaroufCoffeeTheme({ cardId, siteData, siteColors, lang =
     return `${(num >> 16) & 255}, ${(num >> 8) & 255}, ${num & 255}`;
   };
 
-  
+  const isAr = lang === "ar";
+  const [isMenuModalOpen, setIsMenuModalOpen] = useState(false);
+
+  useEffect(() => {
+    document.documentElement.style.setProperty('--primary-color', accent);
+    document.documentElement.style.setProperty('--primary-rgb', hexToRgbStr(accent));
+    document.documentElement.style.setProperty('--bg-color', bgDark);
+  }, [accent, bgDark]);
 
   const t  = (en, ar) => isAr && ar ? ar : en;
   const sd = siteData || {};
