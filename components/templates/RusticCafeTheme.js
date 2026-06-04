@@ -61,24 +61,25 @@ function GlowLinkCard({ link, accent, secondaryAccent, cardId, t, handleMenuClic
       ref={btnRef}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
-      className="flex items-center gap-4 w-full p-4 rounded-2xl relative overflow-hidden group"
+      className="flex items-center gap-4 w-full p-4 rounded-2xl relative overflow-hidden group transition-all duration-400"
       style={{
-        background: "rgba(255,255,255,0.75)",
-        backdropFilter: "blur(20px)",
-        WebkitBackdropFilter: "blur(20px)",
-        border: "1px solid rgba(0,0,0,0.06)",
-        boxShadow: "0 4px 24px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.8)",
-        transition: "transform 0.3s cubic-bezier(0.25,0.46,0.45,0.94), box-shadow 0.3s ease, border-color 0.3s ease",
+        background: "rgba(255,255,255,0.2)",
+        backdropFilter: "blur(12px)",
+        WebkitBackdropFilter: "blur(12px)",
+        border: "1px solid rgba(255,255,255,0.4)",
+        boxShadow: "0 4px 20px rgba(0,0,0,0.03), inset 0 1px 0 rgba(255,255,255,0.5)",
       }}
       onMouseEnter={e => {
         e.currentTarget.style.transform = "translateY(-2px)";
-        e.currentTarget.style.boxShadow = `0 8px 40px rgba(0,0,0,0.08), 0 0 0 1px ${accent}66, inset 0 1px 0 rgba(255,255,255,1)`;
-        e.currentTarget.style.borderColor = `${accent}88`;
+        e.currentTarget.style.boxShadow = `0 8px 30px rgba(0,0,0,0.05), 0 0 0 1px ${accent}40, inset 0 1px 0 rgba(255,255,255,0.8)`;
+        e.currentTarget.style.borderColor = `${accent}66`;
+        e.currentTarget.style.background = "rgba(255,255,255,0.4)";
       }}
       onMouseOut={e => {
         e.currentTarget.style.transform = "translateY(0)";
-        e.currentTarget.style.boxShadow = "0 4px 24px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.8)";
-        e.currentTarget.style.borderColor = "rgba(0,0,0,0.06)";
+        e.currentTarget.style.boxShadow = "0 4px 20px rgba(0,0,0,0.03), inset 0 1px 0 rgba(255,255,255,0.5)";
+        e.currentTarget.style.borderColor = "rgba(255,255,255,0.4)";
+        e.currentTarget.style.background = "rgba(255,255,255,0.2)";
       }}
     >
       {/* Proximity glow spot (Cyan) */}
@@ -106,15 +107,11 @@ function GlowLinkCard({ link, accent, secondaryAccent, cardId, t, handleMenuClic
       <div
         className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 relative z-10 transition-all duration-500 group-hover:scale-105"
         style={{
-          background: `${accent}1A`,
-          border: `1px solid ${accent}33`,
-          boxShadow: `0 0 0 0 ${accent}00`,
+          background: "transparent",
           transition: "all 0.4s ease",
         }}
-        onMouseEnter={e => { e.currentTarget.style.boxShadow = `0 0 20px ${accent}4D`; }}
-        onMouseLeave={e => { e.currentTarget.style.boxShadow = `0 0 0 0 ${accent}00`; }}
       >
-        <IconComponent size={22} style={{ color: accent, filter: `drop-shadow(0 0 4px ${accent}66)` }} />
+        <IconComponent size={24} style={{ color: accent, filter: `drop-shadow(0 2px 4px rgba(0,0,0,0.1))` }} />
       </div>
 
       {/* Label */}
@@ -127,13 +124,9 @@ function GlowLinkCard({ link, accent, secondaryAccent, cardId, t, handleMenuClic
 
       {/* Arrow */}
       <div
-        className="w-8 h-8 rounded-full flex items-center justify-center relative z-10 flex-shrink-0 transition-all duration-500 group-hover:rotate-45"
-        style={{
-          background: `${accent}1A`,
-          border: `1px solid ${accent}33`,
-        }}
+        className="w-8 h-8 flex items-center justify-center relative z-10 flex-shrink-0 transition-all duration-500 group-hover:rotate-45"
       >
-        <LucideIcons.ArrowUpRight size={14} style={{ color: accent }} />
+        <LucideIcons.ArrowUpRight size={18} style={{ color: accent, opacity: 0.7 }} />
       </div>
     </a>
   );
@@ -305,39 +298,33 @@ export default function RusticCafeTheme({ cardId, siteData, siteColors, lang = "
           <BlockReveal delay={0}>
             <div className="px-6 mt-10" style={{ cursor: isPreview ? 'grab' : 'default' }}>
               <div
-                className="rounded-2xl p-5 flex flex-col gap-5 relative overflow-hidden"
+                className="rounded-2xl p-5 flex flex-col gap-4 relative overflow-hidden"
                 style={{
-                  background: "rgba(255,255,255,0.7)",
-                  backdropFilter: "blur(20px)",
-                  border: "1px solid rgba(0,0,0,0.06)",
-                  boxShadow: "0 4px 24px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.8)",
+                  background: "rgba(255,255,255,0.2)",
+                  backdropFilter: "blur(12px)",
+                  border: "1px solid rgba(255,255,255,0.4)",
+                  boxShadow: "0 4px 20px rgba(0,0,0,0.03), inset 0 1px 0 rgba(255,255,255,0.5)",
                 }}
               >
                 <div className="absolute top-0 right-0 w-40 h-40 rounded-full pointer-events-none" style={{ background: `radial-gradient(circle, ${secAccent}1A 0%, transparent 70%)` }} />
 
                 {address && (
-                  <div className="flex items-start gap-4 relative z-10 group">
-                    <div
-                      className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 transition-all duration-400"
-                      style={{ background: `${secAccent}1A`, border: `1px solid ${secAccent}33` }}
-                    >
-                      <LucideIcons.MapPin size={18} style={{ color: secAccent }} />
+                  <div className="flex items-center gap-4 relative z-10 group">
+                    <div className="flex items-center justify-center flex-shrink-0" style={{ width: '28px' }}>
+                      <LucideIcons.MapPin size={22} style={{ color: secAccent }} />
                     </div>
-                    <div className="flex-1 pt-2.5 text-[14.5px] leading-relaxed text-[#2C3E50] font-bold" style={{ fontFamily: "Cairo,sans-serif" }}>
+                    <div className="flex-1 text-[14.5px] leading-relaxed text-[#2C3E50] font-bold" style={{ fontFamily: "Cairo,sans-serif" }}>
                       {address}
                     </div>
                   </div>
                 )}
 
                 {hours && (
-                  <div className="flex items-start gap-4 relative z-10 group">
-                    <div
-                      className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 transition-all duration-400"
-                      style={{ background: `${secAccent}1A`, border: `1px solid ${secAccent}33` }}
-                    >
-                      <LucideIcons.Clock size={18} style={{ color: secAccent }} />
+                  <div className="flex items-center gap-4 relative z-10 group mt-1">
+                    <div className="flex items-center justify-center flex-shrink-0" style={{ width: '28px' }}>
+                      <LucideIcons.Clock size={22} style={{ color: secAccent }} />
                     </div>
-                    <div className="flex-1 pt-2.5 text-[14.5px] leading-relaxed text-[#2C3E50] font-bold" style={{ fontFamily: "Cairo,sans-serif" }}>
+                    <div className="flex-1 text-[14.5px] leading-relaxed text-[#2C3E50] font-bold" style={{ fontFamily: "Cairo,sans-serif" }}>
                       {hours}
                     </div>
                   </div>
@@ -348,7 +335,14 @@ export default function RusticCafeTheme({ cardId, siteData, siteColors, lang = "
         );
 
       case 'links':
-        if (!links || links.length === 0) return null;
+        const displayLinks = (links && links.length > 0) ? links : (isPreview ? [
+          { id: '1', title: 'القائمة', url: '#menu-section' },
+          { id: '2', title: 'انستغرام', url: '#' },
+          { id: '3', title: 'موقعنا', url: '#' }
+        ] : []);
+
+        if (displayLinks.length === 0) return null;
+
         return (
           <div className="px-6 mt-12 flex flex-col gap-4 pb-4" style={{ cursor: isPreview ? 'grab' : 'default' }}>
             <BlockReveal delay={0}>
@@ -361,7 +355,7 @@ export default function RusticCafeTheme({ cardId, siteData, siteColors, lang = "
               </div>
             </BlockReveal>
 
-            {links.map((link, idx) => (
+            {displayLinks.map((link, idx) => (
               <BlockReveal key={link.id || idx} delay={idx * 0.06}>
                 <GlowLinkCard
                   link={link}
