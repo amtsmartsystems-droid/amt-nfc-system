@@ -133,8 +133,8 @@ function GlowLinkCard({ link, accent, secondaryAccent, cardId, t, handleMenuClic
 }
 
 export default function RusticCafeTheme({ cardId, siteData, siteColors, lang = "en", isMenuEnabled, menuMode, isHouseSystemActive, menuCategories, addToCart, pdfMenuUrl, showMenuImages, isPreview, onUpdateLayoutBlocks }) {
-  const accent     = siteColors?.primary || "#3B9FB1"; // Eshq Cyan
-  const bgEarthy   = siteColors?.background || "#F3E9DD"; // Earthy Beige
+  const accent     = "#359BB0"; // Exact Cyan from Eshq logo
+  const bgEarthy   = "#F6EFE6"; // Exact Beige from Eshq logo
   const secAccent  = "#557A46"; // Earthy Green
   
   const isAr    = lang === "ar";
@@ -214,7 +214,7 @@ export default function RusticCafeTheme({ cardId, siteData, siteColors, lang = "
 
             <BlockReveal delay={0.08}>
               <h1
-                className="text-[36px] font-black mb-3 tracking-wide text-[#1A1A1A]"
+                className="text-[36px] font-black mb-3 tracking-wide text-[#1E293B]"
                 style={{
                   fontFamily: "Cairo,sans-serif",
                   textShadow: "0 4px 20px rgba(0,0,0,0.05)",
@@ -246,7 +246,7 @@ export default function RusticCafeTheme({ cardId, siteData, siteColors, lang = "
             <BlockReveal delay={0.14}>
               {about && (
                 <p
-                  className="text-[16px] leading-relaxed max-w-[90%] mx-auto text-[#4A4A4A] font-medium"
+                  className="text-[16px] leading-relaxed max-w-[90%] mx-auto text-[#475569] font-medium"
                   style={{ fontFamily: "Cairo,sans-serif" }}
                 >
                   {about}
@@ -431,11 +431,11 @@ export default function RusticCafeTheme({ cardId, siteData, siteColors, lang = "
         />
         {/* High-quality noise texture overlay */}
         <div
-          className="absolute inset-0 opacity-[0.4]"
+          className="absolute inset-0 opacity-[0.25]"
           style={{
             backgroundImage: "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' /%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' /%3E%3C/svg%3E\")",
             backgroundSize: "180px",
-            mixBlendMode: "overlay",
+            pointerEvents: "none"
           }}
         />
       </div>
