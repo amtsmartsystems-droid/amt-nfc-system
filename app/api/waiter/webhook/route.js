@@ -124,11 +124,13 @@ export async function POST(req) {
         const claimMatch = data.match(/^claim_table_(.+?)_(.+)$/);
         const completeMatch = data.match(/^complete_table_(.+?)_(.+)$/);
         const undoMatch = data.match(/^undo_claim_table_(.+?)_(.+)$/);
+        const orderReadyMatch = data.match(/^order_ready_(.+)$/);
 
         let isCloseAction = false;
         let isClaimAction = false;
         let isCompleteAction = false;
         let isUndoClaimAction = false;
+        let isOrderReadyAction = false;
         let tableNumber, restaurantId;
 
         if (closeMatch) {
@@ -147,6 +149,9 @@ export async function POST(req) {
             isUndoClaimAction = true;
             tableNumber = undoMatch[1];
             restaurantId = undoMatch[2];
+        } else if (orderReadyMatch) {
+            isOrderReadyAction = true;
+            restaurantId = orderReadyMatch[1];
         } else {
             return NextResponse.json({ ok: true });
         }
@@ -420,6 +425,36 @@ export async function POST(req) {
                     text: updatedText,
                     parse_mode: 'HTML',
                     reply_markup: replyMarkup
+                })
+            });
+        } else if (isOrderReadyAction) {
+            // ── 1. Answer Callback Query ──
+            const answerUrl = `https://api.telegram.org/bot${botToken}/answerCallbackQuery`;
+            await fetch(answerUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    callback_query_id: callbackQuery.id,
+                    text: `✅ تم تجهيز الطلب!`,
+                    show_alert: false
+                })
+            }).catch(e => console.error("Failed to answer callback:", e));
+
+            // ── 2. Edit Message ──
+            const waiterName = callbackQuery.from?.first_name || 'الكاشير/الموظف';
+            const originalText = callbackQuery.message?.text || '';
+            const updatedText = `<b>${originalText}</b>\n\n✅ <b>تم التجهيز والاستلام بواسطة: ${waiterName}</b>`;
+
+            const editUrl = `https://api.telegram.org/bot${botToken}/editMessageText`;
+            await fetch(editUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    chat_id: callbackQuery.message?.chat?.id,
+                    message_id: callbackQuery.message?.message_id,
+                    text: updatedText,
+                    parse_mode: 'HTML',
+                    reply_markup: { inline_keyboard: [] }
                 })
             });
         }

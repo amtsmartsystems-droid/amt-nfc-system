@@ -18,8 +18,8 @@ export async function POST(req) {
             return NextResponse.json({ error: 'المطعم غير موجود.' }, { status: 404 });
         }
 
-        const { telegramConfig = {} } = card;
-        if (!telegramConfig.isEnabled || !telegramConfig.botToken || !telegramConfig.chatId) {
+        const { telegramConfig = {}, isHouseSystemActive } = card;
+        if (!telegramConfig.botToken || !telegramConfig.chatId) {
             return NextResponse.json(
                 { error: 'النظام الذكي غير مفعّل لهذا المطعم.' },
                 { status: 403 }
@@ -51,6 +51,17 @@ export async function POST(req) {
             messageText += `💵 <b>الدفع:</b> نقداً (Cash)\n`;
         }
 
+        const replyMarkup = {
+            inline_keyboard: [
+                [
+                    {
+                        text: '✅ تجهيز واستلام الطلب',
+                        callback_data: `order_ready_${restaurantId}`
+                    }
+                ]
+            ]
+        };
+
         const tgUrl = `https://api.telegram.org/bot${telegramConfig.botToken}/sendMessage`;
         const res = await fetch(tgUrl, {
             method: 'POST',
@@ -58,7 +69,8 @@ export async function POST(req) {
             body: JSON.stringify({
                 chat_id: telegramConfig.chatId,
                 text: messageText,
-                parse_mode: 'HTML'
+                parse_mode: 'HTML',
+                reply_markup: replyMarkup
             })
         });
 
