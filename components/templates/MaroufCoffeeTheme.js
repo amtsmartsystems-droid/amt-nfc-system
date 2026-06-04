@@ -201,7 +201,6 @@ export default function MaroufCoffeeTheme({ cardId, siteData, siteColors, lang =
             style={{ cursor: isPreview ? 'grab' : 'default' }}
           >
             <BlockReveal delay={0}>
-              {/* Profile image with pulsing gold halo */}
               <div className="relative mb-8 flex justify-center">
                 <motion.div
                   className="absolute inset-0 rounded-full"
@@ -210,18 +209,16 @@ export default function MaroufCoffeeTheme({ cardId, siteData, siteColors, lang =
                   transition={{ duration: 3.5, repeat: Infinity, ease: "easeInOut" }}
                 />
                 <div
-                  className="w-36 h-36 rounded-full relative z-10 overflow-hidden"
+                  className="w-48 h-48 relative z-10 overflow-hidden flex items-center justify-center"
                   style={{
-                    background: "var(--bg-color)",
-                    padding: "3px",
-                    boxShadow: "0 0 0 1px rgba(var(--primary-rgb),0.5), 0 0 40px rgba(var(--primary-rgb),0.2), 0 20px 60px rgba(0,0,0,0.6)",
+                    boxShadow: "0 0 40px rgba(var(--primary-rgb),0.15), 0 20px 60px rgba(0,0,0,0.4)",
+                    borderRadius: "16px",
                   }}
                 >
                   <img
                     src={profileImg}
                     alt={name}
-                    className="w-full h-full object-contain rounded-full"
-                    style={{ background: "var(--bg-color)" }}
+                    className="w-full h-full object-contain"
                     draggable="false"
                   />
                 </div>
