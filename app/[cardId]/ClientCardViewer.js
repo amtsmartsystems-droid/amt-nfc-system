@@ -925,9 +925,6 @@ export default function ClientCardViewer({ initialCard, cardId }) {
                                     </div>
                                 </div>
                             </div>
-                                    </div>
-                                </div>
-                            </div>
                         )}
 
                         {/* ════════ FLOATING CART WIDGET ════════ */}
