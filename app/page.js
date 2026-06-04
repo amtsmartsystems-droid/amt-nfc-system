@@ -738,6 +738,7 @@ function PageContent() {
                   اختر الصور التي ترغب بتبديلها. سيتم ضغطها تلقائياً لتسريع الموقع ⚡
                 </p>
                 {[
+                  { slot: 'profile', label: '🖼️ اللوغو / صورة البروفايل', icon: 'User' },
                   { slot: 'hero1', label: 'الصورة الرئيسية 1 (Hero)', icon: 'Image' },
                   { slot: 'hero2', label: 'الصورة الرئيسية 2 (لبعض القوالب)', icon: 'Image' },
                   { slot: 'hero3', label: 'الصورة الرئيسية 3 (لبعض القوالب)', icon: 'Image' },
