@@ -8,6 +8,7 @@ import CafeTheme        from '../../components/templates/CafeTheme';
 import CafeTheme1       from '../../components/templates/CafeTheme1';
 import GastroBarTheme   from '../../components/templates/GastroBarTheme';
 import MaroufCoffeeTheme from '../../components/templates/MaroufCoffeeTheme';
+import RusticCafeTheme from '../../components/templates/RusticCafeTheme';
 import AMTBusinessCard  from '../../components/templates/AMTBusinessCard';
 
 // Always bypass browser cache so we get the latest data from MongoDB
@@ -425,7 +426,7 @@ export default function ClientCardViewer({ initialCard, cardId }) {
                 const tn = (card.themeName || '').toLowerCase().trim();
 
                 // ── Full-screen themes (no white wrapper, no generic header) ──
-                const isFullScreen = tn === 'marouf_coffee';
+                const isFullScreen = tn === 'marouf_coffee' || tn === 'rustic_cafe' || tn === 'gastro';
 
                 if (isFullScreen) {
                     return (
@@ -466,7 +467,9 @@ export default function ClientCardViewer({ initialCard, cardId }) {
                                 </button>
                             </div>
                             {/* Full-screen theme */}
+                            {tn === 'gastro' && <GastroBarTheme {...props} />}
                             {tn === 'marouf_coffee' && <MaroufCoffeeTheme {...props} />}
+                            {tn === 'rustic_cafe' && <RusticCafeTheme {...props} />}
                         </div>
                     );
                 }

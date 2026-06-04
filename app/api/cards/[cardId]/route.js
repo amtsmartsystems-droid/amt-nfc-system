@@ -149,7 +149,7 @@ export async function PUT(req, { params }) {
         const body = await req.json();
 
         const cleanSiteData = body.siteData ? sanitizeSiteData(body.siteData) : undefined;
-        const VALID_THEMES = ['restaurant', 'cafe', 'cafe1', 'gastro', 'business_card', 'marouf_coffee'];
+        const VALID_THEMES = ['restaurant', 'cafe', 'cafe1', 'gastro', 'business_card', 'marouf_coffee', 'rustic_cafe'];
         const cleanTheme    = body.themeName && VALID_THEMES.includes(body.themeName)
             ? body.themeName : undefined;
         const cleanCardType = body.cardType && ['restaurant','business_card'].includes(body.cardType)

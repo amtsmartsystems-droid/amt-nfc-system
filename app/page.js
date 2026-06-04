@@ -5,10 +5,10 @@ import { useSearchParams } from 'next/navigation';
 import * as LucideIcons from "lucide-react";
 import { upload } from '@vercel/blob/client';
 import RestaurantTheme  from "../components/templates/RestaurantTheme";
-import CafeTheme        from "../components/templates/CafeTheme";
 import CafeTheme1       from "../components/templates/CafeTheme1";
 import GastroBarTheme   from "../components/templates/GastroBarTheme";
 import MaroufCoffeeTheme from "../components/templates/MaroufCoffeeTheme";
+import RusticCafeTheme  from "../components/templates/RusticCafeTheme";
 import AMTBusinessCard  from "../components/templates/AMTBusinessCard";
 import { getIconForLink } from "../utils/icons";
 
@@ -48,6 +48,7 @@ const DEFAULT_COLORS = {
   cafe1:     { primary:"#C9A96E", background:"#2C1503" },
   gastro:    { primary:"#EDD98A", background:"#0A0A0A" },
   marouf_coffee: { primary:"#B99146", background:"#050505" },
+  rustic_cafe: { primary:"#3B9FB1", background:"#1C1917" },
 };
 
 const THEMES = [
@@ -56,6 +57,7 @@ const THEMES = [
   { id:"cafe1",         label:"مقهى حديث",     icon:"Bean"            },
   { id:"gastro",        label:"مطعم فاخر",   icon:"UtensilsCrossed" },
   { id:"marouf_coffee", label:"بن معروف ✓",   icon:"Coffee" },
+  { id:"rustic_cafe",   label:"عشق البوهيمي",  icon:"Tent" },
 ];
 
 // ─────────────────────────────────────────────────────────────────────
@@ -296,6 +298,7 @@ function PageContent() {
     if (n === 'cafe1' || n === 'cafetheme1')       return 'cafe1';
     if (n === 'gastro' || n === 'gastrobartheme')  return 'gastro';
     if (n === 'marouf_coffee')                     return 'marouf_coffee';
+    if (n === 'rustic_cafe')                       return 'rustic_cafe';
     if (n === 'business_card')                     return 'business_card';
     return 'restaurant'; // covers 'restauranttheme', 'luxury', etc.
   };
@@ -473,6 +476,7 @@ function PageContent() {
       case "cafe1":  return <CafeTheme1     {...props} />;
       case "gastro": return <GastroBarTheme {...props} />;
       case "marouf_coffee": return <MaroufCoffeeTheme {...props} />;
+      case "rustic_cafe": return <RusticCafeTheme {...props} />;
       default:       return <RestaurantTheme {...props} />;
     }
   };
