@@ -163,7 +163,7 @@ function GlowLinkCard({ link, accent, cardId, t, handleMenuClick }) {
   );
 }
 
-export default function MaroufCoffeeTheme({ cardId, siteData, siteColors, lang = "en", isMenuEnabled, menuMode, menuCategories, addToCart, pdfMenuUrl, showMenuImages, isPreview, onUpdateLayoutBlocks }) {
+export default function MaroufCoffeeTheme({ cardId, siteData, siteColors, lang = "en", isMenuEnabled, menuMode, isHouseSystemActive, menuCategories, addToCart, pdfMenuUrl, showMenuImages, isPreview, onUpdateLayoutBlocks }) {
   const accent  = "#B99146";
   const isAr    = lang === "ar";
   const [isMenuModalOpen, setIsMenuModalOpen] = useState(false);
@@ -670,3 +670,4 @@ export default function MaroufCoffeeTheme({ cardId, siteData, siteColors, lang =
     </div>
   );
 }
+

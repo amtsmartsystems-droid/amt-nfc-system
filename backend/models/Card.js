@@ -149,6 +149,10 @@ const cardSchema = new mongoose.Schema({
         type: Boolean,
         default: false,
     },
+    isHouseSystemActive: {
+        type: Boolean,
+        default: false,
+    },
     menuMode: {
         type: String,
         enum: ['pdf', 'interactive'],

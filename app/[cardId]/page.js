@@ -51,47 +51,48 @@ export default async function PublicCardPage({ params }) {
         return notFound();
     }
     
-    // Serialize data to match API response so SWR fallback works perfectly
+    // Safe serializer: strips Mongoose internals, base64 blobs, and prevents call stack overflow
+    function safeJSON(val) {
+        if (!val) return val;
+        return JSON.parse(JSON.stringify(val));
+    }
+
+    const sd = safeJSON(card.siteData || {});
+    delete sd.images;
+    if (sd.layoutBlocks) {
+        sd.layoutBlocks = sd.layoutBlocks.map(({ url, ...rest }) =>
+            (url && url.startsWith('data:'))
+                ? { ...rest, imageUrl: `/api/cards/${cardId}/image/${rest.id}` }
+                : { url, ...rest }
+        );
+    }
+    if (sd.floatingImages) {
+        sd.floatingImages = sd.floatingImages.map(({ url, ...rest }) =>
+            (url && url.startsWith('data:'))
+                ? { ...rest, imageUrl: `/api/cards/${cardId}/image/${rest.id}` }
+                : { url, ...rest }
+        );
+    }
+
     const serializedCard = {
-        shortCode:    card.shortCode,
-        cardType:     card.cardType || 'restaurant',
-        themeName:    card.themeName,
-        businessName: card.businessName,
-        primaryColor: card.primaryColor,
-        background:   card.background,
-        siteData: (() => {
-            const sd = JSON.parse(JSON.stringify(card.siteData || {}));
-            // Remove massive base64 blobs from SSR payload — prevents Next.js call stack overflow
-            // Replace data: URLs with proper /api/cards/[cardId]/image/[blockId] paths
-            delete sd.images;
-            if (sd.layoutBlocks) {
-                sd.layoutBlocks = sd.layoutBlocks.map(({ url, ...rest }) => {
-                    if (url && url.startsWith('data:')) {
-                        return { ...rest, imageUrl: `/api/cards/${cardId}/image/${rest.id}` };
-                    }
-                    return { url, ...rest };
-                });
-            }
-            if (sd.floatingImages) {
-                sd.floatingImages = sd.floatingImages.map(({ url, ...rest }) => {
-                    if (url && url.startsWith('data:')) {
-                        return { ...rest, imageUrl: `/api/cards/${cardId}/image/${rest.id}` };
-                    }
-                    return { url, ...rest };
-                });
-            }
-            return sd;
-        })(),
-        links:     JSON.parse(JSON.stringify(card.links     || [])),
-        events:    JSON.parse(JSON.stringify(card.events    || [])),
-        telegramConfig: card.telegramConfig || { botToken: '', chatId: '', isEnabled: false },
+        shortCode:       String(card.shortCode || ''),
+        cardType:        String(card.cardType  || 'restaurant'),
+        themeName:       String(card.themeName || ''),
+        businessName:    String(card.businessName || ''),
+        primaryColor:    String(card.primaryColor || '#EDD98A'),
+        background:      String(card.background   || ''),
+        siteData:        sd,
+        links:           safeJSON(card.links  || []),
+        events:          safeJSON(card.events || []),
+        telegramConfig:  safeJSON(card.telegramConfig  || { botToken:'', chatId:'', isEnabled: false }),
         isWaiterEnabled: card.telegramConfig?.isEnabled === true,
-        tableMapping:   card.tableMapping || [],
-        isMenuEnabled:  card.isMenuEnabled || false,
-        menuMode:       card.menuMode || 'interactive',
-        pdfMenuUrl:     card.pdfMenuUrl || '',
-        menuCategories: card.menuCategories || [],
-        cliqConfig:     card.cliqConfig || { isEnabled: false, alias: '', message: '' },
+        tableMapping:    safeJSON(card.tableMapping || []),
+        isMenuEnabled:   card.isMenuEnabled  || false,
+        menuMode:        String(card.menuMode || 'interactive'),
+        pdfMenuUrl:      String(card.pdfMenuUrl || ''),
+        menuCategories:  safeJSON(card.menuCategories || []),
+        cliqConfig:      safeJSON(card.cliqConfig || { isEnabled:false, alias:'', message:'' }),
+        hasShisha:       card.hasShisha || false,
     };
     
     return <ClientCardViewer initialCard={serializedCard} cardId={cardId} />;

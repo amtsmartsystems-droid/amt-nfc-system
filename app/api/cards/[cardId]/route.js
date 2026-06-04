@@ -71,6 +71,7 @@ export async function GET(req, { params }) {
             isWaiterEnabled:    card.telegramConfig?.isEnabled === true,
             tableMapping:       card.tableMapping || [],
             isMenuEnabled:      card.isMenuEnabled || false,
+            isHouseSystemActive: card.isHouseSystemActive || false,
             menuMode:           card.menuMode || 'interactive',
             pdfMenuUrl:         card.pdfMenuUrl || '',
             showMenuImages:     card.showMenuImages !== false,
@@ -167,6 +168,7 @@ export async function PUT(req, { params }) {
         const cleanMenuCategories = body.menuCategories;
         const cleanCliqConfig     = body.cliqConfig;
         const cleanIsMenuEnabled  = body.isMenuEnabled;
+        const cleanIsHouseSystemActive = body.isHouseSystemActive;
         const cleanMenuMode       = body.menuMode;
         const cleanPdfMenuUrl     = body.pdfMenuUrl;
 
@@ -186,6 +188,7 @@ export async function PUT(req, { params }) {
                 isLocked:     false,
                 tableMapping: cleanTableMapping || [],
                 isMenuEnabled: cleanIsMenuEnabled || false,
+                isHouseSystemActive: cleanIsHouseSystemActive || false,
                 menuMode:      cleanMenuMode || 'interactive',
                 pdfMenuUrl:    cleanPdfMenuUrl || '',
                 showMenuImages: cleanShowMenuImages !== false,
@@ -204,6 +207,7 @@ export async function PUT(req, { params }) {
         if (cleanTelegram !== undefined) card.telegramConfig = cleanTelegram;
         if (cleanTableMapping !== undefined) card.tableMapping = cleanTableMapping;
         if (cleanIsMenuEnabled !== undefined) card.isMenuEnabled = cleanIsMenuEnabled;
+        if (cleanIsHouseSystemActive !== undefined) card.isHouseSystemActive = cleanIsHouseSystemActive;
         if (cleanMenuMode !== undefined) card.menuMode = cleanMenuMode;
         if (cleanPdfMenuUrl !== undefined) card.pdfMenuUrl = cleanPdfMenuUrl;
         if (cleanShowMenuImages !== undefined) card.showMenuImages = cleanShowMenuImages;

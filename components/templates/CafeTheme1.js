@@ -12,7 +12,7 @@ import { motion, Reorder } from "framer-motion";
 //  Dark espresso bg · circular logo badge · pill buttons · social icons
 //  Props: { siteData, siteColors, lang }
 // ══════════════════════════════════════════════════════════════════════
-export default function CafeTheme1({ cardId, siteData, siteColors, lang = "en", isMenuEnabled, menuMode, menuCategories, addToCart, pdfMenuUrl, showMenuImages, isPreview, onUpdateLayoutBlocks }) {
+export default function CafeTheme1({ cardId, siteData, siteColors, lang = "en", isMenuEnabled, menuMode, isHouseSystemActive, menuCategories, addToCart, pdfMenuUrl, showMenuImages, isPreview, onUpdateLayoutBlocks }) {
   const primary    = siteColors?.primary    || "#C9A96E";   // warm gold
   const bgDark     = siteColors?.background || "#2C1503";   // espresso brown
   const isAr       = lang === "ar";
@@ -302,9 +302,9 @@ export default function CafeTheme1({ cardId, siteData, siteColors, lang = "en", 
                             {item.descAr && <p className="text-[13px] text-white/50 mt-1 leading-relaxed max-w-[90%]" style={{ fontFamily:"Cairo,sans-serif" }}>{t(item.desc, item.descAr)}</p>}
                             <div className="text-[15px] font-black mt-2 tracking-wide" style={{ color: primary }}>{item.price} JOD</div>
                           </div>
-                          <button onClick={() => addToCart && addToCart(item)} className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 transition-transform active:scale-95 hover:brightness-110" style={{ background: primary }}>
+                          {isHouseSystemActive && ( <button onClick={() => addToCart && addToCart(item)} className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 transition-transform active:scale-95 hover:brightness-110" style={{ background: primary }}>
                             <LucideIcons.Plus size={18} color={bgDark} />
-                          </button>
+                          </button> )}
                         </div>
                       ))}
                     </div>
@@ -318,3 +318,4 @@ export default function CafeTheme1({ cardId, siteData, siteColors, lang = "en", 
     </>
   );
 }
+

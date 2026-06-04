@@ -11,7 +11,7 @@ import { motion, Reorder } from "framer-motion";
 //  RestaurantTheme — Dark Elegant "Meaty Story" style
 //  Props: { siteData, siteColors, lang }
 // ══════════════════════════════════════════════════════════════════════
-export default function RestaurantTheme({ cardId, siteData, siteColors, lang = "en", isMenuEnabled, menuMode, pdfMenuUrl, menuCategories, addToCart, showMenuImages, isPreview, onUpdateLayoutBlocks }) {
+export default function RestaurantTheme({ cardId, siteData, siteColors, lang = "en", isMenuEnabled, menuMode, isHouseSystemActive, pdfMenuUrl, menuCategories, addToCart, showMenuImages, isPreview, onUpdateLayoutBlocks }) {
   const primary = siteColors?.primary    || "#EDD98A";
   const bgCream = siteColors?.background || "#F5EDD6";
   const isAr    = lang === "ar";
@@ -257,9 +257,9 @@ export default function RestaurantTheme({ cardId, siteData, siteColors, lang = "
                             {item.descAr && <p className="text-[13px] text-white/50 mt-1 leading-relaxed max-w-[90%]" style={{ fontFamily:"Cairo,sans-serif" }}>{t(item.desc, item.descAr)}</p>}
                             <div className="text-[15px] font-black mt-2 tracking-wide" style={{ color: primary }}>{item.price} JOD</div>
                           </div>
-                          <button onClick={() => addToCart && addToCart(item)} className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 transition-transform active:scale-95 hover:brightness-110" style={{ background: primary }}>
+                          {isHouseSystemActive && ( <button onClick={() => addToCart && addToCart(item)} className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 transition-transform active:scale-95 hover:brightness-110" style={{ background: primary }}>
                             <LucideIcons.Plus size={18} color="#1C1C1C" />
-                          </button>
+                          </button> )}
                         </div>
                       ))}
                     </div>
@@ -274,3 +274,4 @@ export default function RestaurantTheme({ cardId, siteData, siteColors, lang = "
     </div>
   );
 }
+

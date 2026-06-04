@@ -103,6 +103,7 @@ function PageContent() {
   const [nfcTableNum, setNfcTableNum] = useState("");
   const [uploadingPdf, setUploadingPdf] = useState(false);
   const [isMenuEnabled, setIsMenuEnabled] = useState(false);
+  const [isHouseSystemActive, setIsHouseSystemActive] = useState(false);
   const [showMenuImages, setShowMenuImages] = useState(true);
   const [menuCategories, setMenuCategories] = useState([]);
   const [menuMode, setMenuMode] = useState('interactive');
@@ -271,6 +272,7 @@ function PageContent() {
           wifi: { ssid: wifi.ssid.trim(), password: wifi.password.trim() },
           telegramConfig,
           isMenuEnabled,
+          isHouseSystemActive,
           menuMode,
           pdfMenuUrl,
           menuCategories,
@@ -336,6 +338,7 @@ function PageContent() {
       else setTelegramConfig({ botToken: '', chatId: '', isEnabled: false, dashboardMessageId: '' });
 
       if (data.isMenuEnabled !== undefined) setIsMenuEnabled(data.isMenuEnabled);
+      if (data.isHouseSystemActive !== undefined) setIsHouseSystemActive(data.isHouseSystemActive);
       if (data.showMenuImages !== undefined) setShowMenuImages(data.showMenuImages !== false);
       if (data.menuMode) setMenuMode(data.menuMode);
       if (data.pdfMenuUrl) setPdfMenuUrl(data.pdfMenuUrl);
@@ -460,6 +463,7 @@ function PageContent() {
       siteColors, 
       lang, 
       isMenuEnabled, 
+      isHouseSystemActive,
       menuMode, 
       pdfMenuUrl, 
       menuCategories, 
@@ -1160,6 +1164,20 @@ function PageContent() {
                           setIsMenuEnabled(e.target.checked);
                       }} />
                       <div className="w-10 h-5 bg-white/10 peer-focus:outline-none rounded-full peer peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:right-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-yellow-500"></div>
+                    </label>
+                  </div>
+
+                  <div className="flex items-center justify-between bg-[#1f2937]/50 border border-white/5 p-4 rounded-xl">
+                    <div>
+                      <h4 className="font-bold text-white mb-1">تفعيل نظام الهاوس (House System)</h4>
+                      <p className="text-[12px] text-white/50">للطلبات الذاتية من الطاولة مباشرة (نظام الكارت)</p>
+                    </div>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input type="checkbox" className="sr-only peer" checked={isHouseSystemActive} onChange={(e) => {
+                        setIsHouseSystemActive(e.target.checked);
+                        setHasChanges(true);
+                      }} />
+                      <div className="w-11 h-6 bg-white/10 peer-focus:outline-none rounded-full peer peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:right-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-yellow-500"></div>
                     </label>
                   </div>
 

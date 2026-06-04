@@ -13,7 +13,7 @@ import { motion, Reorder } from "framer-motion";
 //  Props: { siteData, siteColors, lang }
 // ══════════════════════════════════════════════════════════════════════
 
-export default function CoffeeLuxuryTheme({ cardId, siteData, siteColors, lang = "en", isMenuEnabled, menuMode, menuCategories, addToCart, pdfMenuUrl, showMenuImages, isPreview, onUpdateLayoutBlocks }) {
+export default function CoffeeLuxuryTheme({ cardId, siteData, siteColors, lang = "en", isMenuEnabled, menuMode, isHouseSystemActive, menuCategories, addToCart, pdfMenuUrl, showMenuImages, isPreview, onUpdateLayoutBlocks }) {
   // Use explicitly requested colors or fallbacks from siteColors if they match
   const accent  = siteColors?.primary    || "#C59B4D";   // Warm Gold
   const bgColor = siteColors?.background || "#050505";   // Deep Pitch Black
@@ -296,9 +296,9 @@ export default function CoffeeLuxuryTheme({ cardId, siteData, siteColors, lang =
                             {item.descAr && <p className="text-[13px] text-gray-400 mt-1 leading-relaxed max-w-[95%]" style={{ fontFamily:"Cairo,sans-serif" }}>{t(item.desc, item.descAr)}</p>}
                             <div className="text-[16px] font-black mt-2 tracking-widest text-[#C59B4D]">{item.price} JOD</div>
                           </div>
-                          <button onClick={() => addToCart && addToCart(item)} className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 transition-all duration-300 border border-[#C59B4D]/50 text-[#C59B4D] hover:bg-[#C59B4D] hover:text-[#050505]">
+                          {isHouseSystemActive && ( <button onClick={() => addToCart && addToCart(item)} className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 transition-all duration-300 border border-[#C59B4D]/50 text-[#C59B4D] hover:bg-[#C59B4D] hover:text-[#050505]">
                             <LucideIcons.Plus size={18} />
-                          </button>
+                          </button> )}
                         </div>
                       ))}
                     </div>
@@ -313,3 +313,4 @@ export default function CoffeeLuxuryTheme({ cardId, siteData, siteColors, lang =
     </div>
   );
 }
+

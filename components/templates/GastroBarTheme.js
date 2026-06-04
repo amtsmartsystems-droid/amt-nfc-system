@@ -15,7 +15,7 @@ import { motion, Reorder } from "framer-motion";
 
 const SOCIAL_KW = ["instagram","انستا","telegram","تيليغرام","whatsapp","واتس","tiktok","تيك","facebook","فيسبوك","twitter","تويتر","youtube","يوتيوب","vk","snapchat","سناب","linkedin"];
 
-export default function GastroBarTheme({ cardId, siteData, siteColors, lang = "en", isMenuEnabled, menuMode, menuCategories, addToCart, pdfMenuUrl, showMenuImages, isPreview, onUpdateLayoutBlocks }) {
+export default function GastroBarTheme({ cardId, siteData, siteColors, lang = "en", isMenuEnabled, menuMode, isHouseSystemActive, menuCategories, addToCart, pdfMenuUrl, showMenuImages, isPreview, onUpdateLayoutBlocks }) {
   const accent  = siteColors?.primary    || "#F5C518";   // gastrobar yellow
   const bgColor = siteColors?.background || "#111111";   // near-black
   const isAr    = lang === "ar";
@@ -420,9 +420,9 @@ export default function GastroBarTheme({ cardId, siteData, siteColors, lang = "e
                             {item.descAr && <p className="text-[13px] text-white/50 mt-1 leading-relaxed max-w-[90%]" style={{ fontFamily:"Cairo,sans-serif" }}>{t(item.desc, item.descAr)}</p>}
                             <div className="text-[15px] font-black mt-2 tracking-wide" style={{ color: accent }}>{item.price} JOD</div>
                           </div>
-                          <button onClick={() => addToCart && addToCart(item)} className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 transition-transform active:scale-95 hover:brightness-110" style={{ background: accent }}>
+                          {isHouseSystemActive && ( <button onClick={() => addToCart && addToCart(item)} className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 transition-transform active:scale-95 hover:brightness-110" style={{ background: accent }}>
                             <LucideIcons.Plus size={18} color="#1C1C1C" />
-                          </button>
+                          </button> )}
                         </div>
                       ))}
                     </div>
@@ -436,3 +436,4 @@ export default function GastroBarTheme({ cardId, siteData, siteColors, lang = "e
     </>
   );
 }
+
