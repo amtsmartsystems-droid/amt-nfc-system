@@ -48,7 +48,7 @@ const DEFAULT_COLORS = {
   cafe1:     { primary:"#C9A96E", background:"#2C1503" },
   gastro:    { primary:"#EDD98A", background:"#0A0A0A" },
   marouf_coffee: { primary:"#B99146", background:"#050505" },
-  rustic_cafe: { primary:"#3B9FB1", background:"#1C1917" },
+  rustic_cafe: { primary:"#3B9FB1", background:"#F3E9DD" },
 };
 
 const THEMES = [

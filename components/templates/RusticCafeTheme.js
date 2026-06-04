@@ -1,303 +1,615 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import Image from "next/image";
-import { getIconForLink } from "../../utils/icons";
+import { useEffect, useState, useRef } from "react";
 import * as LucideIcons from "lucide-react";
-import ScrollReveal from "../ScrollReveal";
-import { Reorder } from "framer-motion";
+import { getIconForLink } from "../../utils/icons";
+import { motion, AnimatePresence, Reorder } from "framer-motion";
 
 // ══════════════════════════════════════════════════════════════════════
-//  RusticCafeTheme — "Eshq" Rustic Bohemian Style
-//  Deep Stone bg · Cyan/Teal accents · Lantern Gold borders
-//  Props: { siteData, siteColors, lang }
+//  RusticCafeTheme — "Eshq" Ultra Premium Edition
+//  Earthy Beige + Cyan + Green + Professional Framer Motion
 // ══════════════════════════════════════════════════════════════════════
+
+// ── Scroll Reveal wrapper (GPU-optimised) ──
+function BlockReveal({ children, delay = 0 }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 40 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "0px 0px -40px 0px" }}
+      transition={{ duration: 0.52, delay, ease: [0.25, 0.46, 0.45, 0.94] }}
+      style={{ willChange: "transform, opacity" }}
+    >
+      {children}
+    </motion.div>
+  );
+}
+
+// ── Glow Button — proximity-aware edge glow for light theme ──
+function GlowLinkCard({ link, accent, secondaryAccent, cardId, t, handleMenuClick }) {
+  const label = t(link.title, link.titleAr);
+  const { IconComponent } = getIconForLink(link.title || link.titleAr || "");
+  const btnRef = useRef(null);
+  const [glowPos, setGlowPos] = useState({ x: 50, y: 50, opacity: 0 });
+
+  const handleMouseMove = (e) => {
+    if (!btnRef.current) return;
+    const rect = btnRef.current.getBoundingClientRect();
+    const x = ((e.clientX - rect.left) / rect.width) * 100;
+    const y = ((e.clientY - rect.top) / rect.height) * 100;
+    setGlowPos({ x, y, opacity: 1 });
+  };
+
+  const handleMouseLeave = () => {
+    setGlowPos(p => ({ ...p, opacity: 0 }));
+  };
+
+  const handleClick = (e) => {
+    if (cardId) fetch('/api/clicks', { method: 'POST', body: JSON.stringify({ cardId, linkId: link.id || link._id }) }).catch(() => {});
+    if (link.url === '#menu-section') {
+      e.preventDefault();
+      handleMenuClick(e);
+    }
+  };
+
+  return (
+    <a
+      href={link.url || "#"}
+      onClick={handleClick}
+      target={link.url && link.url !== "#" && !link.url.startsWith('#') ? "_blank" : undefined}
+      rel="noopener noreferrer"
+      ref={btnRef}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+      className="flex items-center gap-4 w-full p-4 rounded-2xl relative overflow-hidden group"
+      style={{
+        background: "rgba(255,255,255,0.75)",
+        backdropFilter: "blur(20px)",
+        WebkitBackdropFilter: "blur(20px)",
+        border: "1px solid rgba(0,0,0,0.06)",
+        boxShadow: "0 4px 24px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.8)",
+        transition: "transform 0.3s cubic-bezier(0.25,0.46,0.45,0.94), box-shadow 0.3s ease, border-color 0.3s ease",
+      }}
+      onMouseEnter={e => {
+        e.currentTarget.style.transform = "translateY(-2px)";
+        e.currentTarget.style.boxShadow = `0 8px 40px rgba(0,0,0,0.08), 0 0 0 1px ${accent}66, inset 0 1px 0 rgba(255,255,255,1)`;
+        e.currentTarget.style.borderColor = `${accent}88`;
+      }}
+      onMouseOut={e => {
+        e.currentTarget.style.transform = "translateY(0)";
+        e.currentTarget.style.boxShadow = "0 4px 24px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.8)";
+        e.currentTarget.style.borderColor = "rgba(0,0,0,0.06)";
+      }}
+    >
+      {/* Proximity glow spot (Cyan) */}
+      <div
+        className="pointer-events-none absolute inset-0 rounded-2xl transition-opacity duration-300"
+        style={{
+          background: `radial-gradient(250px circle at ${glowPos.x}% ${glowPos.y}%, ${accent}1A, transparent 70%)`,
+          opacity: glowPos.opacity,
+        }}
+      />
+
+      {/* Edge shimmer on hover */}
+      <div className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none overflow-hidden">
+        <div
+          className="absolute inset-x-0 top-0 h-[1px]"
+          style={{ background: `linear-gradient(90deg, transparent, ${accent}AA, transparent)` }}
+        />
+        <div
+          className="absolute inset-x-0 bottom-0 h-[1px]"
+          style={{ background: `linear-gradient(90deg, transparent, ${accent}55, transparent)` }}
+        />
+      </div>
+
+      {/* Icon */}
+      <div
+        className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 relative z-10 transition-all duration-500 group-hover:scale-105"
+        style={{
+          background: `${accent}1A`,
+          border: `1px solid ${accent}33`,
+          boxShadow: `0 0 0 0 ${accent}00`,
+          transition: "all 0.4s ease",
+        }}
+        onMouseEnter={e => { e.currentTarget.style.boxShadow = `0 0 20px ${accent}4D`; }}
+        onMouseLeave={e => { e.currentTarget.style.boxShadow = `0 0 0 0 ${accent}00`; }}
+      >
+        <IconComponent size={22} style={{ color: accent, filter: `drop-shadow(0 0 4px ${accent}66)` }} />
+      </div>
+
+      {/* Label */}
+      <span
+        className="font-bold text-[#1A1A1A] tracking-wide flex-1 relative z-10 text-[15.5px]"
+        style={{ fontFamily: "Cairo,sans-serif", letterSpacing: "0.01em" }}
+      >
+        {label}
+      </span>
+
+      {/* Arrow */}
+      <div
+        className="w-8 h-8 rounded-full flex items-center justify-center relative z-10 flex-shrink-0 transition-all duration-500 group-hover:rotate-45"
+        style={{
+          background: `${accent}1A`,
+          border: `1px solid ${accent}33`,
+        }}
+      >
+        <LucideIcons.ArrowUpRight size={14} style={{ color: accent }} />
+      </div>
+    </a>
+  );
+}
+
 export default function RusticCafeTheme({ cardId, siteData, siteColors, lang = "en", isMenuEnabled, menuMode, isHouseSystemActive, menuCategories, addToCart, pdfMenuUrl, showMenuImages, isPreview, onUpdateLayoutBlocks }) {
-  // Using user provided colors as defaults if not provided via props
-  const primary    = siteColors?.primary    || "#3B9FB1";   // Eshq Cyan
-  const bgDark     = siteColors?.background || "#1C1917";   // Deep warm stone/charcoal
-  const secondary  = "#D49A6A";                             // Lantern Warmth Gold
-  const textCream  = "#F5F5F4";                             // Soft cream
-  const cardBg     = "#292524";                             // Stone 800
-
-  const isAr       = lang === "ar";
+  const accent     = siteColors?.primary || "#3B9FB1"; // Eshq Cyan
+  const bgEarthy   = siteColors?.background || "#F3E9DD"; // Earthy Beige
+  const secAccent  = "#557A46"; // Earthy Green
+  
+  const isAr    = lang === "ar";
   const [isMenuModalOpen, setIsMenuModalOpen] = useState(false);
 
   useEffect(() => {
-    document.documentElement.style.setProperty("--primary-color", primary);
-    document.documentElement.style.setProperty("--bg-dark", bgDark);
-    const h = primary.replace("#", "");
-    document.documentElement.style.setProperty("--primary-rgb",
-      `${parseInt(h.slice(0,2),16)}, ${parseInt(h.slice(2,4),16)}, ${parseInt(h.slice(4,6),16)}`
-    );
-  }, [primary, bgDark]);
+    document.documentElement.style.setProperty("--primary-color", accent);
+    document.documentElement.style.setProperty("--bg-color", bgEarthy);
+  }, [accent, bgEarthy]);
 
-  const t   = (en, ar) => isAr && ar ? ar : en;
-  const sd  = siteData || {};
+  const t  = (en, ar) => isAr && ar ? ar : en;
+  const sd = siteData || {};
 
-  const name     = t(sd.name     || "عِـشْـق | ESHQ",           sd.nameAr);
-  const subtitle = t(sd.subtitle || "A Cozy Rustic Bohemian Cafe", sd.subtitleAr);
-  const about    = t(sd.about    || "Experience the warmth of our lantern-lit space, serving authentic coffee and hearty meals.", sd.aboutAr);
-  const links    = sd.links || [];
+  const name    = t(sd.name || "Eshq Cafe", sd.nameAr || "مقهى عشق");
+  const tagline = t(sd.subtitle, sd.subtitleAr);
+  const about   = t(sd.about, sd.aboutAr);
 
-  const imgs = sd.images || {};
-  const profileImg = imgs.profile || "https://images.unsplash.com/photo-1554118811-1e0d58224f24?q=80&w=400&auto=format&fit=crop";
+  const address = sd.address || "";
+  const hours   = sd.hours   || "";
+  const links   = sd.links   || [];
 
-  // ── Card Button (all links) ──
-  const LinkCardBtn = ({ link }) => {
-    const label = t(link.title, link.titleAr);
-    const { IconComponent } = getIconForLink(link.title || link.titleAr || "");
-    const handleClick = (e) => {
-      if(cardId && !isPreview) fetch('/api/clicks', { method: 'POST', body: JSON.stringify({ cardId, linkId: link.id || link._id }) }).catch(()=>{});
-      if (link.url === '#menu-section') {
-          e.preventDefault();
-          if (menuMode === 'pdf' && pdfMenuUrl) {
-            window.open(pdfMenuUrl, '_blank');
-          } else {
-            setIsMenuModalOpen(true);
-          }
-        }
-    };
-    return (
-      <a
-        href={link.url || "#"}
-        onClick={handleClick}
-        target={link.url && link.url !== "#" && !link.url.startsWith('#') ? "_blank" : undefined}
-        rel="noopener noreferrer"
-        className="group flex items-center p-4 rounded-lg transition-all duration-300 hover:-translate-y-1"
-        style={{
-          background: cardBg,
-          color: textCream,
-          border: `1px solid rgba(255,255,255,0.05)`,
-          boxShadow: "0 4px 15px rgba(0,0,0,0.2)",
-          fontFamily: "Cairo, sans-serif",
-        }}
-        onMouseEnter={e => {
-            e.currentTarget.style.borderColor = secondary;
-            e.currentTarget.style.boxShadow = `0 6px 20px rgba(212, 154, 106, 0.15)`;
-        }}
-        onMouseLeave={e => {
-            e.currentTarget.style.borderColor = `rgba(255,255,255,0.05)`;
-            e.currentTarget.style.boxShadow = "0 4px 15px rgba(0,0,0,0.2)";
-        }}
-      >
-        <div className="w-12 h-12 rounded-md flex items-center justify-center flex-shrink-0 transition-transform group-hover:scale-105"
-             style={{ background: "rgba(255,255,255,0.03)" }}>
-            <IconComponent size={24} color={primary} />
-        </div>
-        <span className="flex-1 font-semibold text-[15px] mx-4 tracking-wide text-left rtl:text-right">{label}</span>
-        <LucideIcons.ChevronRight size={18} className="opacity-50 group-hover:opacity-100 group-hover:translate-x-1 rtl:rotate-180 rtl:group-hover:-translate-x-1 transition-all" color={secondary} />
-      </a>
-    );
+  const profileImg = sd.profileImage || "https://images.unsplash.com/photo-1554118811-1e0d58224f24?q=80&w=400&auto=format&fit=crop";
+
+  const handleMenuClick = (e) => {
+    if (menuMode === 'pdf' && pdfMenuUrl) {
+      window.open(pdfMenuUrl, '_blank');
+    } else {
+      setIsMenuModalOpen(true);
+    }
   };
 
-  // ════ LAYOUT BLOCKS SYSTEM ════
+  // ════ LAYOUT BLOCKS ════
   const defaultBlocks = [
-      { id: "header", type: "header" },
-      { id: "menu_button", type: "menu_button" },
-      { id: "info", type: "info" },
-      { id: "links", type: "links" }
+    { id: "header", type: "header" },
+    { id: "menu_button", type: "menu_button" },
+    { id: "info", type: "info" },
+    { id: "links", type: "links" }
   ];
   const layoutBlocks = (siteData.layoutBlocks && siteData.layoutBlocks.length > 0) ? siteData.layoutBlocks : defaultBlocks;
 
   const renderBlock = (block) => {
-      switch (block.type) {
-          case 'header':
-              return (
-                  <div className="flex flex-col px-6 pt-12 pb-4 text-center" style={{ cursor: isPreview ? 'grab' : 'default' }}>
-                      <ScrollReveal delay={0}>
-                          <div className="flex justify-center mb-6">
-                              <div className="w-32 h-32 rounded-full overflow-hidden p-1 bg-stone-800"
-                                   style={{ border: `2px solid ${secondary}`, boxShadow: `0 8px 30px rgba(0,0,0,0.5)` }}>
-                                  <img src={profileImg} alt="Profile" className="w-full h-full object-cover rounded-full" draggable="false" />
-                              </div>
-                          </div>
-                          <h1 className="font-bold text-[28px] mb-2 tracking-wide" style={{ color: textCream, fontFamily: "Cairo, sans-serif" }}>
-                            {name}
-                          </h1>
-                          <p className="text-[14px] font-medium mb-4" style={{ color: secondary, fontFamily: "Cairo, sans-serif" }}>
-                            {subtitle}
-                          </p>
-                          {about && (
-                            <p className="text-[15px] leading-relaxed max-w-[90%] mx-auto opacity-80" style={{ color: textCream, fontFamily: "Cairo, sans-serif" }}>
-                                {about}
-                            </p>
-                          )}
-                      </ScrollReveal>
+    switch (block.type) {
+
+      case 'header':
+        return (
+          <div
+            className="flex flex-col items-center pt-20 px-6 text-center"
+            style={{ cursor: isPreview ? 'grab' : 'default' }}
+          >
+            <BlockReveal delay={0}>
+              {/* Profile image with subtle green/cyan halo */}
+              <div className="relative mb-8 flex justify-center">
+                <motion.div
+                  className="absolute inset-0 rounded-full"
+                  style={{ background: `radial-gradient(circle, ${secAccent}33 0%, transparent 70%)` }}
+                  animate={{ scale: [1, 1.15, 1], opacity: [0.5, 0.8, 0.5] }}
+                  transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                />
+                <div
+                  className="w-40 h-40 rounded-full relative z-10 overflow-hidden"
+                  style={{
+                    background: "#FFFFFF",
+                    padding: "4px",
+                    boxShadow: `0 0 0 1px rgba(0,0,0,0.05), 0 0 40px ${accent}22, 0 15px 35px rgba(0,0,0,0.1)`,
+                  }}
+                >
+                  <img
+                    src={profileImg}
+                    alt={name}
+                    className="w-full h-full object-cover rounded-full"
+                    style={{ background: "#FFFFFF" }}
+                    draggable="false"
+                  />
+                </div>
+              </div>
+            </BlockReveal>
+
+            <BlockReveal delay={0.08}>
+              <h1
+                className="text-[36px] font-black mb-3 tracking-wide text-[#1A1A1A]"
+                style={{
+                  fontFamily: "Cairo,sans-serif",
+                  textShadow: "0 4px 20px rgba(0,0,0,0.05)",
+                  letterSpacing: "0.02em",
+                }}
+              >
+                {name}
+              </h1>
+
+              {tagline && (
+                <div
+                  className="inline-block px-5 py-2 rounded-full mb-6"
+                  style={{
+                    background: `${secAccent}1A`,
+                    border: `1px solid ${secAccent}33`,
+                    backdropFilter: "blur(10px)",
+                  }}
+                >
+                  <p
+                    className="font-bold tracking-wider text-[13px]"
+                    style={{ color: secAccent, fontFamily: "Cairo,sans-serif" }}
+                  >
+                    {tagline}
+                  </p>
+                </div>
+              )}
+            </BlockReveal>
+
+            <BlockReveal delay={0.14}>
+              {about && (
+                <p
+                  className="text-[16px] leading-relaxed max-w-[90%] mx-auto text-[#4A4A4A] font-medium"
+                  style={{ fontFamily: "Cairo,sans-serif" }}
+                >
+                  {about}
+                </p>
+              )}
+            </BlockReveal>
+          </div>
+        );
+
+      case 'menu_button':
+        if (!isMenuEnabled && menuMode !== 'pdf') return null;
+        return (
+          <BlockReveal delay={0}>
+            <div className="px-6 mt-10" style={{ cursor: isPreview ? 'grab' : 'default' }}>
+              <button
+                onClick={handleMenuClick}
+                className="w-full py-5 rounded-2xl font-black text-white text-[18px] tracking-[0.1em] relative overflow-hidden group transition-all duration-400"
+                style={{
+                  backgroundColor: accent,
+                  fontFamily: "Cairo,sans-serif",
+                  boxShadow: `0 8px 30px ${accent}66, inset 0 1px 0 rgba(255,255,255,0.3)`,
+                  transition: "all 0.35s cubic-bezier(0.25,0.46,0.45,0.94)",
+                }}
+                onMouseEnter={e => {
+                  e.currentTarget.style.transform = "translateY(-2px)";
+                  e.currentTarget.style.boxShadow = `0 12px 40px ${accent}88, inset 0 1px 0 rgba(255,255,255,0.4)`;
+                  e.currentTarget.style.backgroundColor = "#2E8B9E"; // Slightly darker cyan
+                }}
+                onMouseLeave={e => {
+                  e.currentTarget.style.transform = "translateY(0)";
+                  e.currentTarget.style.boxShadow = `0 8px 30px ${accent}66, inset 0 1px 0 rgba(255,255,255,0.3)`;
+                  e.currentTarget.style.backgroundColor = accent;
+                }}
+              >
+                <span className="relative z-10 flex items-center justify-center gap-3">
+                  <LucideIcons.Coffee size={24} strokeWidth={2.5} className="group-hover:-rotate-12 transition-transform duration-500" />
+                  {t("VIEW MENU", "عرض قائمة الطعام")}
+                </span>
+                {/* Shine sweep */}
+                <div className="absolute top-0 -left-[100%] w-1/2 h-full bg-gradient-to-r from-transparent via-white/40 to-transparent skew-x-[-20deg] group-hover:left-[200%] transition-all duration-900 ease-in-out" />
+              </button>
+            </div>
+          </BlockReveal>
+        );
+
+      case 'info':
+        if (!hours && !address) return null;
+        return (
+          <BlockReveal delay={0}>
+            <div className="px-6 mt-10" style={{ cursor: isPreview ? 'grab' : 'default' }}>
+              <div
+                className="rounded-2xl p-5 flex flex-col gap-5 relative overflow-hidden"
+                style={{
+                  background: "rgba(255,255,255,0.7)",
+                  backdropFilter: "blur(20px)",
+                  border: "1px solid rgba(0,0,0,0.06)",
+                  boxShadow: "0 4px 24px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.8)",
+                }}
+              >
+                <div className="absolute top-0 right-0 w-40 h-40 rounded-full pointer-events-none" style={{ background: `radial-gradient(circle, ${secAccent}1A 0%, transparent 70%)` }} />
+
+                {address && (
+                  <div className="flex items-start gap-4 relative z-10 group">
+                    <div
+                      className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 transition-all duration-400"
+                      style={{ background: `${secAccent}1A`, border: `1px solid ${secAccent}33` }}
+                    >
+                      <LucideIcons.MapPin size={18} style={{ color: secAccent }} />
+                    </div>
+                    <div className="flex-1 pt-2.5 text-[14.5px] leading-relaxed text-[#2C3E50] font-bold" style={{ fontFamily: "Cairo,sans-serif" }}>
+                      {address}
+                    </div>
                   </div>
-              );
+                )}
 
-          case 'menu_button':
-              if (!isMenuEnabled && menuMode !== 'pdf') return null;
-              return (
-                  <section className="px-6 py-4" style={{ cursor: isPreview ? 'grab' : 'default' }}>
-                    <ScrollReveal delay={0.1}>
-                        <button
-                          onClick={() => {
-                            if (menuMode === 'pdf' && pdfMenuUrl) {
-                              window.open(pdfMenuUrl, '_blank');
-                            } else {
-                              setIsMenuModalOpen(true);
-                            }
-                          }}
-                          className="flex items-center justify-center gap-3 w-full py-[16px] rounded-lg font-bold text-[16px] transition-all duration-300 hover:brightness-110 active:scale-95"
-                          style={{ background: primary, color: "#fff", fontFamily: "Cairo, sans-serif", boxShadow: `0 8px 25px rgba(59, 159, 177, 0.3)` }}
-                        >
-                          <LucideIcons.Coffee size={20} />
-                          {t("VIEW MENU", "عرض القائمة")}
-                        </button>
-                    </ScrollReveal>
-                  </section>
-              );
-
-          case 'links':
-              return (
-                  <section className="px-6 py-4" style={{ cursor: isPreview ? 'grab' : 'default' }}>
-                      <div className="space-y-4">
-                        {links.length > 0 ? (
-                          links.map((lk, i) => (
-                            <ScrollReveal key={lk.id} delay={0.1 + (i * 0.05)} yOffset={20}>
-                              <LinkCardBtn link={lk} />
-                            </ScrollReveal>
-                          ))
-                        ) : (
-                          ["القائمة", "احجز طاولة", "انستغرام", "الموقع"].map((txt, i) => (
-                            <div key={i} className="flex items-center p-4 rounded-lg opacity-30 pointer-events-none"
-                                 style={{ background: cardBg, border: `1px solid rgba(255,255,255,0.05)` }}>
-                              <div className="w-12 h-12 rounded-md bg-white/5 flex items-center justify-center"><LucideIcons.Link size={20} color={textCream} /></div>
-                              <span className="flex-1 mx-4 font-semibold text-[15px]" style={{ color: textCream, fontFamily: "Cairo, sans-serif" }}>{txt}</span>
-                            </div>
-                          ))
-                        )}
-                      </div>
-                  </section>
-              );
-
-          case 'info':
-              // In this theme we render contact info or a secondary image if we have one. Let's just render a subtle separator and contact text if address exists
-              if (!sd.address && !sd.hours) return null;
-              return (
-                  <section className="px-6 py-6" style={{ cursor: isPreview ? 'grab' : 'default' }}>
-                      <ScrollReveal delay={0.2}>
-                          <div className="flex flex-col items-center p-6 rounded-lg text-center" style={{ background: cardBg, border: `1px solid rgba(255,255,255,0.05)` }}>
-                              <LucideIcons.MapPin size={24} color={secondary} className="mb-3" />
-                              {sd.address && <p className="text-[14px] mb-2" style={{ color: textCream, fontFamily: "Cairo, sans-serif" }}>{sd.address}</p>}
-                              {sd.hours && <p className="text-[13px] opacity-70" style={{ color: textCream, fontFamily: "Cairo, sans-serif" }}>{sd.hours}</p>}
-                          </div>
-                      </ScrollReveal>
-                  </section>
-              );
-
-          case 'image':
-              return (
-                  <div className="px-6 py-4 flex justify-center" style={{ cursor: isPreview ? 'grab' : 'default' }}>
-                      <ScrollReveal delay={0.1}>
-                          <img 
-                              src={block.imageUrl || block.url} 
-                              alt="Layout Block" 
-                              className="rounded-lg shadow-lg"
-                              style={{ width: "100%", maxHeight: block.size ? `${block.size}px` : "300px", objectFit: 'cover' }}
-                              draggable="false"
-                          />
-                      </ScrollReveal>
+                {hours && (
+                  <div className="flex items-start gap-4 relative z-10 group">
+                    <div
+                      className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 transition-all duration-400"
+                      style={{ background: `${secAccent}1A`, border: `1px solid ${secAccent}33` }}
+                    >
+                      <LucideIcons.Clock size={18} style={{ color: secAccent }} />
+                    </div>
+                    <div className="flex-1 pt-2.5 text-[14.5px] leading-relaxed text-[#2C3E50] font-bold" style={{ fontFamily: "Cairo,sans-serif" }}>
+                      {hours}
+                    </div>
                   </div>
-              );
+                )}
+              </div>
+            </div>
+          </BlockReveal>
+        );
 
-          default:
-              return null;
-      }
+      case 'links':
+        if (!links || links.length === 0) return null;
+        return (
+          <div className="px-6 mt-12 flex flex-col gap-4 pb-4" style={{ cursor: isPreview ? 'grab' : 'default' }}>
+            <BlockReveal delay={0}>
+              <div className="flex items-center justify-center gap-4 mb-6">
+                <span className="h-[2px] flex-1 rounded-full" style={{ background: `linear-gradient(90deg, transparent, ${accent}80)` }} />
+                <span className="font-bold tracking-[0.1em] text-[13px]" style={{ color: accent, fontFamily: "Cairo,sans-serif" }}>
+                  {t("Connect With Us", "تواصل معنا")}
+                </span>
+                <span className="h-[2px] flex-1 rounded-full" style={{ background: `linear-gradient(90deg, ${accent}80, transparent)` }} />
+              </div>
+            </BlockReveal>
+
+            {links.map((link, idx) => (
+              <BlockReveal key={link.id || idx} delay={idx * 0.06}>
+                <GlowLinkCard
+                  link={link}
+                  accent={accent}
+                  secondaryAccent={secAccent}
+                  cardId={cardId}
+                  t={t}
+                  handleMenuClick={handleMenuClick}
+                />
+              </BlockReveal>
+            ))}
+          </div>
+        );
+
+      case 'image':
+        if (!block.url && !block.imageUrl) return null;
+        return (
+          <BlockReveal delay={0}>
+            <div
+              className="mt-6 relative overflow-hidden group px-6"
+              style={{ cursor: isPreview ? 'grab' : 'default', width: "100%" }}
+            >
+              <div
+                className="rounded-2xl overflow-hidden"
+                style={{
+                  position: "relative",
+                  width: "100%",
+                  maxHeight: block.size ? `${block.size}px` : "320px",
+                  boxShadow: "0 10px 30px rgba(0,0,0,0.1)",
+                }}
+              >
+                <img
+                  src={block.imageUrl || block.url}
+                  alt="Image"
+                  style={{
+                    width: "100%",
+                    height: "auto",
+                    maxHeight: block.size ? `${block.size}px` : "320px",
+                    objectFit: "cover",
+                    display: "block",
+                    backgroundColor: "transparent",
+                    transition: "transform 0.8s ease",
+                  }}
+                  className="group-hover:scale-105"
+                  draggable="false"
+                />
+              </div>
+            </div>
+          </BlockReveal>
+        );
+
+      default:
+        return null;
+    }
   };
 
   return (
-    <>
-      <div className="w-full min-h-screen overflow-x-hidden relative" dir={isAr ? "rtl" : "ltr"} style={{ background: bgDark, fontFamily: "Cairo, sans-serif" }}>
-        
-        {/* Subtle noise/texture overlay to enhance the rustic feel */}
-        <div className="absolute inset-0 pointer-events-none opacity-[0.03]" style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")` }} />
+    <div
+      className="min-h-screen font-sans selection:bg-[#3B9FB1]/30 relative overflow-hidden"
+      style={{ background: bgEarthy }}
+      dir={isAr ? "rtl" : "ltr"}
+    >
+      {/* ── LAYERED LIGHT BACKGROUND ── */}
+      <div className="absolute inset-0 pointer-events-none z-0">
+        {/* Soft radial glow */}
+        <div
+          className="absolute top-0 left-1/2 -translate-x-1/2"
+          style={{
+            width: "600px",
+            height: "600px",
+            background: "radial-gradient(circle at center, rgba(255,255,255,0.7) 0%, transparent 70%)",
+          }}
+        />
+        {/* High-quality noise texture overlay */}
+        <div
+          className="absolute inset-0 opacity-[0.4]"
+          style={{
+            backgroundImage: "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' /%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' /%3E%3C/svg%3E\")",
+            backgroundSize: "180px",
+            mixBlendMode: "overlay",
+          }}
+        />
+      </div>
 
-        <div className="relative z-10 w-full max-w-lg mx-auto pb-10">
-            {isPreview && onUpdateLayoutBlocks ? (
-                <Reorder.Group axis="y" values={layoutBlocks} onReorder={onUpdateLayoutBlocks} className="flex flex-col w-full h-full">
-                    {layoutBlocks.map((block) => (
-                        <Reorder.Item key={block.id} value={block} dragListener={true} className="w-full">
-                            {renderBlock(block)}
-                        </Reorder.Item>
-                    ))}
-                </Reorder.Group>
-            ) : (
-                <div className="flex flex-col w-full h-full">
-                    {layoutBlocks.map(block => (
-                        <div key={block.id} className="w-full">
-                            {renderBlock(block)}
-                        </div>
-                    ))}
-                </div>
-            )}
+      {/* ── CONTENT ── */}
+      <div className="relative z-10 max-w-[480px] mx-auto min-h-screen pb-28">
+        {isPreview && onUpdateLayoutBlocks ? (
+          <Reorder.Group axis="y" values={layoutBlocks} onReorder={onUpdateLayoutBlocks} className="flex flex-col">
+            {layoutBlocks.map((block) => (
+              <Reorder.Item key={block.id} value={block} dragListener={true}>
+                {renderBlock(block)}
+              </Reorder.Item>
+            ))}
+          </Reorder.Group>
+        ) : (
+          <div className="flex flex-col">
+            {layoutBlocks.map((block) => (
+              <div key={block.id}>
+                {renderBlock(block)}
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* ── WATERMARK ── */}
+        <div className="text-center pb-8 pt-8">
+          <p
+            className="text-[12px] font-bold tracking-[0.1em] uppercase"
+            style={{ color: "rgba(0,0,0,0.25)", fontFamily: "Cairo,sans-serif" }}
+          >
+            Powered by AMT Smart Systems
+          </p>
         </div>
       </div>
-      
-      {/* ── MENU MODAL ── */}
-      {isMenuModalOpen && (
-        <div className="fixed inset-0 z-[100] flex flex-col overflow-hidden" style={{ background: bgDark }} dir={isAr ? "rtl" : "ltr"}>
-          {/* Header */}
-          <div className="relative flex-shrink-0 flex items-center justify-between p-5 border-b" style={{ borderColor: "rgba(255,255,255,0.05)", background: cardBg }}>
-            <h2 className="text-[18px] font-bold uppercase tracking-wide" style={{ color: textCream, fontFamily:"Cairo,sans-serif" }}>
-              {t("Our Menu", "قائمة الطعام")}
-            </h2>
-            <button 
-              onClick={() => setIsMenuModalOpen(false)}
-              className="w-10 h-10 rounded-lg flex items-center justify-center transition-colors"
-              style={{ background: "rgba(255,255,255,0.05)", color: textCream }}
-            >
-              <LucideIcons.X size={20} />
-            </button>
-          </div>
 
-          {/* Scrollable Content */}
-          <div className="flex-1 overflow-y-auto p-5 pb-20">
-            {(!menuCategories || menuCategories.length === 0) ? (
-              <div className="flex flex-col items-center justify-center h-full gap-4 opacity-60">
-                <LucideIcons.BookOpen size={40} color={secondary} />
-                <p className="text-[15px]" style={{ color: textCream, fontFamily:"Cairo,sans-serif" }}>
-                  {t("Menu is currently being updated.", "جاري تحديث قائمة الطعام حالياً.")}
-                </p>
-              </div>
-            ) : (
-              <div className="flex flex-col gap-8 max-w-lg mx-auto">
-                {menuCategories.map((cat, i) => (
-                  <div key={i}>
-                    <div className="flex items-center gap-3 mb-4 border-b pb-2" style={{ borderColor: "rgba(255,255,255,0.05)" }}>
-                        <LucideIcons.Coffee size={20} color={secondary} />
-                        <h3 className="font-bold text-[20px]" style={{ color: secondary, fontFamily:"Cairo,sans-serif" }}>
+      {/* ── MENU MODAL ── */}
+      <AnimatePresence>
+        {isMenuModalOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: "100%" }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: "100%" }}
+            transition={{ type: "spring", damping: 28, stiffness: 220 }}
+            className="fixed inset-0 z-[100] flex flex-col overflow-hidden"
+            style={{ background: "#FDFBF7" }} // Very bright off-white for the menu
+            dir={isAr ? "rtl" : "ltr"}
+          >
+            {/* Modal Header */}
+            <div
+              className="relative flex-shrink-0 flex items-center justify-between px-6 py-5 z-10"
+              style={{
+                background: "rgba(255,255,255,0.95)",
+                backdropFilter: "blur(20px)",
+                borderBottom: "1px solid rgba(0,0,0,0.06)",
+                boxShadow: "0 4px 20px rgba(0,0,0,0.02)",
+              }}
+            >
+              <h2
+                className="text-[18px] font-black tracking-wide flex items-center gap-3"
+                style={{ color: "#1A1A1A", fontFamily: "Cairo,sans-serif" }}
+              >
+                <LucideIcons.BookOpen size={20} style={{ color: accent }} />
+                {t("Our Menu", "قائمة الطعام")}
+              </h2>
+              <button
+                onClick={() => setIsMenuModalOpen(false)}
+                className="w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300"
+                style={{
+                  background: `${accent}1A`,
+                  border: `1px solid ${accent}33`,
+                  color: accent,
+                }}
+                onMouseEnter={e => { e.currentTarget.style.background = accent; e.currentTarget.style.color = "#FFF"; }}
+                onMouseLeave={e => { e.currentTarget.style.background = `${accent}1A`; e.currentTarget.style.color = accent; }}
+              >
+                <LucideIcons.X size={20} />
+              </button>
+            </div>
+
+            {/* Scrollable Menu */}
+            <div className="flex-1 overflow-y-auto p-5 pb-24" style={{ background: "#FDFBF7" }}>
+              <div className="absolute top-0 left-0 w-full h-64 pointer-events-none" style={{ background: `linear-gradient(180deg, ${bgEarthy}80 0%, transparent 100%)` }} />
+
+              {(!menuCategories || menuCategories.length === 0) ? (
+                <div className="flex flex-col items-center justify-center h-full gap-5 opacity-50">
+                  <div className="w-20 h-20 rounded-full flex items-center justify-center" style={{ background: `${accent}1A`, border: `1px solid ${accent}33` }}>
+                    <LucideIcons.Coffee size={40} style={{ color: accent }} />
+                  </div>
+                  <p className="text-[16px] font-bold text-[#2C3E50]" style={{ fontFamily: "Cairo,sans-serif" }}>
+                    {t("Menu is being updated.", "جاري تحديث القائمة حالياً.")}
+                  </p>
+                </div>
+              ) : (
+                <div className="flex flex-col gap-10 relative z-10 max-w-[600px] mx-auto">
+                  {menuCategories.map((cat, i) => (
+                    <motion.div
+                      key={i}
+                      initial={{ opacity: 0, y: 24 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true, margin: "-40px" }}
+                      transition={{ duration: 0.5, delay: i * 0.07 }}
+                    >
+                      <div className="flex items-center gap-3 mb-5 pb-3" style={{ borderBottom: "2px solid rgba(0,0,0,0.04)" }}>
+                        <span className="w-2 h-8 rounded-full" style={{ background: secAccent }} />
+                        <h3 className="font-black text-[22px] text-[#1A1A1A]" style={{ fontFamily: "Cairo,sans-serif" }}>
                           {t(cat.name, cat.nameAr)}
                         </h3>
-                    </div>
-                    <div className="flex flex-col gap-4">
-                      {cat.items.map((item, idx) => (
-                        <div key={idx} className="flex justify-between items-center p-4 rounded-lg shadow-sm" style={{ background: cardBg, border: "1px solid rgba(255,255,255,0.03)" }}>
-                          {showMenuImages !== false && item.image && (
-                              <div className="w-[70px] h-[70px] sm:w-20 sm:h-20 rounded-md overflow-hidden flex-shrink-0 mr-3 ml-3 rtl:mr-0 rtl:ml-3 ltr:ml-0 ltr:mr-3 relative shadow-md">
-                                <img src={item.image} alt={item.name} loading="lazy" decoding="async" className="absolute inset-0 w-full h-full object-cover" />
+                      </div>
+                      <div className="flex flex-col gap-4">
+                        {cat.items.map((item, idx) => (
+                          <div
+                            key={idx}
+                            className="flex justify-between items-center p-4 rounded-2xl group transition-all duration-400"
+                            style={{
+                              background: "#FFFFFF",
+                              border: "1px solid rgba(0,0,0,0.06)",
+                              boxShadow: "0 4px 15px rgba(0,0,0,0.03)",
+                              transition: "all 0.3s ease",
+                            }}
+                            onMouseEnter={e => {
+                              e.currentTarget.style.transform = "translateY(-2px)";
+                              e.currentTarget.style.borderColor = `${accent}66`;
+                              e.currentTarget.style.boxShadow = `0 10px 30px rgba(0,0,0,0.08), 0 0 0 1px ${accent}33`;
+                            }}
+                            onMouseLeave={e => {
+                              e.currentTarget.style.transform = "translateY(0)";
+                              e.currentTarget.style.borderColor = "rgba(0,0,0,0.06)";
+                              e.currentTarget.style.boxShadow = "0 4px 15px rgba(0,0,0,0.03)";
+                            }}
+                          >
+                            {showMenuImages !== false && item.image && (
+                              <div className="w-[75px] h-[75px] sm:w-[85px] sm:h-[85px] rounded-xl overflow-hidden flex-shrink-0 mr-4 ml-4 rtl:mr-0 rtl:ml-4 ltr:ml-0 ltr:mr-4 relative shadow-sm border border-black/5">
+                                <img src={item.image} alt={item.name} loading="lazy" decoding="async" className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
                               </div>
                             )}
                             <div className="flex-1">
-                              <h4 className="font-bold text-[16px]" style={{ color: textCream, fontFamily:"Cairo,sans-serif" }}>{t(item.name, item.nameAr)}</h4>
-                            {item.descAr && <p className="text-[13px] mt-1 leading-relaxed max-w-[90%] opacity-70" style={{ color: textCream, fontFamily:"Cairo,sans-serif" }}>{t(item.desc, item.descAr)}</p>}
-                            <div className="text-[15px] font-bold mt-2" style={{ color: primary }}>{item.price} JOD</div>
+                              <h4 className="font-bold text-[16px] text-[#1A1A1A]" style={{ fontFamily: "Cairo,sans-serif" }}>
+                                {t(item.name, item.nameAr)}
+                              </h4>
+                              {item.descAr && (
+                                <p className="text-[13px] text-[#666] mt-1.5 leading-relaxed max-w-[95%] font-medium" style={{ fontFamily: "Cairo,sans-serif" }}>
+                                  {t(item.desc, item.descAr)}
+                                </p>
+                              )}
+                              <div className="text-[16px] font-black mt-2" style={{ color: accent }}>
+                                {item.price} JOD
+                              </div>
+                            </div>
+                            {isHouseSystemActive && (
+                              <button
+                                onClick={() => addToCart && addToCart(item)}
+                                className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 transition-transform active:scale-95 hover:brightness-110 shadow-md"
+                                style={{ background: accent, color: "#FFF" }}
+                              >
+                                <LucideIcons.Plus size={20} strokeWidth={3} />
+                              </button>
+                            )}
                           </div>
-                          {isHouseSystemActive && ( <button onClick={() => addToCart && addToCart(item)} className="w-10 h-10 rounded-md flex items-center justify-center flex-shrink-0 transition-transform active:scale-95 hover:brightness-110" style={{ background: primary }}>
-                            <LucideIcons.Plus size={18} color="#fff" />
-                          </button> )}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-    </>
+                        ))}
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
   );
 }
