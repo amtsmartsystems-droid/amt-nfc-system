@@ -194,18 +194,15 @@ export default function RusticCafeTheme({ cardId, siteData, siteColors, lang = "
                   transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
                 />
                 <div
-                  className="w-40 h-40 rounded-full relative z-10 overflow-hidden"
+                  className="w-40 h-40 rounded-full relative z-10 overflow-hidden flex items-center justify-center"
                   style={{
-                    background: "#FFFFFF",
-                    padding: "4px",
-                    boxShadow: `0 0 0 1px rgba(0,0,0,0.05), 0 0 40px ${accent}22, 0 15px 35px rgba(0,0,0,0.1)`,
+                    boxShadow: `0 10px 40px ${accent}33, 0 20px 50px rgba(0,0,0,0.15)`,
                   }}
                 >
                   <img
                     src={profileImg}
                     alt={name}
-                    className="w-full h-full object-cover rounded-full"
-                    style={{ background: "#FFFFFF" }}
+                    className="w-[120%] h-[120%] object-contain"
                     draggable="false"
                   />
                 </div>

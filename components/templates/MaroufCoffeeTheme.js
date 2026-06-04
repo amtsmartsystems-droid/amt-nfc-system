@@ -72,8 +72,8 @@ function GlowLinkCard({ link, accent, cardId, t, handleMenuClick }) {
       }}
       onMouseEnter={e => {
         e.currentTarget.style.transform = "translateY(-2px)";
-        e.currentTarget.style.boxShadow = `0 8px 40px rgba(0,0,0,0.5), 0 0 0 1px rgba(185,145,70,0.4), inset 0 1px 0 rgba(255,255,255,0.08)`;
-        e.currentTarget.style.borderColor = "rgba(185,145,70,0.5)";
+        e.currentTarget.style.boxShadow = `0 8px 40px rgba(0,0,0,0.5), 0 0 0 1px rgba(var(--primary-rgb),0.4), inset 0 1px 0 rgba(255,255,255,0.08)`;
+        e.currentTarget.style.borderColor = "rgba(var(--primary-rgb),0.5)";
       }}
       onMouseOut={e => {
         e.currentTarget.style.transform = "translateY(0)";
@@ -85,7 +85,7 @@ function GlowLinkCard({ link, accent, cardId, t, handleMenuClick }) {
       <div
         className="pointer-events-none absolute inset-0 rounded-2xl transition-opacity duration-300"
         style={{
-          background: `radial-gradient(200px circle at ${glowPos.x}% ${glowPos.y}%, rgba(185,145,70,0.18), transparent 70%)`,
+          background: `radial-gradient(200px circle at ${glowPos.x}% ${glowPos.y}%, rgba(var(--primary-rgb),0.18), transparent 70%)`,
           opacity: glowPos.opacity,
         }}
       />
@@ -94,11 +94,11 @@ function GlowLinkCard({ link, accent, cardId, t, handleMenuClick }) {
       <div className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none overflow-hidden">
         <div
           className="absolute inset-x-0 top-0 h-[1px]"
-          style={{ background: "linear-gradient(90deg, transparent, rgba(185,145,70,0.6), transparent)" }}
+          style={{ background: "linear-gradient(90deg, transparent, rgba(var(--primary-rgb),0.6), transparent)" }}
         />
         <div
           className="absolute inset-x-0 bottom-0 h-[1px]"
-          style={{ background: "linear-gradient(90deg, transparent, rgba(185,145,70,0.3), transparent)" }}
+          style={{ background: "linear-gradient(90deg, transparent, rgba(var(--primary-rgb),0.3), transparent)" }}
         />
       </div>
 
@@ -106,15 +106,15 @@ function GlowLinkCard({ link, accent, cardId, t, handleMenuClick }) {
       <div
         className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 relative z-10 transition-all duration-500 group-hover:scale-105"
         style={{
-          background: "rgba(185,145,70,0.08)",
-          border: "1px solid rgba(185,145,70,0.2)",
-          boxShadow: "0 0 0 0 rgba(185,145,70,0)",
+          background: "rgba(var(--primary-rgb),0.08)",
+          border: "1px solid rgba(var(--primary-rgb),0.2)",
+          boxShadow: "0 0 0 0 rgba(var(--primary-rgb),0)",
           transition: "all 0.4s ease",
         }}
-        onMouseEnter={e => { e.currentTarget.style.boxShadow = "0 0 20px rgba(185,145,70,0.35)"; }}
-        onMouseLeave={e => { e.currentTarget.style.boxShadow = "0 0 0 0 rgba(185,145,70,0)"; }}
+        onMouseEnter={e => { e.currentTarget.style.boxShadow = "0 0 20px rgba(var(--primary-rgb),0.35)"; }}
+        onMouseLeave={e => { e.currentTarget.style.boxShadow = "0 0 0 0 rgba(var(--primary-rgb),0)"; }}
       >
-        <IconComponent size={22} style={{ color: "#B99146", filter: "drop-shadow(0 0 6px rgba(185,145,70,0.5))" }} />
+        <IconComponent size={22} style={{ color: "var(--primary-color)", filter: "drop-shadow(0 0 6px rgba(var(--primary-rgb),0.5))" }} />
       </div>
 
       {/* Label */}
@@ -129,25 +129,29 @@ function GlowLinkCard({ link, accent, cardId, t, handleMenuClick }) {
       <div
         className="w-8 h-8 rounded-full flex items-center justify-center relative z-10 flex-shrink-0 transition-all duration-500 group-hover:rotate-45"
         style={{
-          background: "rgba(185,145,70,0.08)",
-          border: "1px solid rgba(185,145,70,0.2)",
+          background: "rgba(var(--primary-rgb),0.08)",
+          border: "1px solid rgba(var(--primary-rgb),0.2)",
         }}
       >
-        <LucideIcons.ArrowUpRight size={14} style={{ color: "rgba(185,145,70,0.7)" }} />
+        <LucideIcons.ArrowUpRight size={14} style={{ color: "rgba(var(--primary-rgb),0.7)" }} />
       </div>
     </a>
   );
 }
 
 export default function MaroufCoffeeTheme({ cardId, siteData, siteColors, lang = "en", isMenuEnabled, menuMode, isHouseSystemActive, menuCategories, addToCart, pdfMenuUrl, showMenuImages, isPreview, onUpdateLayoutBlocks }) {
-  const accent  = "#B99146";
-  const isAr    = lang === "ar";
-  const [isMenuModalOpen, setIsMenuModalOpen] = useState(false);
+  
+  const accent = siteColors?.primary || "#B99146";
+  const bgDark = siteColors?.background || "#050505";
 
-  useEffect(() => {
-    document.documentElement.style.setProperty("--primary-color", accent);
-    document.documentElement.style.setProperty("--primary-rgb", `185, 145, 70`);
-  }, [accent]);
+  const hexToRgbStr = (hex) => {
+    let c = (hex||'#B99146').substring(1);
+    if(c.length===3) c = c.split('').map(x=>x+x).join('');
+    const num = parseInt(c, 16);
+    return `${(num >> 16) & 255}, ${(num >> 8) & 255}, ${num & 255}`;
+  };
+
+  
 
   const t  = (en, ar) => isAr && ar ? ar : en;
   const sd = siteData || {};
@@ -194,23 +198,23 @@ export default function MaroufCoffeeTheme({ cardId, siteData, siteColors, lang =
               <div className="relative mb-8 flex justify-center">
                 <motion.div
                   className="absolute inset-0 rounded-full"
-                  style={{ background: `radial-gradient(circle, rgba(185,145,70,0.3) 0%, transparent 70%)` }}
+                  style={{ background: `radial-gradient(circle, rgba(var(--primary-rgb),0.3) 0%, transparent 70%)` }}
                   animate={{ scale: [1, 1.2, 1], opacity: [0.4, 0.7, 0.4] }}
                   transition={{ duration: 3.5, repeat: Infinity, ease: "easeInOut" }}
                 />
                 <div
                   className="w-36 h-36 rounded-full relative z-10 overflow-hidden"
                   style={{
-                    background: "#050505",
+                    background: "var(--bg-color)",
                     padding: "3px",
-                    boxShadow: "0 0 0 1px rgba(185,145,70,0.5), 0 0 40px rgba(185,145,70,0.2), 0 20px 60px rgba(0,0,0,0.6)",
+                    boxShadow: "0 0 0 1px rgba(var(--primary-rgb),0.5), 0 0 40px rgba(var(--primary-rgb),0.2), 0 20px 60px rgba(0,0,0,0.6)",
                   }}
                 >
                   <img
                     src={profileImg}
                     alt={name}
                     className="w-full h-full object-contain rounded-full"
-                    style={{ background: "#050505" }}
+                    style={{ background: "var(--bg-color)" }}
                     draggable="false"
                   />
                 </div>
@@ -222,7 +226,7 @@ export default function MaroufCoffeeTheme({ cardId, siteData, siteColors, lang =
                 className="text-[34px] font-black mb-3 tracking-wide uppercase text-white"
                 style={{
                   fontFamily: "Cairo,sans-serif",
-                  textShadow: "0 0 60px rgba(185,145,70,0.3)",
+                  textShadow: "0 0 60px rgba(var(--primary-rgb),0.3)",
                   letterSpacing: "0.04em",
                 }}
               >
@@ -233,8 +237,8 @@ export default function MaroufCoffeeTheme({ cardId, siteData, siteColors, lang =
                 <div
                   className="inline-block px-5 py-2 rounded-full mb-6"
                   style={{
-                    background: "rgba(185,145,70,0.08)",
-                    border: "1px solid rgba(185,145,70,0.25)",
+                    background: "rgba(var(--primary-rgb),0.08)",
+                    border: "1px solid rgba(var(--primary-rgb),0.25)",
                     backdropFilter: "blur(10px)",
                   }}
                 >
@@ -272,16 +276,16 @@ export default function MaroufCoffeeTheme({ cardId, siteData, siteColors, lang =
                 style={{
                   backgroundColor: accent,
                   fontFamily: "Cairo,sans-serif",
-                  boxShadow: "0 8px 40px rgba(185,145,70,0.45), 0 0 0 1px rgba(185,145,70,0.3)",
+                  boxShadow: "0 8px 40px rgba(var(--primary-rgb),0.45), 0 0 0 1px rgba(var(--primary-rgb),0.3)",
                   transition: "all 0.35s cubic-bezier(0.25,0.46,0.45,0.94)",
                 }}
                 onMouseEnter={e => {
                   e.currentTarget.style.transform = "translateY(-2px)";
-                  e.currentTarget.style.boxShadow = "0 16px 60px rgba(185,145,70,0.6), 0 0 0 1px rgba(185,145,70,0.5)";
+                  e.currentTarget.style.boxShadow = "0 16px 60px rgba(var(--primary-rgb),0.6), 0 0 0 1px rgba(var(--primary-rgb),0.5)";
                 }}
                 onMouseLeave={e => {
                   e.currentTarget.style.transform = "translateY(0)";
-                  e.currentTarget.style.boxShadow = "0 8px 40px rgba(185,145,70,0.45), 0 0 0 1px rgba(185,145,70,0.3)";
+                  e.currentTarget.style.boxShadow = "0 8px 40px rgba(var(--primary-rgb),0.45), 0 0 0 1px rgba(var(--primary-rgb),0.3)";
                 }}
               >
                 <span className="relative z-10 flex items-center justify-center gap-3">
@@ -309,18 +313,18 @@ export default function MaroufCoffeeTheme({ cardId, siteData, siteColors, lang =
                   boxShadow: "0 4px 24px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.04)",
                 }}
               >
-                <div className="absolute top-0 right-0 w-40 h-40 rounded-full pointer-events-none" style={{ background: "radial-gradient(circle, rgba(185,145,70,0.06) 0%, transparent 70%)" }} />
+                <div className="absolute top-0 right-0 w-40 h-40 rounded-full pointer-events-none" style={{ background: "radial-gradient(circle, rgba(var(--primary-rgb),0.06) 0%, transparent 70%)" }} />
 
                 {address && (
                   <div className="flex items-start gap-4 relative z-10 group">
                     <div
                       className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 transition-all duration-400"
                       style={{
-                        background: "rgba(185,145,70,0.08)",
-                        border: "1px solid rgba(185,145,70,0.2)",
+                        background: "rgba(var(--primary-rgb),0.08)",
+                        border: "1px solid rgba(var(--primary-rgb),0.2)",
                       }}
                     >
-                      <LucideIcons.MapPin size={18} style={{ color: accent, filter: "drop-shadow(0 0 6px rgba(185,145,70,0.4))" }} />
+                      <LucideIcons.MapPin size={18} style={{ color: accent, filter: "drop-shadow(0 0 6px rgba(var(--primary-rgb),0.4))" }} />
                     </div>
                     <div className="flex-1 pt-2.5 text-[14.5px] leading-relaxed text-gray-300 font-medium" style={{ fontFamily: "Cairo,sans-serif" }}>
                       {address}
@@ -333,11 +337,11 @@ export default function MaroufCoffeeTheme({ cardId, siteData, siteColors, lang =
                     <div
                       className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 transition-all duration-400"
                       style={{
-                        background: "rgba(185,145,70,0.08)",
-                        border: "1px solid rgba(185,145,70,0.2)",
+                        background: "rgba(var(--primary-rgb),0.08)",
+                        border: "1px solid rgba(var(--primary-rgb),0.2)",
                       }}
                     >
-                      <LucideIcons.Clock size={18} style={{ color: accent, filter: "drop-shadow(0 0 6px rgba(185,145,70,0.4))" }} />
+                      <LucideIcons.Clock size={18} style={{ color: accent, filter: "drop-shadow(0 0 6px rgba(var(--primary-rgb),0.4))" }} />
                     </div>
                     <div className="flex-1 pt-2.5 text-[14.5px] leading-relaxed text-gray-300 font-medium" style={{ fontFamily: "Cairo,sans-serif" }}>
                       {hours}
@@ -355,11 +359,11 @@ export default function MaroufCoffeeTheme({ cardId, siteData, siteColors, lang =
           <div className="px-6 mt-12 flex flex-col gap-3 pb-4" style={{ cursor: isPreview ? 'grab' : 'default' }}>
             <BlockReveal delay={0}>
               <div className="flex items-center justify-center gap-4 mb-8">
-                <span className="h-[1px] flex-1" style={{ background: "linear-gradient(90deg, transparent, rgba(185,145,70,0.4))" }} />
+                <span className="h-[1px] flex-1" style={{ background: "linear-gradient(90deg, transparent, rgba(var(--primary-rgb),0.4))" }} />
                 <span className="font-bold tracking-[0.25em] text-[11px] uppercase" style={{ color: accent, fontFamily: "Cairo,sans-serif" }}>
                   {t("Connect With Us", "تواصل معنا")}
                 </span>
-                <span className="h-[1px] flex-1" style={{ background: "linear-gradient(90deg, rgba(185,145,70,0.4), transparent)" }} />
+                <span className="h-[1px] flex-1" style={{ background: "linear-gradient(90deg, rgba(var(--primary-rgb),0.4), transparent)" }} />
               </div>
             </BlockReveal>
 
@@ -400,17 +404,17 @@ export default function MaroufCoffeeTheme({ cardId, siteData, siteColors, lang =
                 {/* Top fade from black */}
                 <div
                   className="absolute inset-x-0 top-0 h-16 pointer-events-none z-10"
-                  style={{ background: "linear-gradient(180deg, #050505 0%, transparent 100%)" }}
+                  style={{ background: "linear-gradient(180deg, var(--bg-color) 0%, transparent 100%)" }}
                 />
                 {/* Bottom fade to black */}
                 <div
                   className="absolute inset-x-0 bottom-0 h-16 pointer-events-none z-10"
-                  style={{ background: "linear-gradient(0deg, #050505 0%, transparent 100%)" }}
+                  style={{ background: "linear-gradient(0deg, var(--bg-color) 0%, transparent 100%)" }}
                 />
                 {/* Gold vignette sides */}
                 <div
                   className="absolute inset-0 pointer-events-none z-10"
-                  style={{ boxShadow: "inset 0 0 60px rgba(185,145,70,0.08)" }}
+                  style={{ boxShadow: "inset 0 0 60px rgba(var(--primary-rgb),0.08)" }}
                 />
                 <img
                   src={block.imageUrl || block.url}
@@ -439,8 +443,8 @@ export default function MaroufCoffeeTheme({ cardId, siteData, siteColors, lang =
 
   return (
     <div
-      className="min-h-screen text-white font-sans selection:bg-[#B99146]/30 relative overflow-hidden"
-      style={{ background: "#050505" }}
+      className="min-h-screen text-white font-sans selection:bg-[var(--primary-color)]/30 relative overflow-hidden"
+      style={{ background: "var(--bg-color)" }}
       dir={isAr ? "rtl" : "ltr"}
     >
       {/* ── LAYERED BACKGROUND ── */}
@@ -455,7 +459,7 @@ export default function MaroufCoffeeTheme({ cardId, siteData, siteColors, lang =
         {/* Dark gradient overlay */}
         <div
           className="absolute inset-0"
-          style={{ background: "linear-gradient(180deg, rgba(0,0,0,0.7) 0%, rgba(5,5,5,0.95) 50%, #050505 100%)" }}
+          style={{ background: "linear-gradient(180deg, rgba(0,0,0,0.7) 0%, rgba(5,5,5,0.95) 50%, var(--bg-color) 100%)" }}
         />
         {/* Gold radial glow top */}
         <div
@@ -463,7 +467,7 @@ export default function MaroufCoffeeTheme({ cardId, siteData, siteColors, lang =
           style={{
             width: "500px",
             height: "500px",
-            background: "radial-gradient(circle at center, rgba(185,145,70,0.12) 0%, transparent 70%)",
+            background: "radial-gradient(circle at center, rgba(var(--primary-rgb),0.12) 0%, transparent 70%)",
           }}
         />
         {/* Noise texture overlay */}
@@ -516,7 +520,7 @@ export default function MaroufCoffeeTheme({ cardId, siteData, siteColors, lang =
             exit={{ opacity: 0, y: "100%" }}
             transition={{ type: "spring", damping: 28, stiffness: 220 }}
             className="fixed inset-0 z-[100] flex flex-col overflow-hidden"
-            style={{ background: "#050505" }}
+            style={{ background: "var(--bg-color)" }}
             dir={isAr ? "rtl" : "ltr"}
           >
             {/* Modal Header */}
@@ -532,19 +536,19 @@ export default function MaroufCoffeeTheme({ cardId, siteData, siteColors, lang =
                 className="text-[18px] font-black uppercase tracking-widest flex items-center gap-3"
                 style={{ color: accent, fontFamily: "Cairo,sans-serif" }}
               >
-                <LucideIcons.BookOpen size={20} style={{ filter: "drop-shadow(0 0 8px rgba(185,145,70,0.5))" }} />
+                <LucideIcons.BookOpen size={20} style={{ filter: "drop-shadow(0 0 8px rgba(var(--primary-rgb),0.5))" }} />
                 {t("Our Menu", "قائمة الطعام")}
               </h2>
               <button
                 onClick={() => setIsMenuModalOpen(false)}
                 className="w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300"
                 style={{
-                  background: "rgba(185,145,70,0.08)",
-                  border: "1px solid rgba(185,145,70,0.25)",
+                  background: "rgba(var(--primary-rgb),0.08)",
+                  border: "1px solid rgba(var(--primary-rgb),0.25)",
                   color: accent,
                 }}
                 onMouseEnter={e => { e.currentTarget.style.background = accent; e.currentTarget.style.color = "#000"; }}
-                onMouseLeave={e => { e.currentTarget.style.background = "rgba(185,145,70,0.08)"; e.currentTarget.style.color = accent; }}
+                onMouseLeave={e => { e.currentTarget.style.background = "rgba(var(--primary-rgb),0.08)"; e.currentTarget.style.color = accent; }}
               >
                 <LucideIcons.X size={20} />
               </button>
@@ -552,11 +556,11 @@ export default function MaroufCoffeeTheme({ cardId, siteData, siteColors, lang =
 
             {/* Scrollable Menu */}
             <div className="flex-1 overflow-y-auto p-5 pb-24" style={{ background: "#080808" }}>
-              <div className="absolute top-0 left-0 w-full h-64 pointer-events-none" style={{ background: "linear-gradient(180deg, rgba(185,145,70,0.04) 0%, transparent 100%)" }} />
+              <div className="absolute top-0 left-0 w-full h-64 pointer-events-none" style={{ background: "linear-gradient(180deg, rgba(var(--primary-rgb),0.04) 0%, transparent 100%)" }} />
 
               {(!menuCategories || menuCategories.length === 0) ? (
                 <div className="flex flex-col items-center justify-center h-full gap-5 opacity-40">
-                  <div className="w-20 h-20 rounded-full flex items-center justify-center" style={{ background: "rgba(185,145,70,0.08)", border: "1px solid rgba(185,145,70,0.2)" }}>
+                  <div className="w-20 h-20 rounded-full flex items-center justify-center" style={{ background: "rgba(var(--primary-rgb),0.08)", border: "1px solid rgba(var(--primary-rgb),0.2)" }}>
                     <LucideIcons.Coffee size={40} style={{ color: accent }} />
                   </div>
                   <p className="text-[16px] font-semibold text-gray-400" style={{ fontFamily: "Cairo,sans-serif" }}>
@@ -592,8 +596,8 @@ export default function MaroufCoffeeTheme({ cardId, siteData, siteColors, lang =
                             }}
                             onMouseEnter={e => {
                               e.currentTarget.style.transform = "translateY(-2px)";
-                              e.currentTarget.style.borderColor = "rgba(185,145,70,0.35)";
-                              e.currentTarget.style.boxShadow = "0 8px 30px rgba(0,0,0,0.4), 0 0 0 1px rgba(185,145,70,0.2)";
+                              e.currentTarget.style.borderColor = "rgba(var(--primary-rgb),0.35)";
+                              e.currentTarget.style.boxShadow = "0 8px 30px rgba(0,0,0,0.4), 0 0 0 1px rgba(var(--primary-rgb),0.2)";
                             }}
                             onMouseLeave={e => {
                               e.currentTarget.style.transform = "translateY(0)";
@@ -623,12 +627,12 @@ export default function MaroufCoffeeTheme({ cardId, siteData, siteColors, lang =
                               onClick={() => addToCart && addToCart(item)}
                               className="w-11 h-11 rounded-full flex items-center justify-center flex-shrink-0 transition-all duration-300"
                               style={{
-                                background: "rgba(185,145,70,0.08)",
-                                border: "1px solid rgba(185,145,70,0.25)",
+                                background: "rgba(var(--primary-rgb),0.08)",
+                                border: "1px solid rgba(var(--primary-rgb),0.25)",
                                 color: accent,
                               }}
                               onMouseEnter={e => { e.currentTarget.style.background = accent; e.currentTarget.style.color = "#000"; e.currentTarget.style.transform = "scale(1.1)"; }}
-                              onMouseLeave={e => { e.currentTarget.style.background = "rgba(185,145,70,0.08)"; e.currentTarget.style.color = accent; e.currentTarget.style.transform = "scale(1)"; }}
+                              onMouseLeave={e => { e.currentTarget.style.background = "rgba(var(--primary-rgb),0.08)"; e.currentTarget.style.color = accent; e.currentTarget.style.transform = "scale(1)"; }}
                             >
                               <LucideIcons.Plus size={20} strokeWidth={2.5} />
                             </button>
