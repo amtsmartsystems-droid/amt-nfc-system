@@ -1,6 +1,16 @@
 import { NextResponse } from 'next/server';
+import connectDB from '../../../lib/mongodb';
+import mongoose from 'mongoose';
 
-// Upload images/PDFs via base64 encoding — no external storage needed
+const FileSchema = new mongoose.Schema({
+  name: String,
+  mimeType: String,
+  data: Buffer,
+  createdAt: { type: Date, default: Date.now },
+});
+
+const FileModel = mongoose.models.UploadedFile || mongoose.model('UploadedFile', FileSchema);
+
 export async function POST(request) {
   try {
     const formData = await request.formData();
@@ -13,14 +23,19 @@ export async function POST(request) {
     // Read file as buffer
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
-
-    // Convert to base64 data URL
     const mimeType = file.type || 'application/octet-stream';
-    const base64 = buffer.toString('base64');
-    const dataUrl = `data:${mimeType};base64,${base64}`;
 
-    // Return the data URL directly (works for images and PDFs up to ~10MB)
-    return NextResponse.json({ url: dataUrl });
+    // Store in MongoDB
+    await connectDB();
+    const saved = await FileModel.create({
+      name: file.name,
+      mimeType,
+      data: buffer,
+    });
+
+    // Return a proper URL to serve the file
+    const fileUrl = `/api/file/${saved._id}`;
+    return NextResponse.json({ url: fileUrl });
   } catch (error) {
     console.error('Error uploading file:', error);
     return NextResponse.json({ error: 'حدث خطأ أثناء الرفع: ' + error.message }, { status: 500 });
