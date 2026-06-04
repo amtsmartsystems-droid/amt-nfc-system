@@ -24,8 +24,8 @@ export default function ClientCardViewer({ initialCard, cardId }) {
 
     /* ── Cart State ── */
     const [cart, setCart] = useState([]);
+    const [showCart, setShowCart] = useState(false);
     const [cartToast, setCartToast] = useState(null);
-    const [showCartModal, setShowCartModal] = useState(false);
     const [showCliqModal, setShowCliqModal] = useState(false);
 
     /* ── Smart Waiter State (Server-Side Session) ── */
@@ -632,7 +632,7 @@ export default function ClientCardViewer({ initialCard, cardId }) {
             )}
 
             {/* ════════ FLOATING CART BUTTON ════════ */}
-            {cart.length > 0 && !showCart && !showCliqModal && (
+            {card.isHouseSystemActive && cart.length > 0 && !showCart && !showCliqModal && (
                 <button
                     onClick={() => setShowCart(true)}
                     style={{ position: 'fixed', bottom: 80, right: 20, zIndex: 9997, background: '#ea580c', color: '#fff', border: 'none', borderRadius: 999, padding: '12px 20px', display: 'flex', alignItems: 'center', gap: 10, fontWeight: 900, boxShadow: '0 8px 25px rgba(234,88,12,0.4)', animation: 'bounceIn 0.5s' }}
@@ -674,7 +674,6 @@ export default function ClientCardViewer({ initialCard, cardId }) {
                         </div>
                         <button
                             onClick={() => {
-                                if (!tableNumber) return setWaiterToast({ message: "يرجى مسح الـ NFC للطاولة أولاً", type: 'error' });
                                 setShowCart(false);
                                 if (card.cliqConfig?.isEnabled) setShowCliqModal(true);
                                 else {
@@ -927,110 +926,7 @@ export default function ClientCardViewer({ initialCard, cardId }) {
                             </div>
                         )}
 
-                        {/* ════════ FLOATING CART WIDGET ════════ */}
-                        {card.isHouseSystemActive && cart.length > 0 && !showCartModal && (
-                            <div style={{ position: 'fixed', bottom: 20, left: 16, right: 16, zIndex: 9999, animation: 'slideUp 0.3s ease-out' }}>
-                                <button
-                                    onClick={() => setShowCartModal(true)}
-                                    style={{
-                                        width: '100%',
-                                        background: 'linear-gradient(135deg, #10b981, #059669)',
-                                        color: '#fff',
-                                        border: '1px solid rgba(255,255,255,0.2)',
-                                        borderRadius: 999,
-                                        padding: '16px 24px',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'space-between',
-                                        fontWeight: 900,
-                                        fontSize: 16,
-                                        fontFamily: 'Cairo, sans-serif',
-                                        boxShadow: '0 10px 30px rgba(16,185,129,0.4)',
-                                        cursor: 'pointer',
-                                    }}
-                                >
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                                        <div style={{ background: 'rgba(255,255,255,0.2)', borderRadius: 20, padding: '4px 12px', fontSize: 14 }}>
-                                            {cart.reduce((sum, item) => sum + item.qty, 0)} {lang === 'ar' ? 'عناصر' : 'Items'}
-                                        </div>
-                                    </div>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                                        <span>{lang === 'ar' ? 'إتمام الطلب' : 'Checkout'}</span>
-                                        <span style={{ background: '#fff', color: '#059669', padding: '4px 10px', borderRadius: 12, fontSize: 15 }}>
-                                            {cart.reduce((sum, item) => sum + (item.price * item.qty), 0).toFixed(2)} JOD
-                                        </span>
-                                    </div>
-                                </button>
-                            </div>
-                        )}
 
-                        {/* ════════ CHECKOUT MODAL ════════ */}
-                        {showCartModal && (
-                            <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 10000, background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'flex-end', justifyContent: 'center', fontFamily: 'Cairo, sans-serif' }} onClick={() => setShowCartModal(false)}>
-                                <div style={{ background: '#0a0a0a', width: '100%', maxWidth: 448, borderTopLeftRadius: 32, borderTopRightRadius: 32, padding: '24px 20px 40px', borderTop: '1px solid #10b981', boxShadow: '0 -10px 40px rgba(0,0,0,0.8)', animation: 'slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1)', maxHeight: '90vh', display: 'flex', flexDirection: 'column' }} onClick={e => e.stopPropagation()}>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20, direction: lang === 'ar' ? 'rtl' : 'ltr' }}>
-                                        <h3 style={{ margin: 0, color: '#f8fafc', fontSize: 22, fontWeight: 900 }}>{lang === 'ar' ? 'سلة الطلبات' : 'Your Cart'}</h3>
-                                        <button onClick={() => setShowCartModal(false)} style={{ background: '#1f2937', border: 'none', color: '#9ca3af', width: 32, height: 32, borderRadius: 16, fontSize: 20, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>×</button>
-                                    </div>
-                                    
-                                    <div style={{ flex: 1, overflowY: 'auto', marginBottom: 20, paddingRight: 4, direction: lang === 'ar' ? 'rtl' : 'ltr' }}>
-                                        {cart.map((item, idx) => (
-                                            <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px', background: '#111', borderRadius: 16, marginBottom: 12, border: '1px solid #222' }}>
-                                                <div style={{ flex: 1 }}>
-                                                    <h4 style={{ margin: '0 0 4px', color: '#fff', fontSize: 15, fontWeight: 800 }}>{lang === 'ar' ? item.nameAr : item.name}</h4>
-                                                    <div style={{ color: '#10b981', fontWeight: 900, fontSize: 14 }}>{item.price.toFixed(2)} JOD</div>
-                                                </div>
-                                                <div style={{ display: 'flex', alignItems: 'center', gap: 12, background: '#000', borderRadius: 999, padding: '4px 6px', border: '1px solid #333' }}>
-                                                    <button onClick={() => {
-                                                        const newQty = item.qty - 1;
-                                                        if (newQty <= 0) setCart(cart.filter(i => i.id !== item.id));
-                                                        else setCart(cart.map(i => i.id === item.id ? { ...i, qty: newQty } : i));
-                                                    }} style={{ background: '#222', border: 'none', color: '#fff', width: 28, height: 28, borderRadius: 14, fontSize: 16, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>-</button>
-                                                    <span style={{ color: '#fff', fontWeight: 800, minWidth: 20, textAlign: 'center' }}>{item.qty}</span>
-                                                    <button onClick={() => setCart(cart.map(i => i.id === item.id ? { ...i, qty: item.qty + 1 } : i))} style={{ background: '#10b981', border: 'none', color: '#fff', width: 28, height: 28, borderRadius: 14, fontSize: 16, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>+</button>
-                                                </div>
-                                            </div>
-                                        ))}
-                                        
-                                        <div style={{ marginTop: 24, padding: '16px', background: '#111', borderRadius: 16, border: '1px solid #222' }}>
-                                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12, color: '#9ca3af', fontSize: 14 }}>
-                                                <span>{lang === 'ar' ? 'المجموع الفرعي' : 'Subtotal'}</span>
-                                                <span>{cart.reduce((sum, item) => sum + (item.price * item.qty), 0).toFixed(2)} JOD</span>
-                                            </div>
-                                            <div style={{ display: 'flex', justifyContent: 'space-between', color: '#fff', fontSize: 18, fontWeight: 900, paddingTop: 12, borderTop: '1px solid #333' }}>
-                                                <span>{lang === 'ar' ? 'الإجمالي' : 'Total'}</span>
-                                                <span style={{ color: '#10b981' }}>{cart.reduce((sum, item) => sum + (item.price * item.qty), 0).toFixed(2)} JOD</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    
-                                    <button
-                                        onClick={() => {
-                                            setShowCartModal(false);
-                                            submitOrder('cash'); // House System sends order to backend directly
-                                        }}
-                                        style={{
-                                            width: '100%',
-                                            background: 'linear-gradient(135deg, #10b981, #059669)',
-                                            color: '#fff',
-                                            border: 'none',
-                                            borderRadius: 16,
-                                            padding: '18px',
-                                            fontWeight: 900,
-                                            fontSize: 18,
-                                            fontFamily: 'Cairo, sans-serif',
-                                            cursor: 'pointer',
-                                            transition: 'all 0.2s',
-                                            boxShadow: '0 8px 24px rgba(16,185,129,0.3)',
-                                        }}
-                                        onMouseDown={(e) => e.currentTarget.style.transform = 'scale(0.97)'}
-                                        onMouseUp={(e) => e.currentTarget.style.transform = 'scale(1)'}
-                                    >
-                                        {lang === 'ar' ? 'إرسال الطلب للكاشير' : 'Send Order to Cashier'}
-                                    </button>
-                                </div>
-                            </div>
-                        )}
                     </>
                 );
             })()}
