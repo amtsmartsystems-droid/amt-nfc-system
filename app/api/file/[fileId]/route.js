@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import connectDB from '../../../../lib/mongodb';
+import connectDB from '../../../../backend/config/db';
 import mongoose from 'mongoose';
 
 const FileSchema = new mongoose.Schema({
