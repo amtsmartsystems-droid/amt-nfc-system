@@ -836,7 +836,7 @@ function PageContent() {
                         <LucideIcons.X size={12} />
                       </button>
                       <div className="flex gap-4 items-center pr-2">
-                        <img src={imgBlock.url} alt="block" className="w-14 h-14 rounded-lg object-contain border border-white/10 bg-black/40" />
+                        <img src={imgBlock.imageUrl || imgBlock.url} alt="block" className="w-14 h-14 rounded-lg object-contain border border-white/10 bg-black/40" />
                         <div className="flex-1">
                            <Label className="text-[10px] text-slate-400 mb-2 flex justify-between">
                              <span>الحجم التقريبي (العرض)</span>

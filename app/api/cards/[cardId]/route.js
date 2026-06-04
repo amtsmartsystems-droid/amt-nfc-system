@@ -35,7 +35,16 @@ export async function GET(req, { params }) {
         // Strip large base64 blobs from siteData to prevent RSC serialization crash
         // Replace data: URLs with /api/cards/[cardId]/image/[blockId] so images still load
         const rawSiteData = card.siteData ? JSON.parse(JSON.stringify(card.siteData)) : {};
-        delete rawSiteData.images;
+        
+        if (rawSiteData.images) {
+            for (const key in rawSiteData.images) {
+                const url = rawSiteData.images[key];
+                if (url && url.startsWith('data:')) {
+                    rawSiteData.images[key] = `/api/cards/${params.cardId}/image/${key}`;
+                }
+            }
+        }
+
         if (rawSiteData.layoutBlocks) {
             rawSiteData.layoutBlocks = rawSiteData.layoutBlocks.map(({ url, ...rest }) => {
                 if (url && url.startsWith('data:')) {

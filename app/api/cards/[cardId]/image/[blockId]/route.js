@@ -18,7 +18,7 @@ export async function GET(req, { params }) {
         }
 
         await connectDB();
-        const card = await Card.findOne({ shortCode: cardId }, { 'siteData.layoutBlocks': 1, 'siteData.floatingImages': 1 });
+        const card = await Card.findOne({ shortCode: cardId }, { 'siteData.layoutBlocks': 1, 'siteData.floatingImages': 1, 'siteData.images': 1 });
         if (!card) return NextResponse.json({ error: 'Not found' }, { status: 404 });
 
         // Search for the block in layoutBlocks and floatingImages
@@ -28,12 +28,19 @@ export async function GET(req, { params }) {
         ];
         const block = allBlocks.find(b => String(b.id) === String(blockId));
 
-        if (!block || !block.url || !block.url.startsWith('data:')) {
+        let targetUrl = null;
+        if (block && block.url) {
+            targetUrl = block.url;
+        } else if (card.siteData?.images && card.siteData.images[blockId]) {
+            targetUrl = card.siteData.images[blockId];
+        }
+
+        if (!targetUrl || !targetUrl.startsWith('data:')) {
             return NextResponse.json({ error: 'Image not found' }, { status: 404 });
         }
 
         // Parse the data URL: data:<mime>;base64,<data>
-        const [header, base64Data] = block.url.split(',');
+        const [header, base64Data] = targetUrl.split(',');
         const mimeMatch = header.match(/data:([^;]+);base64/);
         if (!mimeMatch || !base64Data) {
             return NextResponse.json({ error: 'Invalid image data' }, { status: 400 });
