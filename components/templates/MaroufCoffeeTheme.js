@@ -10,39 +10,15 @@ import { motion, AnimatePresence, Reorder, useInView } from "framer-motion";
 //  True Black + Gold + Framer Motion + Scroll Reveal + Edge Glow
 // ══════════════════════════════════════════════════════════════════════
 
-// ── Global scroll direction (module-level, client-only) ──
-let _scrollDir = "down";
-let _prevScrollY = 0;
-if (typeof window !== "undefined") {
-  window.addEventListener("scroll", () => {
-    const y = window.scrollY;
-    _scrollDir = y >= _prevScrollY ? "down" : "up";
-    _prevScrollY = y;
-  }, { passive: true });
-}
-
-// ── Scroll Reveal wrapper (bidirectional, GPU-optimised) ──
+// ── Scroll Reveal wrapper (GPU-optimised) ──
 function BlockReveal({ children, delay = 0 }) {
-  const ref = useRef(null);
-  const inView = useInView(ref, { once: false, margin: "0px 0px -60px 0px" });
-  const [state, setState] = useState(null);
-
-  useEffect(() => {
-    if (inView) setState(_scrollDir);
-    else setState(null);
-  }, [inView]);
-
   return (
     <motion.div
-      ref={ref}
-      style={{ willChange: "transform, opacity" }}
-      initial={false}
-      animate={
-        state
-          ? { opacity: 1, y: 0 }
-          : { opacity: 0, y: state === "up" ? -40 : 40 }
-      }
+      initial={{ opacity: 0, y: 40 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "0px 0px -40px 0px" }}
       transition={{ duration: 0.52, delay, ease: [0.25, 0.46, 0.45, 0.94] }}
+      style={{ willChange: "transform, opacity" }}
     >
       {children}
     </motion.div>
