@@ -133,8 +133,8 @@ function GlowLinkCard({ link, accent, secondaryAccent, cardId, t, handleMenuClic
 }
 
 export default function RusticCafeTheme({ cardId, siteData, siteColors, lang = "en", isMenuEnabled, menuMode, isHouseSystemActive, menuCategories, addToCart, pdfMenuUrl, showMenuImages, isPreview, onUpdateLayoutBlocks }) {
-  const accent     = "#359BB0"; // Exact Cyan from Eshq logo
-  const bgEarthy   = "#F6EFE6"; // Exact Beige from Eshq logo
+  const accent     = siteColors?.primary || "#359BB0"; // Eshq Cyan
+  const bgEarthy   = siteColors?.background || "#F6EFE6"; // Eshq Beige
   const secAccent  = "#557A46"; // Earthy Green
   
   const isAr    = lang === "ar";
@@ -202,7 +202,7 @@ export default function RusticCafeTheme({ cardId, siteData, siteColors, lang = "
                   <img
                     src={profileImg}
                     alt={name}
-                    className="w-[120%] h-[120%] object-contain"
+                    className="w-full h-full object-cover rounded-full"
                     draggable="false"
                   />
                 </div>
@@ -372,11 +372,11 @@ export default function RusticCafeTheme({ cardId, siteData, siteColors, lang = "
         return (
           <BlockReveal delay={0}>
             <div
-              className="mt-6 relative overflow-hidden group px-6"
+              className="mt-8 relative overflow-hidden group"
               style={{ cursor: isPreview ? 'grab' : 'default', width: "100%" }}
             >
               <div
-                className="rounded-2xl overflow-hidden"
+                className="overflow-hidden"
                 style={{
                   position: "relative",
                   width: "100%",
