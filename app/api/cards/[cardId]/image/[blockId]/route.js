@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
-import connectDB from '../../../../../backend/config/db';
-import Card from '../../../../../backend/models/Card';
+import connectDB from '../../../../../../backend/config/db';
+import Card from '../../../../../../backend/models/Card';
 
 export const dynamic = 'force-dynamic';
 
