@@ -402,7 +402,7 @@ export default function MaroufCoffeeTheme({ cardId, siteData, siteColors, lang =
         );
 
       case 'image':
-        if (!block.url) return null;
+        if (!block.url && !block.imageUrl) return null;
         return (
           <BlockReveal delay={0}>
             <div
