@@ -1,6 +1,11 @@
 import { NextResponse } from 'next/server';
+import { cookies } from 'next/headers';
+import jwt from 'jsonwebtoken';
 import connectDB from '../../../backend/config/db';
 import Card from '../../../backend/models/Card';
+
+const JWT_SECRET = process.env.JWT_SECRET || 'amt_smart_waiter_super_secret';
+const COOLDOWN_MS = 60 * 1000; // 60 seconds cooldown for orders
 
 export async function POST(req) {
     try {
@@ -24,6 +29,97 @@ export async function POST(req) {
                 { error: 'النظام الذكي غير مفعّل لهذا المطعم.' },
                 { status: 403 }
             );
+        }
+
+        if (!isHouseSystemActive) {
+            return NextResponse.json(
+                { error: 'نظام الطلبات الذاتية مغلق حالياً.' },
+                { status: 403 }
+            );
+        }
+
+        // ── TABLE VERIFICATION & ANTI-SPAM (IF DINE-IN) ──
+        if (tableNumber) {
+            const cookieStore = await cookies();
+            const sessionCookie = cookieStore.get('waiter_session');
+
+            if (!sessionCookie?.value) {
+                return NextResponse.json(
+                    { error: 'غير مصرح لك. يرجى مسح بطاقة الـ NFC الموجودة على الطاولة لتأكيد الطلب.' },
+                    { status: 401 }
+                );
+            }
+
+            let decodedPayload;
+            try {
+                decodedPayload = jwt.verify(sessionCookie.value, JWT_SECRET);
+            } catch {
+                return NextResponse.json(
+                    { error: 'جلسة غير صالحة. يرجى مسح البطاقة مجدداً.' },
+                    { status: 401 }
+                );
+            }
+
+            if (
+                decodedPayload.restaurantId !== restaurantId ||
+                decodedPayload.tableNumber  !== tableNumber
+            ) {
+                return NextResponse.json(
+                    { error: 'بيانات الجلسة لا تتطابق مع الطلب الحالي.' },
+                    { status: 403 }
+                );
+            }
+
+            const tableReq = (card.tableRequests || []).find(
+                t => t.tableNumber === tableNumber
+            );
+
+            if (!tableReq) {
+                return NextResponse.json(
+                    { error: 'الطاولة غير مسجلة. يرجى مسح البطاقة مجدداً.' },
+                    { status: 403 }
+                );
+            }
+
+            if (tableReq.sessionId !== decodedPayload.sessionId) {
+                return NextResponse.json(
+                    { error: 'الجلسة انتهت أو تم إعادة تعيينها. يرجى مسح البطاقة.' },
+                    { status: 403 }
+                );
+            }
+
+            const now = Date.now();
+            const sessionExpiredMs = tableReq.sessionExpiresAt
+                ? new Date(tableReq.sessionExpiresAt).getTime()
+                : null;
+
+            if (sessionExpiredMs && sessionExpiredMs < now) {
+                return NextResponse.json(
+                    { error: 'الجلسة مغلقة. يرجى مسح البطاقة لتفعيل طاولة جديدة.' },
+                    { status: 403 }
+                );
+            }
+
+            if (tableReq.status === 'closing') {
+                return NextResponse.json(
+                    { error: '🧾 تم طلب الفاتورة مسبقاً. الجلسة مقفلة حتى يتم إغلاق الطاولة.' },
+                    { status: 403 }
+                );
+            }
+        }
+
+        // ── GLOBAL COOKIE COOLDOWN (DINE-IN & TAKEAWAY) ──
+        const cookieStore = await cookies();
+        const lastOrderCookie = cookieStore.get('last_order_time');
+        if (lastOrderCookie?.value) {
+            const elapsed = Date.now() - parseInt(lastOrderCookie.value, 10);
+            if (elapsed < COOLDOWN_MS) {
+                const remaining = Math.ceil((COOLDOWN_MS - elapsed) / 1000);
+                return NextResponse.json(
+                    { error: `⏳ يرجى الانتظار ${remaining} ثانية قبل إرسال طلب طعام جديد.` },
+                    { status: 429 }
+                );
+            }
         }
 
         // ── Formulate Telegram Message ──
@@ -80,7 +176,16 @@ export async function POST(req) {
             return NextResponse.json({ error: 'فشل إرسال الطلب، يرجى إبلاغ الكاشير' }, { status: 500 });
         }
 
-        return NextResponse.json({ message: 'Order sent successfully' }, { status: 200 });
+        // Set Cooldown Cookie on Success
+        const response = NextResponse.json({ message: 'Order sent successfully' }, { status: 200 });
+        response.cookies.set('last_order_time', Date.now().toString(), {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'lax',
+            maxAge: 60 // 1 minute
+        });
+        
+        return response;
 
     } catch (error) {
         console.error('Order API error:', error);
