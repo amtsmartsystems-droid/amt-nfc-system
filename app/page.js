@@ -8,7 +8,6 @@ import RestaurantTheme  from "../components/templates/RestaurantTheme";
 import CafeTheme        from "../components/templates/CafeTheme";
 import CafeTheme1       from "../components/templates/CafeTheme1";
 import GastroBarTheme   from "../components/templates/GastroBarTheme";
-import CoffeeLuxuryTheme from "../components/templates/CoffeeLuxuryTheme";
 import MaroufCoffeeTheme from "../components/templates/MaroufCoffeeTheme";
 import AMTBusinessCard  from "../components/templates/AMTBusinessCard";
 import { getIconForLink } from "../utils/icons";
@@ -21,7 +20,7 @@ const DEFAULT = {
   subtitle:"Bold burgers, real flavors", subtitleAr:"برغر جريء، نكهة حقيقية",
   about:"We make food where every detail counts. Top-quality ingredients, precise methods, true flavors — no shortcuts.",
   aboutAr:"نصنع الطعام بعناية فائقة. أجود المكونات، أدق الطرق، نكهات حقيقية — بلا اختصارات.",
-  principlesTitle:"PRINCIPLES THAT DEFINE THE TASTE", principlesTitleAr:"مبادئنا في تعريف الطعم",
+  principlesTitle:"PRINCIPLES THAT DEFINED THE TASTE", principlesTitleAr:"مبادئنا في تعريف الطعم",
   principlesSubtitle:"Precision, consistency, and respect for your time.", principlesSubtitleAr:"الدقة والاتساق واحترام وقتك.",
   contactsTitle:"CONTACTS", contactsTitleAr:"تواصل معنا",
   address:"123 Main Street, New York", hours:"10:00 AM — 11:00 PM",
@@ -47,18 +46,16 @@ const DEFAULT_COLORS = {
   restaurant:{ primary:"#EDD98A", background:"#F5EDD6" },
   cafe:      { primary:"#6B4226", background:"#FAFAF7" },
   cafe1:     { primary:"#C9A96E", background:"#2C1503" },
-  gastro:    { primary:"#F5C518", background:"#111111" },
-  coffee_luxury: { primary:"#C59B4D", background:"#050505" },
-  marouf_coffee: { primary:"#B99146", background:"#000000" },
+  gastro:    { primary:"#EDD98A", background:"#0A0A0A" },
+  marouf_coffee: { primary:"#B99146", background:"#050505" },
 };
 
 const THEMES = [
   { id:"restaurant",    label:"مطعم فاخر",        icon:"Utensils"        },
   { id:"cafe",          label:"مقهى منيمل",       icon:"Coffee"          },
   { id:"cafe1",         label:"مقهى حديث",     icon:"Bean"            },
-  { id:"gastro",        label:"مطعم وحانة",    icon:"UtensilsCrossed" },
-  { id:"coffee_luxury", label:"مقهى فاخر",     icon:"Coffee" },
-  { id:"marouf_coffee", label:"بن معروف",      icon:"Coffee" },
+  { id:"gastro",        label:"مطعم فاخر",   icon:"UtensilsCrossed" },
+  { id:"marouf_coffee", label:"بن معروف ✓",   icon:"Coffee" },
 ];
 
 // ─────────────────────────────────────────────────────────────────────
@@ -298,7 +295,6 @@ function PageContent() {
     if (n === 'cafe' || n === 'cafetheme')         return 'cafe';
     if (n === 'cafe1' || n === 'cafetheme1')       return 'cafe1';
     if (n === 'gastro' || n === 'gastrobartheme')  return 'gastro';
-    if (n === 'coffee_luxury')                     return 'coffee_luxury';
     if (n === 'marouf_coffee')                     return 'marouf_coffee';
     if (n === 'business_card')                     return 'business_card';
     return 'restaurant'; // covers 'restauranttheme', 'luxury', etc.
@@ -476,7 +472,6 @@ function PageContent() {
       case "cafe":   return <CafeTheme      {...props} />;
       case "cafe1":  return <CafeTheme1     {...props} />;
       case "gastro": return <GastroBarTheme {...props} />;
-      case "coffee_luxury": return <CoffeeLuxuryTheme {...props} />;
       case "marouf_coffee": return <MaroufCoffeeTheme {...props} />;
       default:       return <RestaurantTheme {...props} />;
     }
