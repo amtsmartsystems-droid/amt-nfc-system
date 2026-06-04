@@ -366,7 +366,7 @@ function PageContent() {
     setSiteData(p=>({...p,links:a}));
   };
 
-  // ── File Upload (Vercel Blob — Client-Side, bypasses body size limit) ──
+  // ── File Upload (Direct Server Upload — no Vercel Blob token needed) ──
   const handlePdfUpload = async (file, linkId) => {
     if (!file) return;
     if (file.size > 50 * 1024 * 1024) {
@@ -376,18 +376,18 @@ function PageContent() {
 
     setUploadingPdf(linkId);
     try {
-      // Upload directly from browser to Vercel Blob — no serverless size limit
-      const blob = await upload(`menus/${Date.now()}_${file.name}`, file, {
-        access: 'public',
-        handleUploadUrl: '/api/blob-token',
-      });
+      const formData = new FormData();
+      formData.append('file', file);
+      const res = await fetch('/api/upload', { method: 'POST', body: formData });
+      const data = await res.json();
+      if (!res.ok || !data.url) throw new Error(data.error || 'فشل الرفع');
 
       if (linkId === 'menu') {
-        setPdfMenuUrl(blob.url);
+        setPdfMenuUrl(data.url);
       } else {
         setSiteData(p => ({
           ...p,
-          links: p.links.map(l => l.id === linkId ? { ...l, url: blob.url } : l)
+          links: p.links.map(l => l.id === linkId ? { ...l, url: data.url } : l)
         }));
       }
       showToast("✅ تم رفع الملف بنجاح! (لا تنسَ الضغط على حفظ ونشر)");

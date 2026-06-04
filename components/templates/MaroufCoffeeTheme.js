@@ -209,16 +209,15 @@ export default function MaroufCoffeeTheme({ cardId, siteData, siteColors, lang =
                   transition={{ duration: 3.5, repeat: Infinity, ease: "easeInOut" }}
                 />
                 <div
-                  className="w-48 h-48 relative z-10 overflow-hidden flex items-center justify-center"
+                  className="w-40 h-40 rounded-full relative z-10 overflow-hidden flex items-center justify-center"
                   style={{
-                    boxShadow: "0 0 40px rgba(var(--primary-rgb),0.15), 0 20px 60px rgba(0,0,0,0.4)",
-                    borderRadius: "16px",
+                    boxShadow: `0 0 0 2px rgba(var(--primary-rgb),0.5), 0 0 40px rgba(var(--primary-rgb),0.3), 0 20px 60px rgba(0,0,0,0.6)`,
                   }}
                 >
                   <img
                     src={profileImg}
                     alt={name}
-                    className="w-full h-full object-contain"
+                    className="w-full h-full object-cover"
                     draggable="false"
                   />
                 </div>
