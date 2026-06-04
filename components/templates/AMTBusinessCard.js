@@ -152,7 +152,7 @@ export default function AMTBusinessCard({ siteData = {}, isPreview, onUpdateLayo
                 return (
                     <div className="px-6 pb-6 mt-4 flex justify-center" style={{ cursor: isPreview ? 'grab' : 'default' }}>
                         <img 
-                            src={block.url} 
+                            src={block.imageUrl || block.url} 
                             alt="Layout Block" 
                             style={{ width: block.size || 250, objectFit: 'contain' }}
                             draggable="false"

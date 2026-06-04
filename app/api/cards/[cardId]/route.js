@@ -32,13 +32,34 @@ export async function GET(req, { params }) {
 
         const user = getUser(req);
 
+        // Strip large base64 blobs from siteData to prevent RSC serialization crash
+        // Replace data: URLs with /api/cards/[cardId]/image/[blockId] so images still load
+        const rawSiteData = card.siteData ? JSON.parse(JSON.stringify(card.siteData)) : {};
+        delete rawSiteData.images;
+        if (rawSiteData.layoutBlocks) {
+            rawSiteData.layoutBlocks = rawSiteData.layoutBlocks.map(({ url, ...rest }) => {
+                if (url && url.startsWith('data:')) {
+                    return { ...rest, imageUrl: `/api/cards/${params.cardId}/image/${rest.id}` };
+                }
+                return { url, ...rest };
+            });
+        }
+        if (rawSiteData.floatingImages) {
+            rawSiteData.floatingImages = rawSiteData.floatingImages.map(({ url, ...rest }) => {
+                if (url && url.startsWith('data:')) {
+                    return { ...rest, imageUrl: `/api/cards/${params.cardId}/image/${rest.id}` };
+                }
+                return { url, ...rest };
+            });
+        }
+
         return NextResponse.json({
-            cardType:           card.cardType   || 'restaurant',   // ← NEW
+            cardType:           card.cardType   || 'restaurant',
             themeName:          card.themeName,
             businessName:       card.businessName,
             primaryColor:       card.primaryColor,
             background:         card.background,
-            siteData:           card.siteData,
+            siteData:           rawSiteData,
             links:              card.links,
             events:             card.events,
             isLocked:           card.isLocked,

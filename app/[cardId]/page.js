@@ -61,10 +61,24 @@ export default async function PublicCardPage({ params }) {
         background:   card.background,
         siteData: (() => {
             const sd = JSON.parse(JSON.stringify(card.siteData || {}));
-            // Remove massive fields from SSR payload to prevent Next.js call stack size exceeded
+            // Remove massive base64 blobs from SSR payload — prevents Next.js call stack overflow
+            // Replace data: URLs with proper /api/cards/[cardId]/image/[blockId] paths
             delete sd.images;
             if (sd.layoutBlocks) {
-                sd.layoutBlocks = sd.layoutBlocks.map(b => ({...b, url: undefined}));
+                sd.layoutBlocks = sd.layoutBlocks.map(({ url, ...rest }) => {
+                    if (url && url.startsWith('data:')) {
+                        return { ...rest, imageUrl: `/api/cards/${cardId}/image/${rest.id}` };
+                    }
+                    return { url, ...rest };
+                });
+            }
+            if (sd.floatingImages) {
+                sd.floatingImages = sd.floatingImages.map(({ url, ...rest }) => {
+                    if (url && url.startsWith('data:')) {
+                        return { ...rest, imageUrl: `/api/cards/${cardId}/image/${rest.id}` };
+                    }
+                    return { url, ...rest };
+                });
             }
             return sd;
         })(),

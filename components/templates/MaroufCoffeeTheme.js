@@ -437,7 +437,7 @@ export default function MaroufCoffeeTheme({ cardId, siteData, siteColors, lang =
                   style={{ boxShadow: "inset 0 0 60px rgba(185,145,70,0.08)" }}
                 />
                 <img
-                  src={block.url}
+                  src={block.imageUrl || block.url}
                   alt="Image"
                   style={{
                     width: "100%",

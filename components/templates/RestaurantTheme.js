@@ -178,7 +178,7 @@ export default function RestaurantTheme({ cardId, siteData, siteColors, lang = "
               return (
                   <div className="px-6 mb-8 flex justify-center" style={{ cursor: isPreview ? 'grab' : 'default' }}>
                       <img 
-                          src={block.url} 
+                          src={block.imageUrl || block.url} 
                           alt="Layout Block" 
                           style={{ width: block.size || 250, objectFit: 'contain' }}
                           draggable="false"
