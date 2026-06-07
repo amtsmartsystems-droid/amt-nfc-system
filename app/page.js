@@ -1040,13 +1040,13 @@ function PageContent() {
                           <input 
                             type="text" 
                             readOnly 
-                            value={`${window.location.origin}/api/scan?r=${targetCardId}&t=${nfcTableNum}`} 
+                            value={`https://amt-nfc-system.vercel.app/api/scan?r=${targetCardId}&t=${nfcTableNum}`} 
                             className="w-full text-[10px] bg-black/40 text-blue-200 px-2 py-2 rounded border border-white/5 outline-none font-mono" 
                             dir="ltr" 
                           />
                           <button 
                             onClick={()=>{
-                              navigator.clipboard.writeText(`${window.location.origin}/api/scan?r=${targetCardId}&t=${nfcTableNum}`); 
+                              navigator.clipboard.writeText(`https://amt-nfc-system.vercel.app/api/scan?r=${targetCardId}&t=${nfcTableNum}`); 
                               showToast("✅ تم نسخ رابط الـ NFC للطاولة");
                             }} 
                             className="px-3 py-2 bg-blue-600 hover:bg-blue-500 text-white text-[11px] font-bold rounded transition-all flex items-center gap-1 shrink-0"
