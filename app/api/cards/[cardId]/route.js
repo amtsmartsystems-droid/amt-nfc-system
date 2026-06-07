@@ -229,6 +229,35 @@ export async function PUT(req, { params }) {
         if (cleanCliqConfig !== undefined) card.cliqConfig = cleanCliqConfig;
         if (cleanOffersUrl !== undefined) card.offersUrl = cleanOffersUrl;
         if (cleanSiteData) {
+            // ── RESTORE IMAGES THAT WERE MOCKED AS /api/ URLS ──
+            if (card.siteData) {
+                if (cleanSiteData.images && card.siteData.images) {
+                    for (const key in cleanSiteData.images) {
+                        if (cleanSiteData.images[key] && cleanSiteData.images[key].startsWith('/api/')) {
+                            cleanSiteData.images[key] = card.siteData.images[key];
+                        }
+                    }
+                }
+                if (cleanSiteData.layoutBlocks && card.siteData.layoutBlocks) {
+                    cleanSiteData.layoutBlocks = cleanSiteData.layoutBlocks.map(block => {
+                        if (block.imageUrl && block.imageUrl.startsWith('/api/')) {
+                            const oldBlock = card.siteData.layoutBlocks.find(b => b.id === block.id);
+                            if (oldBlock && oldBlock.url) block.url = oldBlock.url;
+                        }
+                        return block;
+                    });
+                }
+                if (cleanSiteData.floatingImages && card.siteData.floatingImages) {
+                    cleanSiteData.floatingImages = cleanSiteData.floatingImages.map(block => {
+                        if (block.imageUrl && block.imageUrl.startsWith('/api/')) {
+                            const oldBlock = card.siteData.floatingImages.find(b => b.id === block.id);
+                            if (oldBlock && oldBlock.url) block.url = oldBlock.url;
+                        }
+                        return block;
+                    });
+                }
+            }
+
             card.siteData     = cleanSiteData;
             card.markModified('siteData');
             card.businessName = cleanSiteData.name || cleanSiteData.nameAr || card.businessName;
