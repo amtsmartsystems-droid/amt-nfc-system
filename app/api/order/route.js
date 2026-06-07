@@ -106,6 +106,14 @@ export async function POST(req) {
                     { status: 403 }
                 );
             }
+        } else {
+            // ── TAKEAWAY / DELIVERY ORDERS ──
+            if (card.isTakeawayEnabled === false) {
+                return NextResponse.json(
+                    { error: 'عذراً، الطلبات الخارجية (تيك أوي) مغلقة حالياً. لا يمكن الطلب إلا من داخل المطعم (يجب مسح البطاقة).' },
+                    { status: 403 }
+                );
+            }
         }
 
         // ── GLOBAL COOKIE COOLDOWN (DINE-IN & TAKEAWAY) ──

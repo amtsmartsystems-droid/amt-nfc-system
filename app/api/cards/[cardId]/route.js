@@ -81,6 +81,7 @@ export async function GET(req, { params }) {
             tableMapping:       card.tableMapping || [],
             isMenuEnabled:      card.isMenuEnabled || false,
             isHouseSystemActive: card.isHouseSystemActive || false,
+            isTakeawayEnabled:  card.isTakeawayEnabled !== false, // default true
             menuMode:           card.menuMode || 'interactive',
             pdfMenuUrl:         card.pdfMenuUrl || '',
             showMenuImages:     card.showMenuImages !== false,
@@ -179,6 +180,7 @@ export async function PUT(req, { params }) {
         const cleanCliqConfig     = body.cliqConfig;
         const cleanIsMenuEnabled  = body.isMenuEnabled;
         const cleanIsHouseSystemActive = body.isHouseSystemActive;
+        const cleanIsTakeawayEnabled = body.isTakeawayEnabled;
         const cleanMenuMode       = body.menuMode;
         const cleanPdfMenuUrl     = body.pdfMenuUrl;
         const cleanOffersUrl      = body.offersUrl !== undefined ? sanitizeString(body.offersUrl || '', 2000) : undefined;
@@ -219,6 +221,7 @@ export async function PUT(req, { params }) {
         if (cleanTableMapping !== undefined) card.tableMapping = cleanTableMapping;
         if (cleanIsMenuEnabled !== undefined) card.isMenuEnabled = cleanIsMenuEnabled;
         if (cleanIsHouseSystemActive !== undefined) card.isHouseSystemActive = cleanIsHouseSystemActive;
+        if (cleanIsTakeawayEnabled !== undefined) card.isTakeawayEnabled = cleanIsTakeawayEnabled;
         if (cleanMenuMode !== undefined) card.menuMode = cleanMenuMode;
         if (cleanPdfMenuUrl !== undefined) card.pdfMenuUrl = cleanPdfMenuUrl;
         if (cleanShowMenuImages !== undefined) card.showMenuImages = cleanShowMenuImages;

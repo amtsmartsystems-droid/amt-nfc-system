@@ -673,19 +673,25 @@ export default function ClientCardViewer({ initialCard, cardId }) {
                             <span style={{ color: '#9ca3af', fontSize: 16 }}>{lang === 'ar' ? 'المجموع الإجمالي:' : 'Total:'}</span>
                             <span style={{ color: '#10b981', fontSize: 24, fontWeight: 900 }}>{cart.reduce((a, b) => a + (b.price * b.qty), 0)} JOD</span>
                         </div>
-                        <button
-                            onClick={() => {
-                                setShowCart(false);
-                                if (card.cliqConfig?.isEnabled) setShowCliqModal(true);
-                                else {
-                                    // Submit order directly
-                                    submitOrder('cash');
-                                }
-                            }}
-                            style={{ width: '100%', padding: '16px', borderRadius: 16, border: 'none', background: 'linear-gradient(135deg, #10b981, #059669)', color: '#fff', fontWeight: 900, fontSize: 16, cursor: 'pointer' }}
-                        >
-                            {lang === 'ar' ? 'إتمام الطلب' : 'Checkout'}
-                        </button>
+                        {!tableNumber && card.isTakeawayEnabled === false ? (
+                            <div style={{ background: 'rgba(239,68,68,0.1)', color: '#ef4444', border: '1px solid rgba(239,68,68,0.3)', padding: '12px', borderRadius: 16, textAlign: 'center', fontWeight: 800, fontSize: 13, lineHeight: 1.5 }}>
+                                {lang === 'ar' ? 'عذراً، الطلبات الخارجية (تيك أوي) مغلقة حالياً. يرجى مسح بطاقة الطاولة للطلب.' : 'Sorry, takeaway orders are currently disabled. Please scan a table to order.'}
+                            </div>
+                        ) : (
+                            <button
+                                onClick={() => {
+                                    setShowCart(false);
+                                    if (card.cliqConfig?.isEnabled) setShowCliqModal(true);
+                                    else {
+                                        // Submit order directly
+                                        submitOrder('cash');
+                                    }
+                                }}
+                                style={{ width: '100%', padding: '16px', borderRadius: 16, border: 'none', background: 'linear-gradient(135deg, #10b981, #059669)', color: '#fff', fontWeight: 900, fontSize: 16, cursor: 'pointer' }}
+                            >
+                                {lang === 'ar' ? 'إتمام الطلب' : 'Checkout'}
+                            </button>
+                        )}
                     </div>
                 </div>
             )}

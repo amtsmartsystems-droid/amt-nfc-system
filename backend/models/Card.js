@@ -153,6 +153,10 @@ const cardSchema = new mongoose.Schema({
         type: Boolean,
         default: false,
     },
+    isTakeawayEnabled: {
+        type: Boolean,
+        default: true,
+    },
     menuMode: {
         type: String,
         enum: ['pdf', 'interactive'],

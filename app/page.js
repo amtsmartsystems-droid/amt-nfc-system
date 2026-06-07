@@ -103,6 +103,7 @@ function PageContent() {
   const [uploadingPdf, setUploadingPdf] = useState(false);
   const [isMenuEnabled, setIsMenuEnabled] = useState(false);
   const [isHouseSystemActive, setIsHouseSystemActive] = useState(false);
+  const [isTakeawayEnabled, setIsTakeawayEnabled] = useState(true);
   const [showMenuImages, setShowMenuImages] = useState(true);
   const [menuCategories, setMenuCategories] = useState([]);
   const [menuMode, setMenuMode] = useState('interactive');
@@ -273,6 +274,7 @@ function PageContent() {
           telegramConfig,
           isMenuEnabled,
           isHouseSystemActive,
+          isTakeawayEnabled,
           menuMode,
           pdfMenuUrl,
           offersUrl,
@@ -340,6 +342,7 @@ function PageContent() {
 
       if (data.isMenuEnabled !== undefined) setIsMenuEnabled(data.isMenuEnabled);
       if (data.isHouseSystemActive !== undefined) setIsHouseSystemActive(data.isHouseSystemActive);
+      if (data.isTakeawayEnabled !== undefined) setIsTakeawayEnabled(data.isTakeawayEnabled);
       if (data.showMenuImages !== undefined) setShowMenuImages(data.showMenuImages !== false);
       if (data.menuMode) setMenuMode(data.menuMode);
       if (data.pdfMenuUrl) setPdfMenuUrl(data.pdfMenuUrl);
@@ -1229,6 +1232,19 @@ function PageContent() {
                     <label className="relative inline-flex items-center cursor-pointer">
                       <input type="checkbox" className="sr-only peer" checked={isHouseSystemActive} onChange={(e) => {
                         setIsHouseSystemActive(e.target.checked);
+                      }} />
+                      <div className="w-11 h-6 bg-white/10 peer-focus:outline-none rounded-full peer peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:right-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-yellow-500"></div>
+                    </label>
+                  </div>
+
+                  <div className="flex items-center justify-between bg-[#1f2937]/50 border border-white/5 p-4 rounded-xl">
+                    <div>
+                      <h4 className="font-bold text-white mb-1">تفعيل الطلبات الخارجية (التيك أوي)</h4>
+                      <p className="text-[12px] text-white/50">السماح للزبائن بالطلب من خارج المطعم (بدون مسح كارت)</p>
+                    </div>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input type="checkbox" className="sr-only peer" checked={isTakeawayEnabled} onChange={(e) => {
+                        setIsTakeawayEnabled(e.target.checked);
                       }} />
                       <div className="w-11 h-6 bg-white/10 peer-focus:outline-none rounded-full peer peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:right-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-yellow-500"></div>
                     </label>
