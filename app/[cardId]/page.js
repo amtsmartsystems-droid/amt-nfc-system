@@ -58,7 +58,14 @@ export default async function PublicCardPage({ params }) {
     }
 
     const sd = safeJSON(card.siteData || {});
-    delete sd.images;
+    if (sd.images) {
+        for (const key in sd.images) {
+            const url = sd.images[key];
+            if (url && url.startsWith('data:')) {
+                sd.images[key] = `/api/cards/${cardId}/image/${key}`;
+            }
+        }
+    }
     if (sd.layoutBlocks) {
         sd.layoutBlocks = sd.layoutBlocks.map(({ url, ...rest }) =>
             (url && url.startsWith('data:'))

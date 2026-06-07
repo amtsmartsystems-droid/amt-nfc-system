@@ -424,8 +424,8 @@ function PageContent() {
       const img = new window.Image();
       img.onload = () => {
         const canvas = document.createElement('canvas');
-        const MAX_WIDTH = 800;
-        const MAX_HEIGHT = 800;
+        const MAX_WIDTH = 1200;
+        const MAX_HEIGHT = 1200;
         let width = img.width;
         let height = img.height;
 
@@ -450,7 +450,7 @@ function PageContent() {
 
         // Use PNG for images with transparency, WebP otherwise
         const isPng = file.type === 'image/png';
-        const dataUrl = isPng ? canvas.toDataURL('image/png') : canvas.toDataURL('image/webp', 0.85);
+        const dataUrl = isPng ? canvas.toDataURL('image/png') : canvas.toDataURL('image/webp', 0.92);
         setSiteData(p => ({
           ...p,
           images: { ...(p.images || {}), [slot]: dataUrl }
@@ -883,7 +883,7 @@ function PageContent() {
                           const img = new window.Image();
                           img.onload = () => {
                               const canvas = document.createElement('canvas');
-                              const MAX_WIDTH = 500;
+                              const MAX_WIDTH = 1200;
                               let width = img.width;
                               let height = img.height;
                               if (width > MAX_WIDTH) {
@@ -897,7 +897,7 @@ function PageContent() {
                               ctx.clearRect(0, 0, width, height);
                               ctx.drawImage(img, 0, 0, width, height);
                               const isPng = file.type === 'image/png';
-                              const compressedUrl = isPng ? canvas.toDataURL('image/png') : canvas.toDataURL('image/webp', 0.85);
+                              const compressedUrl = isPng ? canvas.toDataURL('image/png') : canvas.toDataURL('image/webp', 0.92);
                               
                               setSiteData(p => {
                                   const currentBlocks = p.layoutBlocks || [
