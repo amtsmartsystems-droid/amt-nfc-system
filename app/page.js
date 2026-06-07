@@ -107,6 +107,7 @@ function PageContent() {
   const [menuCategories, setMenuCategories] = useState([]);
   const [menuMode, setMenuMode] = useState('interactive');
   const [pdfMenuUrl, setPdfMenuUrl] = useState('');
+  const [offersUrl, setOffersUrl] = useState(''); // NEW: عروضنا URL
   const [cliqConfig, setCliqConfig] = useState({ isEnabled: false, alias: '', message: 'لإتمام طلبك، يرجى تحويل المجموع عبر كليك' });
   // Subscription gate state
   const [subscriptionStatus, setSubscriptionStatus] = useState('active');
@@ -264,7 +265,7 @@ function PageContent() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           siteData,
-          cardType,                                              // ← NEW
+          cardType,
           themeName: theme === 'business_card' ? 'business_card' : theme,
           primaryColor: siteColors.primary,
           background: siteColors.background,
@@ -274,6 +275,7 @@ function PageContent() {
           isHouseSystemActive,
           menuMode,
           pdfMenuUrl,
+          offersUrl,
           menuCategories,
           cliqConfig,
         })
@@ -341,6 +343,7 @@ function PageContent() {
       if (data.showMenuImages !== undefined) setShowMenuImages(data.showMenuImages !== false);
       if (data.menuMode) setMenuMode(data.menuMode);
       if (data.pdfMenuUrl) setPdfMenuUrl(data.pdfMenuUrl);
+      if (data.offersUrl) setOffersUrl(data.offersUrl);
       if (data.menuCategories) setMenuCategories(data.menuCategories);
       if (data.cliqConfig) setCliqConfig(data.cliqConfig);
       else setCliqConfig({ isEnabled: false, alias: '', message: 'لإتمام طلبك، يرجى تحويل المجموع عبر كليك' });
@@ -464,7 +467,8 @@ function PageContent() {
       isMenuEnabled, 
       isHouseSystemActive,
       menuMode, 
-      pdfMenuUrl, 
+      pdfMenuUrl,
+      offersUrl,
       menuCategories, 
       showMenuImages,
       isPreview: true,
@@ -1077,6 +1081,57 @@ function PageContent() {
 
 
 
+                {/* ═══ OFFERS LINK QUICK-ADD ═══ */}
+                <div className="rounded-2xl p-4 space-y-3" style={{ background:"rgba(139,92,246,0.08)", border:"1px dashed rgba(139,92,246,0.4)" }}>
+                  <div className="flex items-center gap-2 mb-1">
+                    <LucideIcons.Megaphone size={15} className="text-purple-400" />
+                    <Label className="text-purple-300 text-[12px] mb-0 font-bold">🎉 زر "عروضنا" — فتح صورة أو PDF داخل التطبيق</Label>
+                  </div>
+                  <p className="text-[10px] text-slate-400 leading-relaxed">
+                    ارفع صورة عروضك أو ملف PDF ، سيظهر للزبون بشكل احترافي داخل الصفحة دون فتح تبويب جديد.
+                  </p>
+                  <div className="flex gap-2 items-center">
+                    {offersUrl && (
+                      <div className="flex items-center gap-2 flex-1 bg-purple-500/10 rounded-xl px-3 py-2 border border-purple-500/20">
+                        <LucideIcons.CheckCircle size={14} className="text-purple-400 shrink-0" />
+                        <p className="text-[10px] text-purple-300 truncate">تم رفع ملف العروض ✔️</p>
+                        <button onClick={() => setOffersUrl('')} className="ml-auto text-[9px] text-red-400 hover:text-red-300">حذف</button>
+                      </div>
+                    )}
+                    <label className={`flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-[11px] font-bold cursor-pointer transition-all ${uploadingPdf === 'offers' ? 'opacity-50' : 'hover:bg-purple-500/30'}`}
+                      style={{ background:"rgba(139,92,246,0.2)", border:"1px solid rgba(139,92,246,0.4)", color:"#c084fc" }}>
+                      {uploadingPdf === 'offers' ? <LucideIcons.Loader2 size={14} className="animate-spin" /> : <LucideIcons.UploadCloud size={14} />}
+                      {uploadingPdf === 'offers' ? 'جاري الرفع...' : 'رفع صورة أو PDF'}
+                      <input type="file" accept="image/*,application/pdf" className="hidden" disabled={uploadingPdf === 'offers'}
+                        onChange={async (e) => {
+                          const file = e.target.files[0];
+                          if (!file) return;
+                          const url = await handlePdfUpload(file, 'offers_temp');
+                          // Upload and save
+                          const formData = new FormData();
+                          formData.append('file', file);
+                          setUploadingPdf('offers');
+                          try {
+                            const res = await fetch('/api/upload', { method: 'POST', body: formData });
+                            const data = await res.json();
+                            if (data.url) {
+                              setOffersUrl(data.url);
+                              // Auto-add link if not exists
+                              const hasOffersLink = siteData.links.some(l => l.type === 'offers');
+                              if (!hasOffersLink) {
+                                setSiteData(p => ({ ...p, links: [...p.links, { id: Date.now(), title: 'Our Offers', titleAr: 'عروضنا', url: '#offers', type: 'offers' }] }));
+                              }
+                              showToast('✅ تم رفع ملف العروض بنجاح!');
+                            }
+                          } catch(err) {
+                            showToast('❌ خطأ في رفع ملف العروض', false);
+                          } finally { setUploadingPdf(null); }
+                        }}
+                      />
+                    </label>
+                  </div>
+                </div>
+
                 {/* Add New Link */}
                 <div className="rounded-2xl p-4 space-y-3" style={{ background:"rgba(255,255,255,0.03)", border:"1px dashed rgba(255,255,255,0.10)" }}>
                   <Label>➕ إضافة رابط يدوياً</Label>
@@ -1085,7 +1140,6 @@ function PageContent() {
                     <div><Label>عربي</Label><AdminInput value={newLink.titleAr} onChange={v=>setNewLink(p=>({...p,titleAr:v}))} placeholder="انستغرام" dir="rtl" /></div>
                   </div>
                   <div><Label>الرابط</Label><AdminInput value={newLink.url} onChange={v=>setNewLink(p=>({...p,url:v}))} placeholder="https://..." type="url" dir="ltr" /></div>
-                  {/* Live icon preview */}
                   {(newLink.title||newLink.titleAr) && (()=>{
                     const { IconComponent:Ic, color:c, bg:b } = getIconForLink(newLink.title||newLink.titleAr);
                     return (

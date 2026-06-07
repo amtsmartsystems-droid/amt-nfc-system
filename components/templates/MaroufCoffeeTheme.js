@@ -26,7 +26,7 @@ function BlockReveal({ children, delay = 0 }) {
 }
 
 // ── Glow Button — proximity-aware edge glow ──
-function GlowLinkCard({ link, accent, cardId, t, handleMenuClick }) {
+function GlowLinkCard({ link, accent, cardId, t, handleMenuClick, handleOffersClick }) {
   const label = t(link.title, link.titleAr);
   const { IconComponent } = getIconForLink(link.title || link.titleAr || "");
   const btnRef = useRef(null);
@@ -49,6 +49,10 @@ function GlowLinkCard({ link, accent, cardId, t, handleMenuClick }) {
     if (link.url === '#menu-section') {
       e.preventDefault();
       handleMenuClick(e);
+    }
+    if (link.url === '#offers' || link.type === 'offers') {
+      e.preventDefault();
+      handleOffersClick && handleOffersClick();
     }
   };
 
@@ -139,7 +143,7 @@ function GlowLinkCard({ link, accent, cardId, t, handleMenuClick }) {
   );
 }
 
-export default function MaroufCoffeeTheme({ cardId, siteData, siteColors, lang = "en", isMenuEnabled, menuMode, isHouseSystemActive, menuCategories, addToCart, pdfMenuUrl, showMenuImages, isPreview, onUpdateLayoutBlocks }) {
+export default function MaroufCoffeeTheme({ cardId, siteData, siteColors, lang = "en", isMenuEnabled, menuMode, isHouseSystemActive, menuCategories, addToCart, pdfMenuUrl, offersUrl, showMenuImages, isPreview, onUpdateLayoutBlocks }) {
   
   const accent = siteColors?.primary || "#B99146";
   const bgDark = siteColors?.background || "#050505";
@@ -153,6 +157,7 @@ export default function MaroufCoffeeTheme({ cardId, siteData, siteColors, lang =
 
   const isAr = lang === "ar";
   const [isMenuModalOpen, setIsMenuModalOpen] = useState(false);
+  const [isOffersOpen, setIsOffersOpen] = useState(false);
 
   useEffect(() => {
     document.documentElement.style.setProperty('--primary-color', accent);
@@ -378,6 +383,7 @@ export default function MaroufCoffeeTheme({ cardId, siteData, siteColors, lang =
                   cardId={cardId}
                   t={t}
                   handleMenuClick={handleMenuClick}
+                  handleOffersClick={() => setIsOffersOpen(true)}
                 />
               </BlockReveal>
             ))}
@@ -645,6 +651,55 @@ export default function MaroufCoffeeTheme({ cardId, siteData, siteColors, lang =
                     </motion.div>
                   ))}
                 </div>
+              )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* ═══ OFFERS MODAL ═══ */}
+      <AnimatePresence>
+        {isOffersOpen && offersUrl && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[999] flex flex-col"
+            style={{ background: "rgba(0,0,0,0.95)", backdropFilter: "blur(20px)" }}
+          >
+            {/* Header */}
+            <div className="flex items-center justify-between px-5 py-4 border-b" style={{ borderColor: "rgba(var(--primary-rgb),0.2)", background: "rgba(0,0,0,0.6)" }}>
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: `rgba(var(--primary-rgb),0.15)`, border: `1px solid rgba(var(--primary-rgb),0.3)` }}>
+                  <LucideIcons.Megaphone size={16} style={{ color: accent }} />
+                </div>
+                <h2 className="font-black text-[16px] text-white" style={{ fontFamily: "Cairo,sans-serif" }}>
+                  {t('Our Offers', 'عروضنا')}
+                </h2>
+              </div>
+              <button
+                onClick={() => setIsOffersOpen(false)}
+                className="w-9 h-9 rounded-full flex items-center justify-center text-white hover:bg-white/10 transition-all"
+              >
+                <LucideIcons.X size={20} />
+              </button>
+            </div>
+            {/* Content */}
+            <div className="flex-1 overflow-auto flex items-start justify-center p-4">
+              {offersUrl.startsWith('data:application/pdf') || offersUrl.includes('/api/file/') ? (
+                <iframe
+                  src={offersUrl}
+                  className="w-full rounded-2xl border"
+                  style={{ minHeight: '80vh', borderColor: `rgba(var(--primary-rgb),0.2)` }}
+                  title="offers"
+                />
+              ) : (
+                <img
+                  src={offersUrl}
+                  alt="offers"
+                  className="max-w-full rounded-2xl object-contain"
+                  style={{ maxHeight: '85vh', boxShadow: `0 0 60px rgba(var(--primary-rgb),0.2)` }}
+                />
               )}
             </div>
           </motion.div>

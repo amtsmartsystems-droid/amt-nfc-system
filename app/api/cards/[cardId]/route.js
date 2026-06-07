@@ -86,6 +86,7 @@ export async function GET(req, { params }) {
             showMenuImages:     card.showMenuImages !== false,
             menuCategories:     card.menuCategories || [],
             cliqConfig:         card.cliqConfig || { isEnabled: false, alias: '', message: '' },
+            offersUrl:          card.offersUrl || '',
         });
     } catch (error) {
         return NextResponse.json({ error: 'خطأ في الخادم' }, { status: 500 });
@@ -180,6 +181,7 @@ export async function PUT(req, { params }) {
         const cleanIsHouseSystemActive = body.isHouseSystemActive;
         const cleanMenuMode       = body.menuMode;
         const cleanPdfMenuUrl     = body.pdfMenuUrl;
+        const cleanOffersUrl      = body.offersUrl !== undefined ? sanitizeString(body.offersUrl || '', 2000) : undefined;
 
         // ── 5. Save ────────────────────────────────────────────────
         if (!card) {
@@ -222,6 +224,7 @@ export async function PUT(req, { params }) {
         if (cleanShowMenuImages !== undefined) card.showMenuImages = cleanShowMenuImages;
         if (cleanMenuCategories !== undefined) card.menuCategories = cleanMenuCategories;
         if (cleanCliqConfig !== undefined) card.cliqConfig = cleanCliqConfig;
+        if (cleanOffersUrl !== undefined) card.offersUrl = cleanOffersUrl;
         if (cleanSiteData) {
             card.siteData     = cleanSiteData;
             card.markModified('siteData');
