@@ -709,7 +709,7 @@ export default function ClientCardViewer({ initialCard, cardId }) {
 
                         <button
                             onClick={() => submitOrder('cliq')}
-                            style={{ width: '100%', padding: '16px', borderRadius: 16, border: 'none', background: 'linear-gradient(135deg, #f5c518, #ea580c)', color: '#111827', fontWeight: 900, fontSize: 16, cursor: 'pointer', marginBottom: 12 }}
+                            style={{ width: '100%', padding: '16px', borderRadius: 16, border: 'none', background: card.primaryColor || '#ea580c', color: '#111827', fontWeight: 900, fontSize: 16, cursor: 'pointer', marginBottom: 12 }}
                         >
                             {lang === 'ar' ? '✅ لقد قمت بالتحويل' : 'I have transferred'}
                         </button>
@@ -774,8 +774,8 @@ export default function ClientCardViewer({ initialCard, cardId }) {
                             display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12, pointerEvents: 'none'
                         }}>
                             {waiterName && block === 'ready' && !limitReached && cooldown === 0 && (
-                                <div style={{ background: 'rgba(17,24,39,0.85)', backdropFilter: 'blur(10px)', padding: '10px 20px', borderRadius: 999, border: '1px solid rgba(245,197,24,0.3)', boxShadow: '0 4px 15px rgba(0,0,0,0.2)', pointerEvents: 'auto', animation: 'fadeInUp 0.4s ease-out' }}>
-                                    <span style={{ color: '#f5c518', fontSize: 13, fontWeight: 800, fontFamily: 'Cairo, sans-serif' }}>
+                                <div style={{ background: 'rgba(17,24,39,0.85)', backdropFilter: 'blur(10px)', padding: '10px 20px', borderRadius: 999, border: `1px solid ${card.primaryColor || '#f5c518'}40`, boxShadow: '0 4px 15px rgba(0,0,0,0.2)', pointerEvents: 'auto', animation: 'fadeInUp 0.4s ease-out' }}>
+                                    <span style={{ color: card.primaryColor || '#f5c518', fontSize: 13, fontWeight: 800, fontFamily: 'Cairo, sans-serif' }}>
                                         {getAssignedMessage()}
                                     </span>
                                 </div>
@@ -786,7 +786,7 @@ export default function ClientCardViewer({ initialCard, cardId }) {
                                     ⏳ انتهت الجلسة. يرجى مسح البطاقة مجدداً.
                                 </div>
                             ) : block === 'bill_sent' ? (
-                                <div style={{ background: '#111827', color: '#f5c518', border: '1px solid #f5c518', borderRadius: 24, padding: '12px 24px', fontWeight: 900, pointerEvents: 'auto', boxShadow: '0 10px 25px rgba(0,0,0,0.3)', fontFamily: 'Cairo, sans-serif' }}>
+                                <div style={{ background: '#111827', color: card.primaryColor || '#f5c518', border: `1px solid ${card.primaryColor || '#f5c518'}`, borderRadius: 24, padding: '12px 24px', fontWeight: 900, pointerEvents: 'auto', boxShadow: '0 10px 25px rgba(0,0,0,0.3)', fontFamily: 'Cairo, sans-serif' }}>
                                     🧾 تم طلب الفاتورة. الجلسة مغلقة.
                                 </div>
                             ) : limitReached ? (
@@ -800,7 +800,7 @@ export default function ClientCardViewer({ initialCard, cardId }) {
                                         <span>{lang === 'ar' ? 'الرجاء الانتظار' : 'Please Wait'}</span>
                                     </button>
                                     <div style={{ background: 'rgba(17,24,39,0.9)', backdropFilter: 'blur(8px)', padding: '8px 16px', borderRadius: 12, border: '1px solid rgba(255,255,255,0.1)' }}>
-                                        <span style={{ color: '#f5c518', fontSize: 12, fontWeight: 700, fontFamily: 'Cairo, sans-serif' }}>
+                                        <span style={{ color: card.primaryColor || '#f5c518', fontSize: 12, fontWeight: 700, fontFamily: 'Cairo, sans-serif' }}>
                                             ⏱️ يمكنك طلب خدمة أخرى بعد {cooldown} ثانية
                                         </span>
                                     </div>
@@ -810,7 +810,7 @@ export default function ClientCardViewer({ initialCard, cardId }) {
                                     onClick={() => setShowWaiterMenu(true)}
                                     disabled={isBusy}
                                     style={{
-                                        background: 'linear-gradient(135deg, #f5c518, #ea580c)',
+                                        background: card.primaryColor || '#ea580c',
                                         color: '#111827',
                                         border: 'none',
                                         borderRadius: 999,
@@ -822,7 +822,7 @@ export default function ClientCardViewer({ initialCard, cardId }) {
                                         gap: 12,
                                         pointerEvents: 'auto',
                                         cursor: isBusy ? 'not-allowed' : 'pointer',
-                                        boxShadow: '0 10px 30px rgba(234,88,12,0.4)',
+                                        boxShadow: '0 10px 30px rgba(0,0,0,0.5)',
                                         fontFamily: 'Cairo, sans-serif',
                                         opacity: isBusy ? 0.6 : 1,
                                         transition: 'transform 0.2s',
@@ -839,7 +839,7 @@ export default function ClientCardViewer({ initialCard, cardId }) {
                         {/* ════════ WAITER BOTTOM SHEET MODAL ════════ */}
                         {showWaiterMenu && (
                             <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 9999, background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'flex-end', justifyContent: 'center', fontFamily: 'Cairo, sans-serif' }} onClick={() => setShowWaiterMenu(false)}>
-                                <div style={{ background: '#111827', width: '100%', maxWidth: 448, borderTopLeftRadius: 32, borderTopRightRadius: 32, padding: '24px 20px 40px', borderTop: '2px solid #ea580c', boxShadow: '0 -10px 40px rgba(0,0,0,0.6)', animation: 'slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1)' }} onClick={e => e.stopPropagation()}>
+                                <div style={{ background: '#111827', width: '100%', maxWidth: 448, borderTopLeftRadius: 32, borderTopRightRadius: 32, padding: '24px 20px 40px', borderTop: `2px solid ${card.primaryColor || '#ea580c'}`, boxShadow: '0 -10px 40px rgba(0,0,0,0.6)', animation: 'slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1)' }} onClick={e => e.stopPropagation()}>
                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24, direction: lang === 'ar' ? 'rtl' : 'ltr' }}>
                                         <h3 style={{ margin: 0, color: '#f8fafc', fontSize: 20, fontWeight: 900 }}>{lang === 'ar' ? 'ماذا تحتاج؟' : 'What do you need?'}</h3>
                                         <button onClick={() => setShowWaiterMenu(false)} style={{ background: '#1f2937', border: 'none', color: '#9ca3af', width: 32, height: 32, borderRadius: 16, fontSize: 20, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>×</button>
