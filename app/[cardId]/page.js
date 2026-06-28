@@ -102,6 +102,60 @@ export default async function PublicCardPage({ params, searchParams }) {
         hasShisha:       card.hasShisha || false,
         cardMappings:    safeJSON(card.cardMappings || []),
     };
-    
+
+    // ══════════════════════════════════════════════════════════════
+    // SERVER-SIDE ROUTING — Apply ?card=N or ?wa= override here
+    // This runs BEFORE the client gets the data, so SWR cannot
+    // overwrite it on first render. Most reliable approach.
+    // ══════════════════════════════════════════════════════════════
+    const applyServerRouting = () => {
+        // Build the effective links array (card.links takes priority over siteData.links)
+        let effectiveLinks = serializedCard.links?.length > 0
+            ? [...serializedCard.links]
+            : [...(sd.links || [])];
+
+        if (effectiveLinks.length === 0) return;
+
+        let overrideUrl = null;
+
+        // ?card=N  → look up destination in cardMappings
+        const cardParam = searchParams?.card;
+        if (cardParam) {
+            const cardNum = parseInt(cardParam);
+            if (!isNaN(cardNum)) {
+                const mapping = (card.cardMappings || []).find(
+                    m => Number(m.cardNumber) === cardNum
+                );
+                if (mapping?.destinationUrl) {
+                    overrideUrl = mapping.destinationUrl;
+                }
+            }
+        }
+
+        // ?wa=  → direct number override (lower priority than ?card=)
+        if (!overrideUrl && searchParams?.wa) {
+            const rawWa = String(searchParams.wa).replace(/[^0-9]/g, '');
+            if (rawWa) overrideUrl = `https://wa.me/${rawWa}`;
+        }
+
+        if (!overrideUrl) return;
+
+        const isWaUrl = overrideUrl.toLowerCase().includes('wa.me');
+
+        const patchedLinks = effectiveLinks.map(lk => {
+            const titleStr = `${lk.title || ''} ${lk.titleAr || ''}`.toLowerCase();
+            const urlStr   = (lk.url || '').toLowerCase();
+            const isWaLink = titleStr.includes('whatsapp') || titleStr.includes('واتساب') || urlStr.includes('wa.me');
+            if (isWaUrl && isWaLink) return { ...lk, url: overrideUrl };
+            return lk;
+        });
+
+        // Patch both links arrays so nothing can overwrite them
+        serializedCard.links    = patchedLinks;
+        serializedCard.siteData = { ...serializedCard.siteData, links: patchedLinks };
+    };
+
+    applyServerRouting();
+
     return <ClientCardViewer initialCard={serializedCard} cardId={cardId} searchParams={searchParams} />;
 }
