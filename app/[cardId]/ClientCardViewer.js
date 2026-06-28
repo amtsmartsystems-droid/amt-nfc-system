@@ -374,7 +374,7 @@ export default function ClientCardViewer({ initialCard, cardId, searchParams }) 
             const isWaLink = titleStr.includes('whatsapp') || titleStr.includes('واتساب') || urlStr.includes('wa.me');
             if (!isWaLink) return lk;
             // ?card= takes priority over ?wa=
-            if (mapping?.destinationUrl && mapping.destinationUrl.toLowerCase().includes('wa.me')) {
+            if (mapping?.destinationUrl) {
                 return { ...lk, url: mapping.destinationUrl };
             }
             if (rawWa) {

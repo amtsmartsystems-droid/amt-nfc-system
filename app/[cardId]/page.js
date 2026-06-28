@@ -140,13 +140,13 @@ export default async function PublicCardPage({ params, searchParams }) {
 
         if (!overrideUrl) return;
 
-        const isWaUrl = overrideUrl.toLowerCase().includes('wa.me');
-
         const patchedLinks = effectiveLinks.map(lk => {
             const titleStr = `${lk.title || ''} ${lk.titleAr || ''}`.toLowerCase();
             const urlStr   = (lk.url || '').toLowerCase();
             const isWaLink = titleStr.includes('whatsapp') || titleStr.includes('واتساب') || urlStr.includes('wa.me');
-            if (isWaUrl && isWaLink) return { ...lk, url: overrideUrl };
+            
+            // If it's the WhatsApp link, override its URL
+            if (isWaLink) return { ...lk, url: overrideUrl };
             return lk;
         });
 
