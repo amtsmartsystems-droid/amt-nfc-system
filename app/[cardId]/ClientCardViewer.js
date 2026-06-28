@@ -349,9 +349,41 @@ export default function ClientCardViewer({ initialCard, cardId, searchParams }) 
 
     /* ── Build props ── */
     const siteData = { ...(card.siteData || {}) };
+    // card.links overrides siteData.links (DB top-level array has priority)
     if (card.links?.length  > 0) siteData.links  = card.links;
     if (card.events?.length > 0) siteData.events = card.events;
     if (card.siteData?.layoutBlocks) siteData.layoutBlocks = card.siteData.layoutBlocks;
+
+    // ════ RE-APPLY ROUTING on final siteData ════
+    // Must run AFTER siteData is built because card.links may override siteData.links above
+    const _applyRouting = (links) => {
+        if (!links || links.length === 0) return links;
+        // ?wa= routing
+        const rawWa = searchParams?.wa ? String(searchParams.wa).replace(/[^0-9]/g, '') : null;
+        // ?card= routing
+        const cp = searchParams?.card ||
+            (typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('card') : null);
+        const cardNum = cp ? parseInt(cp) : null;
+        const mapping = (!isNaN(cardNum) && card?.cardMappings?.length > 0)
+            ? card.cardMappings.find(m => Number(m.cardNumber) === cardNum)
+            : null;
+
+        return links.map(lk => {
+            const titleStr = `${lk.title || ''} ${lk.titleAr || ''}`.toLowerCase();
+            const urlStr   = (lk.url || '').toLowerCase();
+            const isWaLink = titleStr.includes('whatsapp') || titleStr.includes('واتساب') || urlStr.includes('wa.me');
+            if (!isWaLink) return lk;
+            // ?card= takes priority over ?wa=
+            if (mapping?.destinationUrl && mapping.destinationUrl.toLowerCase().includes('wa.me')) {
+                return { ...lk, url: mapping.destinationUrl };
+            }
+            if (rawWa) {
+                return { ...lk, url: `https://wa.me/${rawWa}` };
+            }
+            return lk;
+        });
+    };
+    siteData.links = _applyRouting(siteData.links);
 
     const props = {
         cardId:     card.shortCode || cardId,
