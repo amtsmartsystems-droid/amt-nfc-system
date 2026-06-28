@@ -302,24 +302,26 @@ export default function ClientCardViewer({ initialCard, cardId, searchParams }) 
         }
     }
 
-    // ════ TARGETED CARD ROUTING (‫?card=N‬) ════
+    // ════ TARGETED CARD ROUTING (?card=N) ════
     // If ?card=N is in the URL, look up destinationUrl from cardMappings
     // and overwrite the WhatsApp link with it.
-    if (searchParams?.card && card?.cardMappings?.length > 0) {
-        const cardNum = parseInt(searchParams.card);
+    const cardParam = searchParams?.card ||
+        (typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('card') : null);
+
+    if (cardParam && card?.cardMappings?.length > 0) {
+        const cardNum = parseInt(cardParam);
         if (!isNaN(cardNum)) {
-            const mapping = card.cardMappings.find(m => m.cardNumber === cardNum);
+            // Use loose comparison (==) to handle Number/String type mismatch from MongoDB
+            const mapping = card.cardMappings.find(m => Number(m.cardNumber) === cardNum);
             if (mapping?.destinationUrl && card?.siteData?.links) {
                 card = JSON.parse(JSON.stringify(card));
                 const dest = mapping.destinationUrl;
-                // If destination is a wa.me URL, override whatsapp links
-                const isWa = dest.includes('wa.me');
+                const isWa = dest.toLowerCase().includes('wa.me');
                 card.siteData.links = card.siteData.links.map(lk => {
                     const titleStr = `${lk.title || ''} ${lk.titleAr || ''}`.toLowerCase();
                     const urlStr = (lk.url || '').toLowerCase();
                     const isWaLink = titleStr.includes('whatsapp') || titleStr.includes('واتساب') || urlStr.includes('wa.me');
                     if (isWa && isWaLink) return { ...lk, url: dest };
-                    // Non-WA destination: override the first link if no WA link found
                     return lk;
                 });
             }

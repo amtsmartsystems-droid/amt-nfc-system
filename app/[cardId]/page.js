@@ -100,6 +100,7 @@ export default async function PublicCardPage({ params, searchParams }) {
         menuCategories:  safeJSON(card.menuCategories || []),
         cliqConfig:      safeJSON(card.cliqConfig || { isEnabled:false, alias:'', message:'' }),
         hasShisha:       card.hasShisha || false,
+        cardMappings:    safeJSON(card.cardMappings || []),
     };
     
     return <ClientCardViewer initialCard={serializedCard} cardId={cardId} searchParams={searchParams} />;
