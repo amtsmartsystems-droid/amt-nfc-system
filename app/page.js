@@ -5,6 +5,7 @@ import { useSearchParams } from 'next/navigation';
 import * as LucideIcons from "lucide-react";
 import { upload } from '@vercel/blob/client';
 import RestaurantTheme  from "../components/templates/RestaurantTheme";
+import CafeTheme        from "../components/templates/CafeTheme";
 import CafeTheme1       from "../components/templates/CafeTheme1";
 import GastroBarTheme   from "../components/templates/GastroBarTheme";
 import MaroufCoffeeTheme from "../components/templates/MaroufCoffeeTheme";
@@ -501,7 +502,8 @@ function PageContent() {
       setIsAuthenticated(true);
       showToast("✅ تم تسجيل الدخول");
     } else {
-      showToast("❌ كلمة المرور غير صحيحة", false);
+      const data = await res.json().catch(() => ({}));
+      showToast(`❌ ${data.error || "كلمة المرور غير صحيحة"}`, false);
     }
   };
 
