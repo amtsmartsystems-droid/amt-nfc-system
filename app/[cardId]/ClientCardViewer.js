@@ -354,18 +354,20 @@ export default function ClientCardViewer({ initialCard, cardId, searchParams }) 
     if (card.events?.length > 0) siteData.events = card.events;
     if (card.siteData?.layoutBlocks) siteData.layoutBlocks = card.siteData.layoutBlocks;
 
+    // Extract card number from URL at component level so UI can use it
+    const cp = searchParams?.card || searchParams?.table ||
+        (typeof window !== 'undefined' ? (new URLSearchParams(window.location.search).get('card') || new URLSearchParams(window.location.search).get('table')) : null);
+    const resolvedCardNum = cp ? parseInt(cp) : null;
+
     // ════ RE-APPLY ROUTING on final siteData ════
     // Must run AFTER siteData is built because card.links may override siteData.links above
     const _applyRouting = (links) => {
         if (!links || links.length === 0) return links;
         // ?wa= routing
         const rawWa = searchParams?.wa ? String(searchParams.wa).replace(/[^0-9]/g, '') : null;
-        // ?card= or ?table= routing
-        const cp = searchParams?.card || searchParams?.table ||
-            (typeof window !== 'undefined' ? (new URLSearchParams(window.location.search).get('card') || new URLSearchParams(window.location.search).get('table')) : null);
-        const cardNum = cp ? parseInt(cp) : null;
-        const mapping = (!isNaN(cardNum) && card?.cardMappings?.length > 0)
-            ? card.cardMappings.find(m => Number(m.cardNumber) === cardNum)
+        
+        const mapping = (!isNaN(resolvedCardNum) && card?.cardMappings?.length > 0)
+            ? card.cardMappings.find(m => Number(m.cardNumber) === resolvedCardNum)
             : null;
 
         return links.map(lk => {
@@ -513,7 +515,7 @@ export default function ClientCardViewer({ initialCard, cardId, searchParams }) 
                                 position: 'fixed', top: 16, right: lang === 'ar' ? 'auto' : 16, left: lang === 'ar' ? 16 : 'auto',
                                 zIndex: 200, display: 'flex', gap: 8
                             }}>
-                                {cardNum && (
+                                {resolvedCardNum && (
                                     <div style={{
                                         background: 'rgba(0,0,0,0.6)',
                                         color: '#fff',
@@ -529,7 +531,7 @@ export default function ClientCardViewer({ initialCard, cardId, searchParams }) 
                                         fontFamily: 'Cairo, sans-serif',
                                         backdropFilter: 'blur(12px)',
                                     }}>
-                                        {lang === 'ar' ? `بطاقة ${cardNum}` : `Card ${cardNum}`}
+                                        {lang === 'ar' ? `بطاقة ${resolvedCardNum}` : `Card ${resolvedCardNum}`}
                                     </div>
                                 )}
                                 {hasWifi && (
