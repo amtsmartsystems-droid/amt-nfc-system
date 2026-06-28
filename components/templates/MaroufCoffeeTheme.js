@@ -170,7 +170,7 @@ export default function MaroufCoffeeTheme({ cardId, siteData, siteColors, lang =
 
   const name    = t(sd.name || "Marouf Coffee", sd.nameAr || "بن معروف");
   const tagline = t(sd.subtitle, sd.subtitleAr);
-  const defaultAbout = isAr ? "مزاجك على الطريق..." : "Your mood is on the way...";
+  const defaultAbout = '';
   const about   = t(sd.about, sd.aboutAr) || defaultAbout;
 
   const address = sd.address || "";

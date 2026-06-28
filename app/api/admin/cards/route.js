@@ -41,8 +41,9 @@ export async function POST(req) {
             businessName: 'New Restaurant',
             siteData: {
                 name: 'New Restaurant',
-                subtitle: 'A new beginning',
-                about: 'Add your description here.',
+                subtitle: '',
+                about: '',
+                aboutAr: '',
                 links: []
             }
         });
