@@ -508,11 +508,30 @@ export default function ClientCardViewer({ initialCard, cardId, searchParams }) 
                 if (isFullScreen) {
                     return (
                         <div style={{ minHeight: '100vh', position: 'relative', overflowX: 'hidden' }}>
-                            {/* Floating language button */}
+                            {/* Floating language button and card number */}
                             <div style={{
                                 position: 'fixed', top: 16, right: lang === 'ar' ? 'auto' : 16, left: lang === 'ar' ? 16 : 'auto',
                                 zIndex: 200, display: 'flex', gap: 8
                             }}>
+                                {cardNum && (
+                                    <div style={{
+                                        background: 'rgba(0,0,0,0.6)',
+                                        color: '#fff',
+                                        border: '1px solid rgba(255,255,255,0.1)',
+                                        borderRadius: 8,
+                                        padding: '0 12px',
+                                        height: 38,
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        fontWeight: 700,
+                                        fontSize: 14,
+                                        fontFamily: 'Cairo, sans-serif',
+                                        backdropFilter: 'blur(12px)',
+                                    }}>
+                                        {lang === 'ar' ? `بطاقة ${cardNum}` : `Card ${cardNum}`}
+                                    </div>
+                                )}
                                 {hasWifi && (
                                     <button
                                         onClick={handleCopyWifi}
@@ -520,7 +539,7 @@ export default function ClientCardViewer({ initialCard, cardId, searchParams }) 
                                             background: wifiState === 'copied' ? 'rgba(16,185,129,0.9)' : 'rgba(0,0,0,0.6)',
                                             color: wifiState === 'copied' ? '#fff' : '#B99146',
                                             border: '1px solid rgba(185,145,70,0.3)',
-                                            borderRadius: 10, width: 38, height: 38,
+                                            borderRadius: 8, width: 38, height: 38,
                                             display: 'flex', alignItems: 'center', justifyContent: 'center',
                                             backdropFilter: 'blur(12px)', cursor: 'pointer', transition: 'all 0.3s'
                                         }}
