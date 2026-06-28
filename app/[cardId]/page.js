@@ -39,7 +39,7 @@ export async function generateMetadata({ params }) {
     };
 }
 
-export default async function PublicCardPage({ params }) {
+export default async function PublicCardPage({ params, searchParams }) {
     await connectDB();
     const { cardId } = params;
     
@@ -102,5 +102,5 @@ export default async function PublicCardPage({ params }) {
         hasShisha:       card.hasShisha || false,
     };
     
-    return <ClientCardViewer initialCard={serializedCard} cardId={cardId} />;
+    return <ClientCardViewer initialCard={serializedCard} cardId={cardId} searchParams={searchParams} />;
 }

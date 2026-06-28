@@ -776,7 +776,10 @@ function PageContent() {
                         <input
                           type="file"
                           accept="image/*"
-                          onChange={(e) => handleImageUpload(slot, e.target.files[0])}
+                          onChange={(e) => {
+                            handleImageUpload(slot, e.target.files[0]);
+                            e.target.value = '';
+                          }}
                           className="block w-full text-[11px] text-slate-400 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-[11px] file:font-bold file:bg-white/10 file:text-white hover:file:bg-white/20 cursor-pointer"
                         />
                       </div>
@@ -920,6 +923,7 @@ function PageContent() {
                           img.src = url;
                         };
                         reader.readAsDataURL(file);
+                        e.target.value = '';
                       }}
                     />
                     <label htmlFor="upload-block-img" className="cursor-pointer flex flex-col items-center justify-center gap-2">

@@ -18,7 +18,7 @@ const fetcher = async (url) => {
     if (!res.ok || json.error) throw new Error(json.error || 'Failed to fetch');
     return json;
 };
-export default function ClientCardViewer({ initialCard, cardId }) {
+export default function ClientCardViewer({ initialCard, cardId, searchParams }) {
     const [lang,      setLang]      = useState('ar');
     const [wifiState, setWifiState] = useState('idle');
 
@@ -282,7 +282,26 @@ export default function ClientCardViewer({ initialCard, cardId }) {
         refreshInterval:    5000,      // Poll every 5 seconds
     });
 
-    const card    = fetchedCard || initialCard;
+    let card    = fetchedCard || initialCard;
+    
+    // ════ DYNAMIC WHATSAPP ROUTING ════
+    // If ?wa=123456789 is in the URL, overwrite the WhatsApp link in siteData
+    if (searchParams?.wa && card?.siteData?.links) {
+        const rawWa = String(searchParams.wa).replace(/[^0-9]/g, '');
+        if (rawWa) {
+            // Deep clone to avoid mutating SWR cache directly
+            card = JSON.parse(JSON.stringify(card));
+            card.siteData.links = card.siteData.links.map(lk => {
+                const titleStr = `${lk.title || ''} ${lk.titleAr || ''}`.toLowerCase();
+                const urlStr = (lk.url || '').toLowerCase();
+                if (titleStr.includes('whatsapp') || titleStr.includes('واتساب') || urlStr.includes('wa.me')) {
+                    return { ...lk, url: `https://wa.me/${rawWa}` };
+                }
+                return lk;
+            });
+        }
+    }
+
     const wifi    = card.wifi || { ssid: '', password: '' };
     const hasWifi = !!(wifi.ssid || wifi.password);
     const primary = card.primaryColor || '#EDD98A';
