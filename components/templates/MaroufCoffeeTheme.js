@@ -168,7 +168,7 @@ export default function MaroufCoffeeTheme({ cardId, siteData, siteColors, lang =
   const t  = (en, ar) => isAr && ar ? ar : en;
   const sd = siteData || {};
 
-  const name    = t(sd.name || "Marouf Coffee", sd.nameAr || "بن معروف");
+  const name    = t(sd.name || sd.nameAr || "Marouf Coffee", sd.nameAr || sd.name || "Marouf Coffee");
   const tagline = t(sd.subtitle, sd.subtitleAr);
   const defaultAbout = '';
   const about   = t(sd.about, sd.aboutAr) || defaultAbout;
