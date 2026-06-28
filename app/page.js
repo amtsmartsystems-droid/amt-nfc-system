@@ -101,6 +101,9 @@ function PageContent() {
   const [wifi,       setWifi]       = useState({ ssid: "", password: "" });
   const [telegramConfig, setTelegramConfig] = useState({ botToken: "", chatId: "", isEnabled: false });
   const [nfcTableNum, setNfcTableNum] = useState("");
+  const [nfcDestUrl, setNfcDestUrl]   = useState("");
+  const [cardMappings, setCardMappings] = useState([]);
+  const [savingMapping, setSavingMapping] = useState(false);
   const [uploadingPdf, setUploadingPdf] = useState(false);
   const [isMenuEnabled, setIsMenuEnabled] = useState(false);
   const [isHouseSystemActive, setIsHouseSystemActive] = useState(false);
@@ -295,6 +298,49 @@ function PageContent() {
     }
   };
 
+  // ══ Save Card Mapping (per-physical-card destination URL) ══
+  const handleSaveCardMapping = async () => {
+    if (!targetCardId.trim()) return showToast("⚠️ يرجى تحديد رقم البطاقة أولاً", false);
+    if (!nfcTableNum)        return showToast("⚠️ أدخل رقم البطاقة المادية", false);
+    if (!nfcDestUrl.trim())  return showToast("⚠️ أدخل رابط الوجهة (WhatsApp أو غيره)", false);
+
+    setSavingMapping(true);
+    try {
+      const res = await fetch(`/api/cards/${targetCardId}/mappings`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          cardNumber:     parseInt(nfcTableNum),
+          destinationUrl: nfcDestUrl.trim(),
+          label:          `بطاقة رقم ${nfcTableNum}`,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'فشل الحفظ');
+      showToast(data.message || `✅ تم حفظ البطاقة رقم ${nfcTableNum}`);
+      setCardMappings(data.cardMappings || []);
+    } catch (e) {
+      showToast(`❌ ${e.message}`, false);
+    } finally {
+      setSavingMapping(false);
+    }
+  };
+
+  const handleDeleteCardMapping = async (cardNumber) => {
+    if (!targetCardId.trim()) return;
+    try {
+      const res = await fetch(`/api/cards/${targetCardId}/mappings?cardNumber=${cardNumber}`, {
+        method: 'DELETE',
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'فشل الحذف');
+      showToast(data.message);
+      setCardMappings(prev => prev.filter(m => m.cardNumber !== cardNumber));
+    } catch (e) {
+      showToast(`❌ ${e.message}`, false);
+    }
+  };
+
   // ── Load Card Data (and check subscription status) ──
   const normalizeTheme = (name) => {
     if (!name) return 'restaurant';
@@ -351,6 +397,10 @@ function PageContent() {
       if (data.menuCategories) setMenuCategories(data.menuCategories);
       if (data.cliqConfig) setCliqConfig(data.cliqConfig);
       else setCliqConfig({ isEnabled: false, alias: '', message: 'لإتمام طلبك، يرجى تحويل المجموع عبر كليك' });
+
+      // ── Load card mappings ──
+      if (data.cardMappings) setCardMappings(data.cardMappings);
+      else setCardMappings([]);
 
       showToast(`✅ تم تحميل بيانات البطاقة: ${cid}`);
     } catch {}
@@ -1020,53 +1070,116 @@ function PageContent() {
                   )}
                 </div>
 
-                {/* ═══ NFC LINK GENERATOR ═══ */}
+                {/* ═══ NFC LINK GENERATOR + TARGETED UPDATE ═══ */}
                 {targetCardId && (
                   <div className="rounded-2xl p-4 mb-4 space-y-4" style={{ background:"rgba(59,130,246,0.08)", border:"1.5px dashed rgba(59,130,246,0.4)" }}>
-                    <div className="flex items-center gap-2 mb-2">
+                    <div className="flex items-center gap-2 mb-1">
                       <LucideIcons.Nfc size={15} className="text-blue-400" />
                       <Label className="font-bold text-blue-300 text-[12px] mb-0">
-                        مُولّد روابط الطاولات (NFC)
+                        مُولّد روابط البطاقات (NFC) — التحديث المستهدف
                       </Label>
                     </div>
                     <p className="text-[10px] text-slate-400 leading-relaxed">
-                      أدخل رقم الطاولة لنسخ رابط الأمان المباشر (Scan API) لبرمجته على البطاقة بسرعة.
+                      أدخل رقم البطاقة المادية ورابط الوجهة (واتساب أو غيره) ثم احفظ. كل بطاقة تُحدَّث باستقلالية تامة دون المساس بالأخريات.
                     </p>
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-2">
-                        <div className="flex-1">
-                          <AdminInput
-                            value={nfcTableNum}
-                            onChange={setNfcTableNum}
-                            placeholder="أدخل رقم الطاولة (مثال: 5)"
-                            type="number"
+
+                    {/* ── Inputs Row ── */}
+                    <div className="grid grid-cols-2 gap-2">
+                      <div>
+                        <Label className="text-[10px] text-slate-400 mb-1">رقم البطاقة المادية</Label>
+                        <AdminInput
+                          value={nfcTableNum}
+                          onChange={setNfcTableNum}
+                          placeholder="مثال: 1"
+                          type="number"
+                          dir="ltr"
+                        />
+                      </div>
+                      <div>
+                        <Label className="text-[10px] text-slate-400 mb-1">رابط الوجهة</Label>
+                        <AdminInput
+                          value={nfcDestUrl}
+                          onChange={setNfcDestUrl}
+                          placeholder="https://wa.me/962..."
+                          type="url"
+                          dir="ltr"
+                        />
+                      </div>
+                    </div>
+
+                    {/* ── NFC Scan URL + Copy & Save buttons ── */}
+                    {nfcTableNum && (
+                      <div className="space-y-2">
+                        {/* Scan URL row */}
+                        <div className="flex items-center gap-2 p-2 bg-blue-500/10 rounded-lg border border-blue-500/20">
+                          <input
+                            type="text"
+                            readOnly
+                            value={`https://amt-nfc-system.vercel.app/api/scan?r=${targetCardId}&t=${nfcTableNum}`}
+                            className="w-full text-[10px] bg-black/40 text-blue-200 px-2 py-2 rounded border border-white/5 outline-none font-mono"
                             dir="ltr"
                           />
-                        </div>
-                      </div>
-                      {nfcTableNum && (
-                        <div className="flex items-center gap-2 mt-2 p-2 bg-blue-500/10 rounded-lg border border-blue-500/20">
-                          <input 
-                            type="text" 
-                            readOnly 
-                            value={`https://amt-nfc-system.vercel.app/api/scan?r=${targetCardId}&t=${nfcTableNum}`} 
-                            className="w-full text-[10px] bg-black/40 text-blue-200 px-2 py-2 rounded border border-white/5 outline-none font-mono" 
-                            dir="ltr" 
-                          />
-                          <button 
-                            onClick={()=>{
-                              navigator.clipboard.writeText(`https://amt-nfc-system.vercel.app/api/scan?r=${targetCardId}&t=${nfcTableNum}`); 
-                              showToast("✅ تم نسخ رابط الـ NFC للطاولة");
-                            }} 
+                          <button
+                            onClick={() => {
+                              navigator.clipboard.writeText(`https://amt-nfc-system.vercel.app/api/scan?r=${targetCardId}&t=${nfcTableNum}`);
+                              showToast("✅ تم نسخ رابط الـ NFC");
+                            }}
                             className="px-3 py-2 bg-blue-600 hover:bg-blue-500 text-white text-[11px] font-bold rounded transition-all flex items-center gap-1 shrink-0"
                           >
                             <LucideIcons.Copy size={13} /> نسخ
                           </button>
                         </div>
-                      )}
-                    </div>
+
+                        {/* Save mapping button */}
+                        <button
+                          onClick={handleSaveCardMapping}
+                          disabled={savingMapping || !nfcDestUrl.trim()}
+                          className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl font-black text-[12px] transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+                          style={{ background: savingMapping ? '#1d4ed8' : 'linear-gradient(135deg,#2563eb,#1d4ed8)', color: '#fff', boxShadow: '0 4px 15px rgba(37,99,235,0.3)' }}
+                        >
+                          {savingMapping
+                            ? <LucideIcons.Loader2 size={14} className="animate-spin" />
+                            : <LucideIcons.Save size={14} />}
+                          {savingMapping ? 'جاري الحفظ...' : `💾 حفظ للبطاقة رقم ${nfcTableNum}`}
+                        </button>
+                      </div>
+                    )}
+
+                    {/* ── Saved Mappings List ── */}
+                    {cardMappings.length > 0 && (
+                      <div className="pt-3 border-t border-blue-500/20 space-y-2">
+                        <Label className="text-[10px] text-blue-300 font-bold flex items-center gap-1">
+                          <LucideIcons.List size={11} /> البطاقات المحفوظة ({cardMappings.length})
+                        </Label>
+                        {[...cardMappings].sort((a,b) => a.cardNumber - b.cardNumber).map(m => (
+                          <div key={m.cardNumber} className="flex items-center gap-2 p-2 rounded-lg bg-blue-500/5 border border-blue-500/15">
+                            <div className="w-7 h-7 rounded-lg bg-blue-600/20 text-blue-300 flex items-center justify-center text-[11px] font-black flex-shrink-0">
+                              {m.cardNumber}
+                            </div>
+                            <p className="flex-1 text-[10px] text-slate-400 truncate font-mono" dir="ltr">
+                              {m.destinationUrl}
+                            </p>
+                            <button
+                              onClick={() => { setNfcTableNum(String(m.cardNumber)); setNfcDestUrl(m.destinationUrl); }}
+                              title="تعديل"
+                              className="p-1 rounded text-slate-500 hover:text-blue-400 transition-all"
+                            >
+                              <LucideIcons.PenLine size={11} />
+                            </button>
+                            <button
+                              onClick={() => handleDeleteCardMapping(m.cardNumber)}
+                              title="حذف"
+                              className="p-1 rounded text-slate-600 hover:text-red-400 transition-all"
+                            >
+                              <LucideIcons.Trash2 size={11} />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 )}
+
 
                 {/* Link List */}
                 <div className="space-y-2">

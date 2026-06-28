@@ -284,7 +284,7 @@ export default function ClientCardViewer({ initialCard, cardId, searchParams }) 
 
     let card    = fetchedCard || initialCard;
     
-    // ════ DYNAMIC WHATSAPP ROUTING ════
+    // ════ DYNAMIC WHATSAPP ROUTING (‫?wa=‬) ════
     // If ?wa=123456789 is in the URL, overwrite the WhatsApp link in siteData
     if (searchParams?.wa && card?.siteData?.links) {
         const rawWa = String(searchParams.wa).replace(/[^0-9]/g, '');
@@ -299,6 +299,30 @@ export default function ClientCardViewer({ initialCard, cardId, searchParams }) 
                 }
                 return lk;
             });
+        }
+    }
+
+    // ════ TARGETED CARD ROUTING (‫?card=N‬) ════
+    // If ?card=N is in the URL, look up destinationUrl from cardMappings
+    // and overwrite the WhatsApp link with it.
+    if (searchParams?.card && card?.cardMappings?.length > 0) {
+        const cardNum = parseInt(searchParams.card);
+        if (!isNaN(cardNum)) {
+            const mapping = card.cardMappings.find(m => m.cardNumber === cardNum);
+            if (mapping?.destinationUrl && card?.siteData?.links) {
+                card = JSON.parse(JSON.stringify(card));
+                const dest = mapping.destinationUrl;
+                // If destination is a wa.me URL, override whatsapp links
+                const isWa = dest.includes('wa.me');
+                card.siteData.links = card.siteData.links.map(lk => {
+                    const titleStr = `${lk.title || ''} ${lk.titleAr || ''}`.toLowerCase();
+                    const urlStr = (lk.url || '').toLowerCase();
+                    const isWaLink = titleStr.includes('whatsapp') || titleStr.includes('واتساب') || urlStr.includes('wa.me');
+                    if (isWa && isWaLink) return { ...lk, url: dest };
+                    // Non-WA destination: override the first link if no WA link found
+                    return lk;
+                });
+            }
         }
     }
 

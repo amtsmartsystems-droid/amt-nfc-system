@@ -88,6 +88,7 @@ export async function GET(req, { params }) {
             menuCategories:     card.menuCategories || [],
             cliqConfig:         card.cliqConfig || { isEnabled: false, alias: '', message: '' },
             offersUrl:          card.offersUrl || '',
+            cardMappings:       card.cardMappings || [],
         });
     } catch (error) {
         return NextResponse.json({ error: 'خطأ في الخادم' }, { status: 500 });

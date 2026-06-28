@@ -194,6 +194,23 @@ const cardSchema = new mongoose.Schema({
         default: { isEnabled: false, alias: '', message: 'لإتمام طلبك، يرجى تحويل المجموع عبر كليك' }
     },
 
+    offersUrl: {
+        type: String,
+        default: '',
+    },
+
+    // ── Card Mappings (per-physical-card destination URLs) ──────────
+    // Stores a destination URL per numbered physical NFC card
+    // e.g. [{cardNumber: 1, destinationUrl: 'https://wa.me/96279...', label: 'موظف 1'}]
+    cardMappings: {
+        type: [{
+            cardNumber:     { type: Number, required: true },
+            destinationUrl: { type: String, default: '' },
+            label:          { type: String, default: '' },
+        }],
+        default: [],
+    },
+
 }, { timestamps: true });
 
 module.exports = mongoose.models.Card || mongoose.model('Card', cardSchema);
