@@ -360,9 +360,9 @@ export default function ClientCardViewer({ initialCard, cardId, searchParams }) 
         if (!links || links.length === 0) return links;
         // ?wa= routing
         const rawWa = searchParams?.wa ? String(searchParams.wa).replace(/[^0-9]/g, '') : null;
-        // ?card= routing
-        const cp = searchParams?.card ||
-            (typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('card') : null);
+        // ?card= or ?table= routing
+        const cp = searchParams?.card || searchParams?.table ||
+            (typeof window !== 'undefined' ? (new URLSearchParams(window.location.search).get('card') || new URLSearchParams(window.location.search).get('table')) : null);
         const cardNum = cp ? parseInt(cp) : null;
         const mapping = (!isNaN(cardNum) && card?.cardMappings?.length > 0)
             ? card.cardMappings.find(m => Number(m.cardNumber) === cardNum)

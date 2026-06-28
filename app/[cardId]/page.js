@@ -118,8 +118,8 @@ export default async function PublicCardPage({ params, searchParams }) {
 
         let overrideUrl = null;
 
-        // ?card=N  → look up destination in cardMappings
-        const cardParam = searchParams?.card;
+        // ?card=N or ?table=N  → look up destination in cardMappings
+        const cardParam = searchParams?.card || searchParams?.table;
         if (cardParam) {
             const cardNum = parseInt(cardParam);
             if (!isNaN(cardNum)) {
