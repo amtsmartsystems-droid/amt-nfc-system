@@ -11,6 +11,7 @@ import GastroBarTheme   from "../components/templates/GastroBarTheme";
 import MaroufCoffeeTheme from "../components/templates/MaroufCoffeeTheme";
 import RusticCafeTheme  from "../components/templates/RusticCafeTheme";
 import AMTBusinessCard  from "../components/templates/AMTBusinessCard";
+import QRCodeGenerator  from "../components/QRCodeGenerator";
 import { getIconForLink } from "../utils/icons";
 
 // ─────────────────────────────────────────────────────────────────────
@@ -1142,6 +1143,14 @@ function PageContent() {
                             : <LucideIcons.Save size={14} />}
                           {savingMapping ? 'جاري الحفظ...' : `💾 حفظ للبطاقة رقم ${nfcTableNum}`}
                         </button>
+                        
+                        {/* QR Code Generator */}
+                        <div className="mt-4 pt-4 border-t border-blue-500/20">
+                          <QRCodeGenerator 
+                            tableNumber={nfcTableNum} 
+                            baseUrl={`https://amt-nfc-system.vercel.app/api/scan?r=${targetCardId}&t=[tableNumber]`} 
+                          />
+                        </div>
                       </div>
                     )}
 
