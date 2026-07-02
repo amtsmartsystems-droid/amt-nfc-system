@@ -111,7 +111,11 @@ function GlowLinkCard({ link, accent, secondaryAccent, cardId, t, handleMenuClic
           transition: "all 0.4s ease",
         }}
       >
-        <IconComponent size={24} style={{ color: accent, filter: `drop-shadow(0 2px 4px rgba(0,0,0,0.1))` }} />
+        {link.iconUrl ? (
+          <img src={link.iconUrl} alt="icon" className="w-full h-full object-cover" />
+        ) : (
+          <IconComponent size={24} style={{ color: accent, filter: `drop-shadow(0 2px 4px rgba(0,0,0,0.1))` }} />
+        )}
       </div>
 
       {/* Label */}

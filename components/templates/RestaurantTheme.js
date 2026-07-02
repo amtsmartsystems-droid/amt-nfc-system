@@ -63,8 +63,12 @@ export default function RestaurantTheme({ cardId, siteData, siteColors, lang = "
         className="group flex items-center gap-4 w-full px-5 py-4 rounded-2xl font-bold text-[13.5px] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl active:scale-[0.98]"
         style={{ background:"#1C1C1C", color:"#fff", boxShadow:"0 4px 16px rgba(0,0,0,0.22)", fontFamily:"Cairo,sans-serif" }}
       >
-        <div className="w-9 h-9 rounded-xl flex-shrink-0 flex items-center justify-center transition-transform duration-300 group-hover:scale-110" style={{ background: bg }}>
-          <IconComponent size={17} color={color} />
+        <div className="w-9 h-9 rounded-xl flex-shrink-0 flex items-center justify-center transition-transform duration-300 group-hover:scale-110 overflow-hidden" style={{ background: bg }}>
+          {link.iconUrl ? (
+            <img src={link.iconUrl} alt={label} className="w-full h-full object-cover" />
+          ) : (
+            <IconComponent size={17} color={color} />
+          )}
         </div>
         <span className="flex-1 truncate">{label}</span>
         <LucideIcons.ArrowLeft size={15} color="rgba(255,255,255,0.30)" className={`flex-shrink-0 transition-transform group-hover:translate-x-[-3px]`} />

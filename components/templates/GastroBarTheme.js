@@ -68,8 +68,12 @@ export default function GastroBarTheme({ cardId, siteData, siteColors, lang = "e
       <a href={link.url || "#"} onClick={handleClick} target={link.url && link.url !== "#" && !link.url.startsWith('#') ? "_blank" : undefined} rel="noopener noreferrer"
         className="flex items-center justify-center gap-3 w-full py-4 rounded-xl font-black text-[14px] uppercase tracking-wider transition-all duration-300 hover:brightness-110 active:scale-95 hover:shadow-[0_0_24px_rgba(var(--primary-rgb),0.45)]"
         style={{ background: accent, color: "#111", boxShadow: `0 4px 20px rgba(var(--primary-rgb),0.30)`, fontFamily:"Cairo,sans-serif" }}>
-        <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background:"rgba(0,0,0,0.15)" }}>
-          <IconComponent size={16} color="#111" />
+        <div className="w-7 h-7 rounded-lg flex items-center justify-center overflow-hidden" style={{ background:"rgba(0,0,0,0.15)" }}>
+          {link.iconUrl ? (
+            <img src={link.iconUrl} alt={label} className="w-full h-full object-cover" />
+          ) : (
+            <IconComponent size={16} color="#111" />
+          )}
         </div>
         {label}
       </a>
@@ -95,7 +99,13 @@ export default function GastroBarTheme({ cardId, siteData, siteColors, lang = "e
       <a href={link.url || "#"} onClick={handleClick} target={link.url && link.url !== "#" ? "_blank" : undefined} rel="noopener noreferrer"
         className="flex items-center justify-center gap-3 w-full py-4 rounded-xl font-bold text-[13px] uppercase tracking-wider transition-all duration-300 hover:bg-white/10 active:scale-95"
         style={{ background:"rgba(255,255,255,0.07)", color:"#fff", border:`1px solid rgba(255,255,255,0.12)`, fontFamily:"Cairo,sans-serif" }}>
-        <IconComponent size={16} color={accent} />
+        <div className="w-6 h-6 rounded-md flex items-center justify-center overflow-hidden">
+          {link.iconUrl ? (
+            <img src={link.iconUrl} alt={label} className="w-full h-full object-cover" />
+          ) : (
+            <IconComponent size={16} color={accent} />
+          )}
+        </div>
         {label}
       </a>
     );

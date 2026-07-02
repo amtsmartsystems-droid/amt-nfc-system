@@ -104,7 +104,11 @@ export default function CafeTheme1({ cardId, siteData, siteColors, lang = "en", 
           backdropFilter: "blur(8px)",
         }}
       >
-        <IconComponent size={20} color="#fff" />
+        {link.iconUrl ? (
+          <img src={link.iconUrl} alt="icon" className="w-full h-full object-cover rounded-full" />
+        ) : (
+          <IconComponent size={20} color="#fff" />
+        )}
       </a>
     );
   };

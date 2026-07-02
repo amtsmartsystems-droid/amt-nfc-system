@@ -108,7 +108,7 @@ function GlowLinkCard({ link, accent, cardId, t, handleMenuClick, handleOffersCl
 
       {/* Icon */}
       <div
-        className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 relative z-10 transition-all duration-500 group-hover:scale-105"
+        className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 relative z-10 transition-all duration-500 group-hover:scale-105 overflow-hidden"
         style={{
           background: "rgba(var(--primary-rgb),0.08)",
           border: "1px solid rgba(var(--primary-rgb),0.2)",
@@ -118,7 +118,11 @@ function GlowLinkCard({ link, accent, cardId, t, handleMenuClick, handleOffersCl
         onMouseEnter={e => { e.currentTarget.style.boxShadow = "0 0 20px rgba(var(--primary-rgb),0.35)"; }}
         onMouseLeave={e => { e.currentTarget.style.boxShadow = "0 0 0 0 rgba(var(--primary-rgb),0)"; }}
       >
-        <IconComponent size={22} style={{ color: "var(--primary-color)", filter: "drop-shadow(0 0 6px rgba(var(--primary-rgb),0.5))" }} />
+        {link.iconUrl ? (
+          <img src={link.iconUrl} alt={label} className="w-full h-full object-cover" />
+        ) : (
+          <IconComponent size={22} style={{ color: "var(--primary-color)", filter: "drop-shadow(0 0 6px rgba(var(--primary-rgb),0.5))" }} />
+        )}
       </div>
 
       {/* Label */}

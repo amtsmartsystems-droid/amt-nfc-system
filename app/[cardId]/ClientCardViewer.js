@@ -515,7 +515,7 @@ export default function ClientCardViewer({ initialCard, cardId, searchParams }) 
                                 position: 'fixed', top: 16, right: lang === 'ar' ? 'auto' : 16, left: lang === 'ar' ? 16 : 'auto',
                                 zIndex: 200, display: 'flex', gap: 8
                             }}>
-                                {resolvedCardNum && (
+                                {(resolvedCardNum !== null && !isNaN(resolvedCardNum) && resolvedCardNum !== 0) && (
                                     <div style={{
                                         background: 'rgba(0,0,0,0.6)',
                                         color: '#fff',

@@ -114,6 +114,7 @@ function PageContent() {
   const [menuMode, setMenuMode] = useState('interactive');
   const [pdfMenuUrl, setPdfMenuUrl] = useState('');
   const [offersUrl, setOffersUrl] = useState(''); // NEW: عروضنا URL
+  const [uploadingIcon, setUploadingIcon] = useState(null);
   const [cliqConfig, setCliqConfig] = useState({ isEnabled: false, alias: '', message: 'لإتمام طلبك، يرجى تحويل المجموع عبر كليك' });
   // Subscription gate state
   const [subscriptionStatus, setSubscriptionStatus] = useState('active');
@@ -456,6 +457,32 @@ function PageContent() {
     }
   };
 
+  const handleIconUpload = async (file, linkId) => {
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) {
+      showToast("❌ حجم الصورة كبير جداً! الحد الأقصى 5 ميجابايت.", false);
+      return;
+    }
+
+    setUploadingIcon(linkId);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      const res = await fetch('/api/upload', { method: 'POST', body: formData });
+      const data = await res.json();
+      if (!res.ok || !data.url) throw new Error(data.error || 'فشل الرفع');
+
+      setSiteData(p => ({
+        ...p,
+        links: p.links.map(l => l.id === linkId ? { ...l, iconUrl: data.url } : l)
+      }));
+      showToast("✅ تم رفع الأيقونة بنجاح!");
+    } catch (e) {
+      showToast(`❌ خطأ في رفع الأيقونة: ${e.message}`, false);
+    } finally {
+      setUploadingIcon(null);
+    }
+  };
 
   // ── Events CRUD ──
   const addEvent = () => {
@@ -1245,11 +1272,23 @@ function PageContent() {
                               </div>
                             </div>
 
-
-
-                            <div className="flex items-center gap-2 pt-1">
-                              <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background:bg }}><Ic size={14} color={color} /></div>
-                              <p className="text-[9.5px] text-slate-600">الأيقونة تتغير تلقائياً بناءً على الاسم ✨</p>
+                            <div className="flex items-center gap-2 pt-1 justify-between">
+                              <div className="flex items-center gap-2">
+                                <div className="w-7 h-7 rounded-lg flex items-center justify-center overflow-hidden" style={{ background:bg }}>
+                                  {lk.iconUrl ? (
+                                    <img src={lk.iconUrl} alt="icon" className="w-full h-full object-cover" />
+                                  ) : (
+                                    <Ic size={14} color={color} />
+                                  )}
+                                </div>
+                                <p className="text-[9.5px] text-slate-600">
+                                  {lk.iconUrl ? 'أيقونة مخصصة' : 'الأيقونة تتغير تلقائياً بناءً على الاسم ✨'}
+                                </p>
+                              </div>
+                              <label title="رفع أيقونة مخصصة للرابط" className={`flex-shrink-0 flex items-center justify-center w-8 h-8 rounded-lg bg-white/10 hover:bg-white/20 text-gray-300 cursor-pointer transition-all ${uploadingIcon === lk.id ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                                {uploadingIcon === lk.id ? <LucideIcons.Loader2 size={14} className="animate-spin" /> : <LucideIcons.Image size={14} />}
+                                <input type="file" accept="image/*" className="hidden" disabled={uploadingIcon === lk.id} onChange={(e) => handleIconUpload(e.target.files[0], lk.id)} />
+                              </label>
                             </div>
                           </div>
                         )}
