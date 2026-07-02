@@ -771,6 +771,15 @@ function PageContent() {
                       <LucideIcons.ExternalLink size={14} />
                     </a>
                   </div>
+                  
+                  {/* General QR Code */}
+                  <div className="mt-4 pt-4 border-t border-emerald-500/20">
+                    <QRCodeGenerator 
+                      baseUrl={publishedUrl} 
+                      label="رمز الـ QR للرابط العام"
+                      downloadName={`${targetCardId}_General_QR.png`}
+                    />
+                  </div>
                 </div>
               )}
             </div>

@@ -152,21 +152,21 @@ export default async function PublicCardPage({ params, searchParams }) {
             if (rawWa) overrideUrl = `https://wa.me/${rawWa}`;
         }
 
-        if (!overrideUrl) return;
+        if (overrideUrl) {
+            effectiveLinks = effectiveLinks.map(lk => {
+                const titleStr = `${lk.title || ''} ${lk.titleAr || ''}`.toLowerCase();
+                const urlStr   = (lk.url || '').toLowerCase();
+                const isWaLink = titleStr.includes('whatsapp') || titleStr.includes('واتساب') || urlStr.includes('wa.me');
+                
+                // If it's the WhatsApp link, override its URL
+                if (isWaLink) return { ...lk, url: overrideUrl };
+                return lk;
+            });
+        }
 
-        const patchedLinks = effectiveLinks.map(lk => {
-            const titleStr = `${lk.title || ''} ${lk.titleAr || ''}`.toLowerCase();
-            const urlStr   = (lk.url || '').toLowerCase();
-            const isWaLink = titleStr.includes('whatsapp') || titleStr.includes('واتساب') || urlStr.includes('wa.me');
-            
-            // If it's the WhatsApp link, override its URL
-            if (isWaLink) return { ...lk, url: overrideUrl };
-            return lk;
-        });
-
-        // Patch both links arrays so nothing can overwrite them
-        serializedCard.links    = patchedLinks;
-        serializedCard.siteData = { ...serializedCard.siteData, links: patchedLinks };
+        // Patch both links arrays so nothing can overwrite them (always apply merged links)
+        serializedCard.links    = effectiveLinks;
+        serializedCard.siteData = { ...serializedCard.siteData, links: effectiveLinks };
     };
 
     applyServerRouting();
