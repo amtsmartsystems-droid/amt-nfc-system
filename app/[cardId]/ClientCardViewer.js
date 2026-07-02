@@ -90,8 +90,8 @@ export default function ClientCardViewer({ initialCard, cardId, searchParams }) 
         const tbl = params.get('table');
         const auth = params.get('auth');
         
-        if (!tbl) return;
-        
+        // استثناء: رقم 0 لا يظهر للعميل ولا يُستخدم كرقم طاولة
+        if (tbl === '0') return;
         setTableNumber(tbl);
         setIsNfc(auth === 'nfc');
 
@@ -636,7 +636,7 @@ export default function ClientCardViewer({ initialCard, cardId, searchParams }) 
                                         }}>
                                             {card.siteData?.name || card.siteData?.nameAr || card.businessName || 'المطعم الذكي'}
                                         </h1>
-                                        {tableNumber && (
+                                        {tableNumber && tableNumber !== '0' && (
                                             <p style={{ color: props.siteColors.primary, fontSize: 13, margin: 0, fontWeight: 700, fontFamily: 'Cairo, sans-serif' }}>
                                                 {lang === 'ar' ? 'الطاولة' : 'Table'} {tableNumber}
                                             </p>
