@@ -59,13 +59,16 @@ const cardSchema = new mongoose.Schema({
         default: {},
     },
     links: {
-        type: [{
-            id:     Number,
-            title:  String,
-            titleAr:String,
-            url:    String,
-            clicks: { type: Number, default: 0 },
-        }],
+        type: [
+            {
+                id:      Number,
+                title:   String,
+                titleAr: String,
+                url:     String,
+                iconUrl: String,
+                clicks:  { type: Number, default: 0 },
+            }
+        ],
         default: [],
     },
     events: {
