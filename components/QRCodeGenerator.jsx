@@ -33,11 +33,12 @@ export default function QRCodeGenerator({ tableNumber, baseUrl, label, downloadN
       >
         <QRCodeCanvas 
           value={targetUrl} 
-          size={200} 
+          size={1024} 
           bgColor={"#ffffff"} 
           fgColor={"#000000"} 
           level={"H"} 
           includeMargin={false}
+          style={{ width: "200px", height: "200px" }}
         />
       </div>
       <button 
