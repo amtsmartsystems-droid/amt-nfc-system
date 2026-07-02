@@ -62,16 +62,25 @@ export async function GET(req, { params }) {
             });
         }
 
-        // ── Merge iconUrl from siteData.links into card.links ──
-        // card.links is the strict-schema array (clicks tracking etc.)
-        // rawSiteData.links is the flexible Object field that preserves iconUrl
-        // We merge them so the client always gets iconUrl regardless of when it was saved
+        // ── Merge links using siteData.links as the Source of Truth ──
+        // siteData.links perfectly preserves emojis, translations, and new fields from the admin UI.
+        // card.links is strict-schema and might strip things, but it has the most accurate 'clicks' count.
         const sdLinks = rawSiteData.links || [];
-        const mergedLinks = (card.links || []).map(lk => {
-            if (lk.iconUrl) return lk; // Already has iconUrl (new schema saves)
-            // Find matching entry in siteData.links by id
-            const sdLink = sdLinks.find(s => String(s.id) === String(lk.id));
-            return sdLink?.iconUrl ? { ...lk.toObject ? lk.toObject() : lk, iconUrl: sdLink.iconUrl } : lk;
+        const dbLinks = card.links || [];
+
+        const mergedLinks = sdLinks.map(sdLink => {
+            const dbLink = dbLinks.find(l => String(l.id) === String(sdLink.id));
+            if (dbLink && dbLink.clicks > (sdLink.clicks || 0)) {
+                return { ...sdLink, clicks: dbLink.clicks };
+            }
+            return sdLink;
+        });
+
+        // Ensure we don't lose any db links that somehow aren't in siteData
+        dbLinks.forEach(dbLink => {
+            if (!mergedLinks.find(m => String(m.id) === String(dbLink.id))) {
+                mergedLinks.push(dbLink.toObject ? dbLink.toObject() : dbLink);
+            }
         });
 
         return NextResponse.json({

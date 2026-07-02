@@ -109,19 +109,24 @@ export default async function PublicCardPage({ params, searchParams }) {
     // overwrite it on first render. Most reliable approach.
     // ══════════════════════════════════════════════════════════════
     const applyServerRouting = () => {
-        // Build the effective links array (card.links takes priority over siteData.links)
-        // BUT merge iconUrl from siteData.links for backward compat (old records before schema fix)
-        let effectiveLinks;
-        if (serializedCard.links?.length > 0) {
-            const sdLinks = sd.links || [];
-            effectiveLinks = serializedCard.links.map(lk => {
-                if (lk.iconUrl) return lk;
-                const sdLink = sdLinks.find(s => String(s.id) === String(lk.id));
-                return sdLink?.iconUrl ? { ...lk, iconUrl: sdLink.iconUrl } : lk;
-            });
-        } else {
-            effectiveLinks = [...(sd.links || [])];
-        }
+        // ── Merge links using siteData.links as the Source of Truth ──
+        const sdLinks = sd.links || [];
+        const dbLinks = serializedCard.links || [];
+        
+        let effectiveLinks = sdLinks.map(sdLink => {
+            const dbLink = dbLinks.find(l => String(l.id) === String(sdLink.id));
+            if (dbLink && dbLink.clicks > (sdLink.clicks || 0)) {
+                return { ...sdLink, clicks: dbLink.clicks };
+            }
+            return sdLink;
+        });
+
+        // Add any dbLinks that aren't in sdLinks
+        dbLinks.forEach(dbLink => {
+            if (!effectiveLinks.find(m => String(m.id) === String(dbLink.id))) {
+                effectiveLinks.push({ ...dbLink });
+            }
+        });
 
         if (effectiveLinks.length === 0) return;
 

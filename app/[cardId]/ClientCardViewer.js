@@ -349,17 +349,10 @@ export default function ClientCardViewer({ initialCard, cardId, searchParams }) 
 
     /* ── Build props ── */
     const siteData = { ...(card.siteData || {}) };
-    // card.links overrides siteData.links (DB top-level array has priority)
-    // BUT preserve iconUrl from siteData.links if card.links entry doesn't have it
+    // card.links is now perfectly merged by the server (API/SSR)
+    // It contains the correct emojis, titles, translations, and icons from siteData.links
     if (card.links?.length > 0) {
-        const sdLinks = siteData.links || [];
-        siteData.links = card.links.map(lk => {
-            // If card.links already has iconUrl (new schema), use it directly
-            if (lk.iconUrl) return lk;
-            // Otherwise, try to find iconUrl from siteData.links (stored in the Object field)
-            const sdLink = sdLinks.find(s => String(s.id) === String(lk.id));
-            return sdLink?.iconUrl ? { ...lk, iconUrl: sdLink.iconUrl } : lk;
-        });
+        siteData.links = card.links;
     }
     if (card.events?.length > 0) siteData.events = card.events;
     if (card.siteData?.layoutBlocks) siteData.layoutBlocks = card.siteData.layoutBlocks;
