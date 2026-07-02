@@ -62,6 +62,18 @@ export async function GET(req, { params }) {
             });
         }
 
+        // ── Merge iconUrl from siteData.links into card.links ──
+        // card.links is the strict-schema array (clicks tracking etc.)
+        // rawSiteData.links is the flexible Object field that preserves iconUrl
+        // We merge them so the client always gets iconUrl regardless of when it was saved
+        const sdLinks = rawSiteData.links || [];
+        const mergedLinks = (card.links || []).map(lk => {
+            if (lk.iconUrl) return lk; // Already has iconUrl (new schema saves)
+            // Find matching entry in siteData.links by id
+            const sdLink = sdLinks.find(s => String(s.id) === String(lk.id));
+            return sdLink?.iconUrl ? { ...lk.toObject ? lk.toObject() : lk, iconUrl: sdLink.iconUrl } : lk;
+        });
+
         return NextResponse.json({
             cardType:           card.cardType   || 'restaurant',
             themeName:          card.themeName,
@@ -69,7 +81,7 @@ export async function GET(req, { params }) {
             primaryColor:       card.primaryColor,
             background:         card.background,
             siteData:           rawSiteData,
-            links:              card.links,
+            links:              mergedLinks,
             events:             card.events,
             isLocked:           card.isLocked,
             wifi:               card.wifi || { ssid: '', password: '' },
