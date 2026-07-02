@@ -110,9 +110,18 @@ export default async function PublicCardPage({ params, searchParams }) {
     // ══════════════════════════════════════════════════════════════
     const applyServerRouting = () => {
         // Build the effective links array (card.links takes priority over siteData.links)
-        let effectiveLinks = serializedCard.links?.length > 0
-            ? [...serializedCard.links]
-            : [...(sd.links || [])];
+        // BUT merge iconUrl from siteData.links for backward compat (old records before schema fix)
+        let effectiveLinks;
+        if (serializedCard.links?.length > 0) {
+            const sdLinks = sd.links || [];
+            effectiveLinks = serializedCard.links.map(lk => {
+                if (lk.iconUrl) return lk;
+                const sdLink = sdLinks.find(s => String(s.id) === String(lk.id));
+                return sdLink?.iconUrl ? { ...lk, iconUrl: sdLink.iconUrl } : lk;
+            });
+        } else {
+            effectiveLinks = [...(sd.links || [])];
+        }
 
         if (effectiveLinks.length === 0) return;
 
