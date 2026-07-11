@@ -11,7 +11,7 @@ export default function SuperAdminDashboard() {
 
   const fetchRestaurants = async () => {
     try {
-      const res = await fetch('/api/superadmin/cards');
+      const res = await fetch('/api/superadmin/cards', { cache: 'no-store' });
       if (res.ok) {
         const data = await res.json();
         setRestaurants(data);

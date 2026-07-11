@@ -362,7 +362,7 @@ function PageContent() {
     const cid = (id || targetCardId).trim();
     if (!cid) return;
     try {
-      const res = await fetch(`/api/cards/${cid}`);
+      const res = await fetch(`/api/cards/${cid}`, { cache: 'no-store' });
       if (!res.ok) return;
       const data = await res.json();
       setSubscriptionStatus(data.subscriptionStatus || 'active');
