@@ -85,6 +85,17 @@ export default function ClientCardViewer({ initialCard, cardId, searchParams }) 
     };
 
     useEffect(() => {
+        // Record total view analytics
+        if (cardId) {
+            fetch('/api/analytics/view', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ cardId })
+            }).catch(() => {});
+        }
+    }, [cardId]);
+
+    useEffect(() => {
         if (typeof window === 'undefined') return;
         const params = new URLSearchParams(window.location.search);
         const tbl = params.get('table');

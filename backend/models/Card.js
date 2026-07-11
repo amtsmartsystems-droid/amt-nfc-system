@@ -62,6 +62,10 @@ const cardSchema = new mongoose.Schema({
         type:    Number,
         default: 0,
     },
+    totalViews: {
+        type:    Number,
+        default: 0,
+    },
     links: {
         type: [
             {

@@ -134,7 +134,10 @@ export default function SuperAdminDashboard() {
                   </div>
                 </div>
                 
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap bg-emerald-100 text-emerald-700">
+                    👁️ إجمالي الزيارات: {restaurant.totalViews || 0}
+                  </span>
                   <span className="px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap bg-blue-100 text-blue-700">
                     عدد المسحات 📊 {restaurant.scanCount || 0}
                   </span>

@@ -121,6 +121,7 @@ function PageContent() {
   const [allowEditing,       setAllowEditing]       = useState(true);
   const [currentUserRole,    setCurrentUserRole]    = useState(null);
   const [scanCount,          setScanCount]          = useState(0);
+  const [totalViews,         setTotalViews]         = useState(0);
   const isSuspended = subscriptionStatus === 'suspended' || !allowEditing;
 
   useEffect(() => { 
@@ -367,6 +368,7 @@ function PageContent() {
       setSubscriptionStatus(data.subscriptionStatus || 'active');
       setAllowEditing(data.allowEditing !== false);
       setScanCount(data.scanCount || 0);
+      setTotalViews(data.totalViews || 0);
       if (data.siteData) setSiteData(prev => ({ ...prev, ...data.siteData }));
       // ── Restore cardType + theme (normalize old DB values) ──
       if (data.cardType) {
@@ -688,11 +690,12 @@ function PageContent() {
                 </h1>
                 <div className="flex items-center gap-2 mt-1">
                   <p className="text-[10px] text-slate-600">SaaS Link-in-Bio · Static Themes</p>
-                  {scanCount > 0 && (
-                    <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-blue-500/20 text-blue-400 border border-blue-500/30">
-                      عدد الزيارات: {scanCount} 📊
-                    </span>
-                  )}
+                  <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center gap-1">
+                    👁️ إجمالي الزيارات: {totalViews || 0}
+                  </span>
+                  <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-blue-500/20 text-blue-400 border border-blue-500/30">
+                    NFC مسحات: {scanCount || 0} 📊
+                  </span>
                 </div>
               </div>
               <button onClick={()=>setLang(l=>l==="en"?"ar":"en")}
