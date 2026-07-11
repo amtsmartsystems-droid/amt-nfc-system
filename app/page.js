@@ -120,6 +120,7 @@ function PageContent() {
   const [subscriptionStatus, setSubscriptionStatus] = useState('active');
   const [allowEditing,       setAllowEditing]       = useState(true);
   const [currentUserRole,    setCurrentUserRole]    = useState(null);
+  const [scanCount,          setScanCount]          = useState(0);
   const isSuspended = subscriptionStatus === 'suspended' || !allowEditing;
 
   useEffect(() => { 
@@ -365,6 +366,7 @@ function PageContent() {
       const data = await res.json();
       setSubscriptionStatus(data.subscriptionStatus || 'active');
       setAllowEditing(data.allowEditing !== false);
+      setScanCount(data.scanCount || 0);
       if (data.siteData) setSiteData(prev => ({ ...prev, ...data.siteData }));
       // ── Restore cardType + theme (normalize old DB values) ──
       if (data.cardType) {
@@ -684,7 +686,14 @@ function PageContent() {
                   <LucideIcons.Cpu size={16} style={{ color:"var(--primary-color, #EDD98A)" }} />
                   لوحة المدير الرقمي
                 </h1>
-                <p className="text-[10px] text-slate-600 mt-0.5">SaaS Link-in-Bio · Static Themes</p>
+                <div className="flex items-center gap-2 mt-1">
+                  <p className="text-[10px] text-slate-600">SaaS Link-in-Bio · Static Themes</p>
+                  {scanCount > 0 && (
+                    <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-blue-500/20 text-blue-400 border border-blue-500/30">
+                      عدد الزيارات: {scanCount} 📊
+                    </span>
+                  )}
+                </div>
               </div>
               <button onClick={()=>setLang(l=>l==="en"?"ar":"en")}
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-black border border-yellow-500/30 text-yellow-400 bg-yellow-500/10 hover:bg-yellow-500/20 transition-all">
