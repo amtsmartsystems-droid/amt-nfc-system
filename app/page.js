@@ -1132,7 +1132,12 @@ function PageContent() {
                     {/* ── Inputs Row ── */}
                     <div className="grid grid-cols-2 gap-2">
                       <div>
-                        <Label className="text-[10px] text-slate-400 mb-1">رقم البطاقة المادية</Label>
+                        <div className="flex justify-between items-end mb-1">
+                          <Label className="text-[10px] text-slate-400">رقم البطاقة المادية</Label>
+                          <span className={`text-[9px] font-bold flex items-center gap-1 ${scanCount > 0 ? 'text-blue-400' : 'text-slate-500'}`}>
+                            📊 عدد المسحات: {scanCount || 0}
+                          </span>
+                        </div>
                         <AdminInput
                           value={nfcTableNum}
                           onChange={setNfcTableNum}
