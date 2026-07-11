@@ -25,7 +25,7 @@ export async function GET(req) {
 
         // --- SMART RESET LOGIC ---
         await connectDB();
-        const card = await Card.findOne({ shortCode: restaurantId });
+        const card = await Card.findOneAndUpdate({ shortCode: restaurantId }, { $inc: { scanCount: 1 } }, { new: true });
         if (card) {
             let tableReq = (card.tableRequests || []).find(t => t.tableNumber === tableNumber);
             const now = Date.now();

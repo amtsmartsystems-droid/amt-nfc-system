@@ -58,6 +58,10 @@ const cardSchema = new mongoose.Schema({
         type:    Object,
         default: {},
     },
+    scanCount: {
+        type:    Number,
+        default: 0,
+    },
     links: {
         type: [
             {

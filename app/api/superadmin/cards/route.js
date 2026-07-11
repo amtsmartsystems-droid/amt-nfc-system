@@ -8,7 +8,7 @@ export async function GET(req) {
         
         // Fetch all cards, sorted by creation date (newest first)
         const cards = await Card.find({})
-            .select('shortCode businessName siteData.name subscriptionStatus cardType createdAt')
+            .select('shortCode businessName siteData.name subscriptionStatus cardType createdAt scanCount')
             .sort({ createdAt: -1 })
             .lean();
 
@@ -19,7 +19,8 @@ export async function GET(req) {
             name: card.businessName || card.siteData?.name || card.shortCode,
             type: card.cardType,
             status: card.subscriptionStatus,
-            createdAt: card.createdAt
+            createdAt: card.createdAt,
+            scanCount: card.scanCount || 0
         }));
 
         return NextResponse.json(formattedCards);
