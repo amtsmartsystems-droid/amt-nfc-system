@@ -87,11 +87,17 @@ export default function ClientCardViewer({ initialCard, cardId, searchParams }) 
     useEffect(() => {
         // Record total view analytics
         if (cardId) {
+            console.log('[ClientCardViewer] Tracking view for cardId:', cardId);
             fetch('/api/analytics/view', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ cardId })
-            }).catch(() => {});
+            })
+            .then(r => r.json())
+            .then(d => console.log('[ClientCardViewer] Analytics response:', d))
+            .catch(e => console.error('[ClientCardViewer] Analytics error:', e));
+        } else {
+            console.warn('[ClientCardViewer] No cardId provided, skipping analytics');
         }
     }, [cardId]);
 

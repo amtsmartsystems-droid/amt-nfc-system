@@ -122,6 +122,7 @@ function PageContent() {
   const [currentUserRole,    setCurrentUserRole]    = useState(null);
   const [scanCount,          setScanCount]          = useState(0);
   const [totalViews,         setTotalViews]         = useState(0);
+  const [refreshingStats,    setRefreshingStats]    = useState(false);
   const isSuspended = subscriptionStatus === 'suspended' || !allowEditing;
 
   useEffect(() => { 
@@ -682,21 +683,13 @@ function PageContent() {
               </div>
             )}
 
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center justify-between mb-3">
               <div>
                 <h1 className="text-[16px] font-black flex items-center gap-2">
                   <LucideIcons.Cpu size={16} style={{ color:"var(--primary-color, #EDD98A)" }} />
                   لوحة المدير الرقمي
                 </h1>
-                <div className="flex items-center gap-2 mt-1">
-                  <p className="text-[10px] text-slate-600">SaaS Link-in-Bio · Static Themes</p>
-                  <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center gap-1">
-                    👁️ إجمالي الزيارات: {totalViews || 0}
-                  </span>
-                  <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-blue-500/20 text-blue-400 border border-blue-500/30">
-                    NFC مسحات: {scanCount || 0} 📊
-                  </span>
-                </div>
+                <p className="text-[10px] text-slate-600 mt-0.5">SaaS Link-in-Bio · Static Themes</p>
               </div>
               <button onClick={()=>setLang(l=>l==="en"?"ar":"en")}
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-black border border-yellow-500/30 text-yellow-400 bg-yellow-500/10 hover:bg-yellow-500/20 transition-all">
@@ -704,6 +697,52 @@ function PageContent() {
                 {lang==="en"?"عربي":"English"}
               </button>
             </div>
+
+            {/* ── Stats Card ── */}
+            {targetCardId && (
+              <div className="mb-4 p-3 rounded-xl border border-white/10 bg-white/3">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-[10px] font-bold text-slate-400 flex items-center gap-1">
+                    <LucideIcons.BarChart2 size={11} className="text-slate-500" />
+                    إحصائيات البطاقة
+                  </span>
+                  <button
+                    onClick={async () => {
+                      if (!targetCardId || refreshingStats) return;
+                      setRefreshingStats(true);
+                      try {
+                        const res = await fetch(`/api/cards/${targetCardId}`, { cache: 'no-store' });
+                        if (res.ok) {
+                          const d = await res.json();
+                          setScanCount(d.scanCount || 0);
+                          setTotalViews(d.totalViews || 0);
+                          showToast('✅ تم تحديث الإحصائيات');
+                        }
+                      } catch(e) { console.error(e); showToast('❌ خطأ في التحديث', false); }
+                      finally { setRefreshingStats(false); }
+                    }}
+                    disabled={refreshingStats}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-black transition-all disabled:opacity-50"
+                    style={{ background: refreshingStats ? '#1e3a5f' : 'linear-gradient(135deg,#1d4ed8,#1e40af)', color: '#93c5fd' }}
+                  >
+                    {refreshingStats
+                      ? <LucideIcons.Loader2 size={11} className="animate-spin" />
+                      : <LucideIcons.RefreshCw size={11} />}
+                    {refreshingStats ? 'جاري التحديث...' : 'تحديث عدد الزوار'}
+                  </button>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="flex flex-col items-center justify-center p-2 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
+                    <span className="text-[18px] font-black text-emerald-400">{totalViews || 0}</span>
+                    <span className="text-[9px] text-emerald-400/70 font-bold mt-0.5">👁️ إجمالي الزيارات</span>
+                  </div>
+                  <div className="flex flex-col items-center justify-center p-2 rounded-lg bg-blue-500/10 border border-blue-500/20">
+                    <span className="text-[18px] font-black text-blue-400">{scanCount || 0}</span>
+                    <span className="text-[9px] text-blue-400/70 font-bold mt-0.5">📊 مسحات NFC</span>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Save Section */}
             <div className="mb-4 bg-white/5 p-3 rounded-xl border border-white/10">
