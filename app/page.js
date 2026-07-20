@@ -75,6 +75,111 @@ const Label = ({ children }) => (
 );
 
 // ─────────────────────────────────────────────────────────────────────
+// مكوّن منتقي القوالب — يجمع بين القائمة المنسدلة وإعادة التسمية
+// ─────────────────────────────────────────────────────────────────────
+function ThemeDropdown({ themes, selectedThemeId, onSelect }) {
+  // قائمة القوالب مع إمكانية تخصيص الأسماء محلياً
+  const [localThemes, setLocalThemes] = React.useState(themes);
+  // هل وضع التعديل مفعّل؟
+  const [isEditing, setIsEditing] = React.useState(false);
+  // النص المؤقت أثناء التعديل
+  const [editText, setEditText] = React.useState('');
+
+  // اسم القالب الحالي
+  const currentTheme = localThemes.find(t => t.id === selectedThemeId) || localThemes[0];
+  const CurrentIcon = LucideIcons[currentTheme?.icon] || LucideIcons.Layout;
+
+  // فتح وضع تعديل اسم القالب المختار
+  const startEditing = () => {
+    setEditText(currentTheme.label);
+    setIsEditing(true);
+  };
+
+  // حفظ الاسم الجديد عند الخروج من حقل النص
+  const commitEdit = () => {
+    if (editText.trim()) {
+      setLocalThemes(prev =>
+        prev.map(t => t.id === selectedThemeId ? { ...t, label: editText.trim() } : t)
+      );
+    }
+    setIsEditing(false);
+  };
+
+  // الحفظ عند الضغط على Enter، والإلغاء عند Escape
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter') commitEdit();
+    if (e.key === 'Escape') setIsEditing(false);
+  };
+
+  return (
+    <div className="mt-4">
+      <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-1.5">
+        قالب التصميم
+      </p>
+      <div className="flex items-center gap-2">
+
+        {isEditing ? (
+          /* ── وضع التعديل: حقل نص ── */
+          <input
+            autoFocus
+            value={editText}
+            onChange={e => setEditText(e.target.value)}
+            onBlur={commitEdit}
+            onKeyDown={handleKeyDown}
+            className="flex-1 px-3 py-2 rounded-xl text-[12px] text-yellow-400 font-bold bg-yellow-400/10 border border-yellow-400/40 outline-none focus:border-yellow-400/70 transition-all"
+            placeholder="اكتب اسماً مخصصاً..."
+          />
+        ) : (
+          /* ── وضع الاختيار: قائمة منسدلة ── */
+          <div className="relative flex-1">
+            <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center">
+              <CurrentIcon size={13} className="text-yellow-400" />
+            </div>
+            <select
+              value={selectedThemeId}
+              onChange={e => onSelect(e.target.value)}
+              className="w-full appearance-none pr-8 pl-8 py-2 rounded-xl text-[12px] font-bold text-yellow-400 bg-yellow-400/10 border border-yellow-400/30 outline-none focus:border-yellow-400/50 transition-all cursor-pointer"
+              style={{ direction: 'rtl' }}
+            >
+              {localThemes.map(th => (
+                <option
+                  key={th.id}
+                  value={th.id}
+                  style={{ background: '#0d1117', color: th.id === selectedThemeId ? '#facc15' : '#94a3b8' }}
+                >
+                  {th.label}
+                </option>
+              ))}
+            </select>
+            {/* سهم الفتح */}
+            <div className="pointer-events-none absolute inset-y-0 left-3 flex items-center">
+              <LucideIcons.ChevronDown size={12} className="text-yellow-400/60" />
+            </div>
+          </div>
+        )}
+
+        {/* زر تعديل الاسم (✏️) */}
+        <button
+          onClick={isEditing ? commitEdit : startEditing}
+          title={isEditing ? 'حفظ الاسم' : 'إعادة تسمية القالب'}
+          className="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-xl border border-white/10 bg-white/5 hover:bg-yellow-400/15 hover:border-yellow-400/30 text-slate-500 hover:text-yellow-400 transition-all"
+        >
+          {isEditing
+            ? <LucideIcons.Check size={13} />
+            : <LucideIcons.Pencil size={13} />
+          }
+        </button>
+      </div>
+
+      {/* مؤشر القالب الحالي */}
+      <p className="text-[9px] text-slate-600 mt-1 text-right">
+        القالب الحالي: <span className="text-yellow-400/60 font-bold">{currentTheme?.label}</span>
+      </p>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────
 // PageContent
 // ─────────────────────────────────────────────────────────────────────
 function PageContent() {
@@ -835,21 +940,13 @@ function PageContent() {
               )}
             </div>
 
-            {/* Theme Switcher */}
+            {/* ══ منتقي القالب — Dropdown مع إمكانية إعادة التسمية ══ */}
             {cardType === 'restaurant' && (
-              <div className="grid grid-cols-2 gap-2 mt-4">
-                {THEMES.map(th => {
-                  const Ic = LucideIcons[th.icon]||LucideIcons.Layout;
-                  const active = theme === th.id;
-                  return (
-                    <button key={th.id} onClick={()=>switchTheme(th.id)}
-                      className={`flex items-center justify-center gap-2 py-2.5 rounded-xl text-[12px] font-bold border transition-all ${active?"border-yellow-400/50 bg-yellow-400/10 text-yellow-400":"border-white/8 bg-white/3 text-slate-500 hover:text-slate-300 hover:border-white/15"}`}>
-                      <Ic size={14} /> {th.label}
-                      {active && <span className="text-[9px] text-yellow-400/70">✓</span>}
-                    </button>
-                  );
-                })}
-              </div>
+              <ThemeDropdown
+                themes={THEMES}
+                selectedThemeId={theme}
+                onSelect={(id) => switchTheme(id)}
+              />
             )}
           </div>
 
