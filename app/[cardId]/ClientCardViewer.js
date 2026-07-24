@@ -406,6 +406,7 @@ export default function ClientCardViewer({ initialCard, cardId, searchParams }) 
         });
     };
     siteData.links = _applyRouting(siteData.links);
+    siteData.events = card.events || [];
 
     const props = {
         cardId:     card.shortCode || cardId,
