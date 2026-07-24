@@ -196,12 +196,13 @@ export default function MaroufCoffeeTheme({ cardId, siteData, siteColors, lang =
     { id: "header", type: "header" },
     { id: "menu_button", type: "menu_button" },
     { id: "info", type: "info" },
+    { id: "events", type: "events" },
     { id: "links", type: "links" }
   ];
   let layoutBlocks = (siteData.layoutBlocks && siteData.layoutBlocks.length > 0) ? [...siteData.layoutBlocks] : [...defaultBlocks];
   
   // Ensure core blocks exist (backward compatibility)
-  const coreTypes = ["header", "menu_button", "info", "links"];
+  const coreTypes = ["header", "menu_button", "info", "events", "links"];
   coreTypes.forEach(type => {
       if (!layoutBlocks.find(b => b.type === type)) {
           layoutBlocks.push({ id: type, type });
@@ -379,6 +380,54 @@ export default function MaroufCoffeeTheme({ cardId, siteData, siteColors, lang =
               </div>
             </div>
           </BlockReveal>
+        );
+
+      case 'events':
+        if (!sd.events || sd.events.length === 0) return null;
+        return (
+          <div className="px-6 mt-12 flex flex-col gap-4 pb-4" style={{ cursor: isPreview ? 'grab' : 'default' }}>
+            <BlockReveal delay={0}>
+              <div className="flex items-center justify-center gap-4 mb-6">
+                <span className="h-[1px] flex-1" style={{ background: "linear-gradient(90deg, transparent, rgba(var(--primary-rgb),0.4))" }} />
+                <span className="font-bold tracking-[0.2em] text-[12px] uppercase flex items-center gap-2" style={{ color: accent, fontFamily: "Cairo,sans-serif" }}>
+                  <LucideIcons.CalendarDays size={14} />
+                  {t("Upcoming Events", "الفعاليات القادمة")}
+                </span>
+                <span className="h-[1px] flex-1" style={{ background: "linear-gradient(90deg, rgba(var(--primary-rgb),0.4), transparent)" }} />
+              </div>
+            </BlockReveal>
+
+            {sd.events.map((ev, idx) => (
+              <BlockReveal key={ev.id || idx} delay={idx * 0.08}>
+                <div 
+                  className="rounded-2xl p-5 relative overflow-hidden group transition-all duration-500 hover:-translate-y-1"
+                  style={{ 
+                    background: "rgba(255,255,255,0.03)", 
+                    border: "1px solid rgba(255,255,255,0.06)",
+                    boxShadow: "0 10px 40px rgba(0,0,0,0.5)",
+                  }}
+                >
+                  <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" style={{ background: "radial-gradient(circle at top right, rgba(var(--primary-rgb),0.15) 0%, transparent 60%)" }} />
+                  
+                  <div className="flex items-start gap-4 relative z-10">
+                    <div className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 shadow-lg" style={{ background: "linear-gradient(135deg, rgba(var(--primary-rgb),0.2), rgba(var(--primary-rgb),0.05))", border: "1px solid rgba(var(--primary-rgb),0.3)" }}>
+                      <LucideIcons.Calendar size={22} style={{ color: accent }} className="group-hover:scale-110 transition-transform duration-500" />
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-white text-[15px] mb-1.5" style={{ fontFamily: "Cairo,sans-serif" }}>
+                        {t(ev.titleEn || ev.title, ev.title)}
+                      </h3>
+                      {t(ev.descEn || ev.desc, ev.desc) && (
+                        <p className="text-[12.5px] leading-relaxed" style={{ color: "rgba(255,255,255,0.6)", fontFamily: "Cairo,sans-serif" }}>
+                          {t(ev.descEn || ev.desc, ev.desc)}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </BlockReveal>
+            ))}
+          </div>
         );
 
       case 'links':
