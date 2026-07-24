@@ -14,10 +14,9 @@ import { motion, AnimatePresence, Reorder } from "framer-motion";
 function BlockReveal({ children, delay = 0 }) {
   return (
     <motion.div
-      initial={{ opacity: 0, y: 40 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "0px 0px -40px 0px" }}
-      transition={{ duration: 0.52, delay, ease: [0.25, 0.46, 0.45, 0.94] }}
+      initial={{ opacity: 0, y: 30 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, delay, ease: "easeOut" }}
       style={{ willChange: "transform, opacity" }}
     >
       {children}
