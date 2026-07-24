@@ -198,7 +198,15 @@ export default function MaroufCoffeeTheme({ cardId, siteData, siteColors, lang =
     { id: "info", type: "info" },
     { id: "links", type: "links" }
   ];
-  const layoutBlocks = (siteData.layoutBlocks && siteData.layoutBlocks.length > 0) ? siteData.layoutBlocks : defaultBlocks;
+  let layoutBlocks = (siteData.layoutBlocks && siteData.layoutBlocks.length > 0) ? [...siteData.layoutBlocks] : [...defaultBlocks];
+  
+  // Ensure core blocks exist (backward compatibility)
+  const coreTypes = ["header", "menu_button", "info", "links"];
+  coreTypes.forEach(type => {
+      if (!layoutBlocks.find(b => b.type === type)) {
+          layoutBlocks.push({ id: type, type });
+      }
+  });
 
   const renderBlock = (block) => {
     switch (block.type) {
@@ -301,8 +309,16 @@ export default function MaroufCoffeeTheme({ cardId, siteData, siteColors, lang =
                 }}
               >
                 <span className="relative z-10 flex items-center justify-center gap-3">
-                  <LucideIcons.Coffee size={24} strokeWidth={2.5} className="group-hover:rotate-12 transition-transform duration-500" />
-                  {t("VIEW MENU", "عرض قائمة الطعام")}
+                  {(() => {
+                    const BtnIcon = siteData.menuBtnIcon ? LucideIcons[siteData.menuBtnIcon] : LucideIcons.Coffee;
+                    const menuBtnLabel = t(siteData.menuBtnEn || "VIEW MENU", siteData.menuBtnAr || "عرض قائمة الطعام");
+                    return (
+                      <>
+                        <BtnIcon size={24} strokeWidth={2.5} className="group-hover:-rotate-12 transition-transform duration-500" />
+                        {menuBtnLabel}
+                      </>
+                    );
+                  })()}
                 </span>
                 {/* Shine sweep */}
                 <div className="absolute top-0 -left-[100%] w-1/2 h-full bg-gradient-to-r from-transparent via-white/35 to-transparent skew-x-[-20deg] group-hover:left-[200%] transition-all duration-900 ease-in-out" />

@@ -175,11 +175,23 @@ export async function PUT(req, { params }) {
         const body = await req.json();
 
         const cleanSiteData = body.siteData ? sanitizeSiteData(body.siteData) : undefined;
-        const VALID_THEMES = ['restaurant', 'cafe', 'cafe1', 'gastro', 'business_card', 'marouf_coffee', 'rustic_cafe'];
-        const cleanTheme    = body.themeName && VALID_THEMES.includes(body.themeName)
-            ? body.themeName : undefined;
-        const cleanCardType = body.cardType && ['restaurant','business_card'].includes(body.cardType)
-            ? body.cardType : undefined;                                    // ← NEW
+        // ── Fetch dynamic settings for validation ──
+        const SystemSettings = (await import('../../../../backend/models/SystemSettings')).default;
+        const settings = await SystemSettings.findOne({ singleton: 'amyt_system_settings' });
+        const categories = settings?.categories || [];
+        
+        let isValidTheme = false;
+        let isValidCardType = false;
+
+        if (body.cardType) {
+            isValidCardType = categories.some(cat => cat.id === body.cardType);
+        }
+        if (body.themeName) {
+            isValidTheme = categories.some(cat => cat.themes.some(t => t.id === body.themeName));
+        }
+
+        const cleanTheme    = isValidTheme ? body.themeName : undefined;
+        const cleanCardType = isValidCardType ? body.cardType : undefined;
         const cleanPrimary  = body.primaryColor ? sanitizeColor(body.primaryColor)       : undefined;
         const cleanBg       = body.background   ? sanitizeColor(body.background)         : undefined;
         const cleanWifi     = body.wifi

@@ -80,7 +80,15 @@ export default function CafeTheme({ cardId, siteData, siteColors, lang = "en", i
       { id: "info", type: "info" },
       { id: "links", type: "links" }
   ];
-  const layoutBlocks = (siteData.layoutBlocks && siteData.layoutBlocks.length > 0) ? siteData.layoutBlocks : defaultBlocks;
+  let layoutBlocks = (siteData.layoutBlocks && siteData.layoutBlocks.length > 0) ? [...siteData.layoutBlocks] : [...defaultBlocks];
+  
+  // Ensure core blocks exist
+  const coreTypes = ["header", "menu_button", "info", "links"];
+  coreTypes.forEach(type => {
+      if (!layoutBlocks.find(b => b.type === type)) {
+          layoutBlocks.push({ id: type, type });
+      }
+  });
 
   const renderBlock = (block) => {
       switch (block.type) {
@@ -124,9 +132,12 @@ export default function CafeTheme({ cardId, siteData, siteColors, lang = "en", i
                       style={{ background: primary, color:"#fff", boxShadow:`0 4px 18px rgba(var(--primary-rgb),.28)`, fontFamily:"Cairo,sans-serif" }}
                     >
                       <div className="w-9 h-9 rounded-xl flex-shrink-0 flex items-center justify-center transition-transform group-hover:scale-110 bg-white/20">
-                        <LucideIcons.UtensilsCrossed size={18} color="#fff" />
+                        {(() => {
+                          const BtnIcon = siteData.menuBtnIcon ? LucideIcons[siteData.menuBtnIcon] : LucideIcons.UtensilsCrossed;
+                          return <BtnIcon size={18} color="#fff" />;
+                        })()}
                       </div>
-                      <span className="flex-1 text-center pr-9 rtl:pr-0 rtl:pl-9">{t("View Menu", "عرض القائمة")}</span>
+                      <span className="flex-1 text-center pr-9 rtl:pr-0 rtl:pl-9">{t(siteData.menuBtnEn || "View Menu", siteData.menuBtnAr || "عرض القائمة")}</span>
                     </button>
                   </section>
               );

@@ -117,10 +117,18 @@ export default function CafeTheme1({ cardId, siteData, siteColors, lang = "en", 
   const defaultBlocks = [
       { id: "header", type: "header" },
       { id: "menu_button", type: "menu_button" },
-      { id: "links", type: "links" },
-      { id: "info", type: "info" } // info usually at bottom for this theme
+      { id: "info", type: "info" },
+      { id: "links", type: "links" }
   ];
-  const layoutBlocks = (siteData.layoutBlocks && siteData.layoutBlocks.length > 0) ? siteData.layoutBlocks : defaultBlocks;
+  let layoutBlocks = (siteData.layoutBlocks && siteData.layoutBlocks.length > 0) ? [...siteData.layoutBlocks] : [...defaultBlocks];
+  
+  // Ensure core blocks exist
+  const coreTypes = ["header", "menu_button", "info", "links"];
+  coreTypes.forEach(type => {
+      if (!layoutBlocks.find(b => b.type === type)) {
+          layoutBlocks.push({ id: type, type });
+      }
+  });
 
   const renderBlock = (block) => {
       switch (block.type) {
@@ -166,8 +174,16 @@ export default function CafeTheme1({ cardId, siteData, siteColors, lang = "en", 
                       className="flex items-center justify-center gap-3 w-full py-[18px] rounded-full font-bold text-[14px] transition-all duration-300 hover:brightness-110 active:scale-95"
                       style={{ background: primary, color: "#fff", fontFamily: "Cairo, sans-serif", boxShadow: `0 6px 20px rgba(var(--primary-rgb), 0.35)` }}
                     >
-                      <LucideIcons.UtensilsCrossed size={18} color="#fff" />
-                      {t("View Menu", "عرض القائمة")}
+                      {(() => {
+                        const BtnIcon = siteData.menuBtnIcon ? LucideIcons[siteData.menuBtnIcon] : LucideIcons.UtensilsCrossed;
+                        const menuBtnLabel = t(siteData.menuBtnEn || "View Menu", siteData.menuBtnAr || "عرض القائمة");
+                        return (
+                          <>
+                            <BtnIcon size={18} color="#fff" />
+                            {menuBtnLabel}
+                          </>
+                        );
+                      })()}
                     </button>
                   </section>
               );

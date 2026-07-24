@@ -31,7 +31,6 @@ const cardSchema = new mongoose.Schema({
     // ── SaaS Theme Fields ──────────────────────────────────────────
     cardType: {
         type:    String,
-        enum:    ['restaurant', 'business_card'],
         default: 'restaurant',
     },
     themeName: {
@@ -224,4 +223,5 @@ const cardSchema = new mongoose.Schema({
 
 }, { timestamps: true });
 
-module.exports = mongoose.models.Card || mongoose.model('Card', cardSchema);
+delete mongoose.models.Card;
+module.exports = mongoose.model('Card', cardSchema);

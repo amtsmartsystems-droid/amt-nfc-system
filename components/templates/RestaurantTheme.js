@@ -86,14 +86,21 @@ export default function RestaurantTheme({ cardId, siteData, siteColors, lang = "
     <p className={`text-[#555] text-[14px] leading-[1.8] ${c?"text-center":""}`} style={{ fontFamily:"Cairo,sans-serif" }}>{children}</p>
   );
 
-  // ════ LAYOUT BLOCKS SYSTEM ════
   const defaultBlocks = [
       { id: "header", type: "header" },
       { id: "menu_button", type: "menu_button" },
       { id: "info", type: "info" },
       { id: "links", type: "links" }
   ];
-  const layoutBlocks = (siteData.layoutBlocks && siteData.layoutBlocks.length > 0) ? siteData.layoutBlocks : defaultBlocks;
+  let layoutBlocks = (siteData.layoutBlocks && siteData.layoutBlocks.length > 0) ? [...siteData.layoutBlocks] : [...defaultBlocks];
+  
+  // Ensure core blocks exist
+  const coreTypes = ["header", "menu_button", "info", "links"];
+  coreTypes.forEach(type => {
+      if (!layoutBlocks.find(b => b.type === type)) {
+          layoutBlocks.push({ id: type, type });
+      }
+  });
 
   const renderBlock = (block) => {
       switch (block.type) {
@@ -123,14 +130,16 @@ export default function RestaurantTheme({ cardId, siteData, siteColors, lang = "
                   if (links[0].url && links[0].url !== '#') window.open(links[0].url, '_blank');
                 }
               };
-              const primaryBtnText = isMenuEnabled ? t("View Menu", "عرض القائمة") : (links[0] ? t(links[0].title, links[0].titleAr) : t("View Menu", "عرض القائمة"));
+              const primaryBtnText = isMenuEnabled ? t(siteData.menuBtnEn || "View Menu", siteData.menuBtnAr || "عرض القائمة") : (links[0] ? t(links[0].title, links[0].titleAr) : t(siteData.menuBtnEn || "View Menu", siteData.menuBtnAr || "عرض القائمة"));
+              const BtnIcon = siteData.menuBtnIcon ? LucideIcons[siteData.menuBtnIcon] : null;
 
               return (
                   <div className="px-6 -mt-6 relative z-20 mb-6" style={{ cursor: isPreview ? 'grab' : 'default' }}>
                     <button
                       onClick={primaryBtnAction}
-                      className="flex items-center justify-center w-full py-[17px] rounded-2xl font-bold text-[13px] uppercase tracking-[.15em] transition-all hover:brightness-110 active:scale-95 shadow-xl"
+                      className="flex items-center justify-center gap-2 w-full py-[17px] rounded-2xl font-bold text-[13px] uppercase tracking-[.15em] transition-all hover:brightness-110 active:scale-95 shadow-xl"
                       style={{ background:primary, color:"#1C1C1C", boxShadow:`0 8px 28px rgba(var(--primary-rgb),.45)` }}>
+                      {BtnIcon && isMenuEnabled && <BtnIcon size={16} />}
                       {primaryBtnText}
                     </button>
                   </div>

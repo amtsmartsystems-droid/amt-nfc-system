@@ -127,7 +127,15 @@ export default function GastroBarTheme({ cardId, siteData, siteColors, lang = "e
       { id: "links", type: "links" },
       { id: "contact", type: "contact" }
   ];
-  const layoutBlocks = (siteData.layoutBlocks && siteData.layoutBlocks.length > 0) ? siteData.layoutBlocks : defaultBlocks;
+  let layoutBlocks = (siteData.layoutBlocks && siteData.layoutBlocks.length > 0) ? [...siteData.layoutBlocks] : [...defaultBlocks];
+  
+  // Ensure core blocks exist
+  const coreTypes = ["header", "menu_button", "info", "links"];
+  coreTypes.forEach(type => {
+      if (!layoutBlocks.find(b => b.type === type)) {
+          layoutBlocks.push({ id: type, type });
+      }
+  });
 
   const renderBlock = (block) => {
       switch (block.type) {
@@ -192,8 +200,16 @@ export default function GastroBarTheme({ cardId, siteData, siteColors, lang = "e
                             className="flex items-center justify-center gap-3 w-full py-4 rounded-xl font-black text-[14px] uppercase tracking-wider transition-all duration-300 hover:brightness-110 active:scale-95 hover:shadow-[0_0_24px_rgba(var(--primary-rgb),0.45)]"
                             style={{ background: accent, color: "#111", boxShadow: `0 4px 20px rgba(var(--primary-rgb),0.30)`, fontFamily:"Cairo,sans-serif" }}
                           >
-                            <LucideIcons.UtensilsCrossed size={18} color="#111" />
-                            {t("View Menu", "عرض القائمة")}
+                            {(() => {
+                              const BtnIcon = siteData.menuBtnIcon ? LucideIcons[siteData.menuBtnIcon] : LucideIcons.UtensilsCrossed;
+                              const menuBtnLabel = t(siteData.menuBtnEn || "View Menu", siteData.menuBtnAr || "عرض القائمة");
+                              return (
+                                <>
+                                  <BtnIcon size={18} color="#111" />
+                                  {menuBtnLabel}
+                                </>
+                              );
+                            })()}
                           </button>
                         </div>
                       ) : (

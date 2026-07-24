@@ -13,6 +13,7 @@ import RusticCafeTheme  from "../components/templates/RusticCafeTheme";
 import AMTBusinessCard  from "../components/templates/AMTBusinessCard";
 import QRCodeGenerator  from "../components/QRCodeGenerator";
 import { getIconForLink } from "../utils/icons";
+import CategoryManagerModal from "../components/CategoryManagerModal";
 
 // ─────────────────────────────────────────────────────────────────────
 // DEFAULT DATA
@@ -53,13 +54,26 @@ const DEFAULT_COLORS = {
   rustic_cafe: { primary:"#3B9FB1", background:"#F3E9DD" },
 };
 
-const THEMES = [
-  { id:"restaurant",    label:"مطعم فاخر",        icon:"Utensils"        },
-  { id:"cafe",          label:"مقهى منيمل",       icon:"Coffee"          },
-  { id:"cafe1",         label:"مقهى حديث",     icon:"Bean"            },
-  { id:"gastro",        label:"مطعم فاخر",   icon:"UtensilsCrossed" },
-  { id:"marouf_coffee", label:"بن معروف ✓",   icon:"Coffee" },
-  { id:"rustic_cafe",   label:"عشق البوهيمي",  icon:"Tent" },
+const DEFAULT_THEMES = [
+  {
+      id: 'restaurant',
+      name: 'منيو مطعم',
+      themes: [
+          { id: 'restaurant', label: 'مطعم فاخر', icon: 'Utensils' },
+          { id: 'cafe', label: 'مقهى منيمل', icon: 'Coffee' },
+          { id: 'cafe1', label: 'مقهى حديث', icon: 'Bean' },
+          { id: 'gastro', label: 'مطعم فاخر', icon: 'UtensilsCrossed' },
+          { id: 'marouf_coffee', label: 'بن معروف ✓', icon: 'Coffee' },
+          { id: 'rustic_cafe', label: 'عشق البوهيمي', icon: 'Tent' }
+      ]
+  },
+  {
+      id: 'business_card',
+      name: 'بطاقة أعمال',
+      themes: [
+          { id: 'business_card', label: 'بطاقة رقمية', icon: 'IdCard' }
+      ]
+  }
 ];
 
 // ─────────────────────────────────────────────────────────────────────
@@ -79,11 +93,11 @@ const Label = ({ children }) => (
 // ─────────────────────────────────────────────────────────────────────
 function ThemeDropdown({ themes, selectedThemeId, onSelect }) {
   // قائمة القوالب مع إمكانية تخصيص الأسماء محلياً
-  const [localThemes, setLocalThemes] = React.useState(themes);
+  const [localThemes, setLocalThemes] = useState(themes);
   // هل وضع التعديل مفعّل؟
-  const [isEditing, setIsEditing] = React.useState(false);
+  const [isEditing, setIsEditing] = useState(false);
   // النص المؤقت أثناء التعديل
-  const [editText, setEditText] = React.useState('');
+  const [editText, setEditText] = useState('');
 
   // اسم القالب الحالي
   const currentTheme = localThemes.find(t => t.id === selectedThemeId) || localThemes[0];
@@ -228,16 +242,31 @@ function PageContent() {
   const [scanCount,          setScanCount]          = useState(0);
   const [totalViews,         setTotalViews]         = useState(0);
   const [refreshingStats,    setRefreshingStats]    = useState(false);
+  const [categories,         setCategories]         = useState(DEFAULT_THEMES); // Dynamic categories
+  const [isCategoryManagerOpen, setIsCategoryManagerOpen] = useState(false);
   const isSuspended = subscriptionStatus === 'suspended' || !allowEditing;
 
   useEffect(() => { 
     setMounted(true);
+    // Fetch categories and themes from DB
+    fetch('/api/admin/settings')
+        .then(res => res.json())
+        .then(data => {
+            if (data.success && data.categories) {
+                setCategories(data.categories);
+            }
+        })
+        .catch(err => console.error("Failed to fetch settings:", err));
+
     // Check auth status + get current user role
-    fetch('/api/admin-auth').then(r => r.json()).then(d => {
-      if(d.authenticated) setIsAuthenticated(true);
-    });
     fetch('/api/auth/me').then(r => r.json()).then(d => {
-      if(d.authenticated) setCurrentUserRole(d.role);
+      if(d.authenticated) {
+        setIsAuthenticated(true);
+        setCurrentUserRole(d.role || null);
+        if (d.role === 'Restaurant_Owner' && d.tenantId) {
+          setTargetCardId(d.tenantId);
+        }
+      }
     }).catch(() => {});
 
     // Auto-load card if ?id=xyz is present
@@ -367,6 +396,28 @@ function PageContent() {
     } finally { setLoading(false); }
   };
 
+  // ── Save Categories (Super Admin) ──
+  const handleSaveCategories = async (newCategories) => {
+    try {
+      const res = await fetch('/api/admin/settings', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ categories: newCategories })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.categories) {
+          setCategories(data.categories);
+          showToast("✅ تم حفظ التصنيفات بنجاح");
+        }
+      } else {
+        showToast("❌ خطأ في الحفظ", false);
+      }
+    } catch (e) {
+      showToast("❌ خطأ في الاتصال", false);
+    }
+  };
+
   // ── Save & Publish ──
   const handleSavePublish = async () => {
     if (!targetCardId.trim()) return showToast("⚠️ يرجى إدخال رقم البطاقة (Card ID) أولاً", false);
@@ -475,7 +526,15 @@ function PageContent() {
       setAllowEditing(data.allowEditing !== false);
       setScanCount(data.scanCount || 0);
       setTotalViews(data.totalViews || 0);
-      if (data.siteData) setSiteData(prev => ({ ...prev, ...data.siteData }));
+      if (data.siteData) {
+        setSiteData(prev => {
+            const newData = { ...prev, ...data.siteData };
+            // Ensure merged links from DB are used
+            if (data.links) newData.links = data.links;
+            if (data.events) newData.events = data.events;
+            return newData;
+        });
+      }
       // ── Restore cardType + theme (normalize old DB values) ──
       if (data.cardType) {
         setCardType(data.cardType);
@@ -879,30 +938,49 @@ function PageContent() {
                 )}
               </div>
 
-              {/* NEW: Card Type Selector */}
+              {/* NEW: Dynamic Card Type Selector */}
               <div className="mt-4 mb-2">
-                <Label>نوع البطاقة (Card Type)</Label>
-                <div className="flex p-1 bg-black/40 rounded-xl border border-white/5 mt-1.5">
-                  <button
-                    onClick={() => {
-                        setCardType('restaurant');
-                        if (theme === 'business_card') setTheme('restaurant');
-                    }}
-                    className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-[11px] font-bold transition-all ${cardType === 'restaurant' ? 'bg-yellow-400/20 text-yellow-400 shadow-sm' : 'text-slate-500 hover:text-white'}`}
-                  >
-                    🍔 منيو مطعم
-                  </button>
-                  <button
-                    onClick={() => {
-                        setCardType('business_card');
-                        setTheme('business_card');
-                    }}
-                    className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-[11px] font-bold transition-all ${cardType === 'business_card' ? 'bg-yellow-400/20 text-yellow-400 shadow-sm' : 'text-slate-500 hover:text-white'}`}
-                  >
-                    💳 بطاقة أعمال
-                  </button>
+                <div className="flex items-center justify-between">
+                  <Label>نوع البطاقة (Card Type)</Label>
+                  {currentUserRole === 'Super_Admin' && (
+                    <button onClick={() => setIsCategoryManagerOpen(true)} className="text-[10px] text-yellow-400 hover:text-yellow-300 flex items-center gap-1 bg-yellow-400/10 hover:bg-yellow-400/20 px-2 py-1 rounded-lg transition-all">
+                      <LucideIcons.Settings size={12} /> إدارة التصنيفات
+                    </button>
+                  )}
+                </div>
+                <div className="flex p-1 bg-black/40 rounded-xl border border-white/5 mt-1.5 flex-wrap gap-1">
+                  {categories.map((cat) => (
+                      <button
+                        key={cat.id}
+                        onClick={() => {
+                            setCardType(cat.id);
+                            // Auto-select first theme of this category if switching
+                            if (cat.themes && cat.themes.length > 0) {
+                                setTheme(cat.themes[0].id);
+                            }
+                        }}
+                        className={`flex-1 min-w-[100px] flex items-center justify-center gap-1.5 py-2 rounded-lg text-[11px] font-bold transition-all ${cardType === cat.id ? 'bg-yellow-400/20 text-yellow-400 shadow-sm' : 'text-slate-500 hover:text-white'}`}
+                      >
+                        {cat.name}
+                      </button>
+                  ))}
                 </div>
               </div>
+
+            {/* ══ منتقي القالب — Dropdown مع إمكانية إعادة التسمية ══ */}
+            {(() => {
+                const activeCategory = categories.find(c => c.id === cardType);
+                if (activeCategory && activeCategory.themes && activeCategory.themes.length > 0) {
+                    return (
+                        <ThemeDropdown
+                            themes={activeCategory.themes}
+                            selectedThemeId={theme}
+                            onSelect={(id) => switchTheme(id)}
+                        />
+                    );
+                }
+                return null;
+            })()}
 
               <button
                 onClick={handleSavePublish}
@@ -939,15 +1017,6 @@ function PageContent() {
                 </div>
               )}
             </div>
-
-            {/* ══ منتقي القالب — Dropdown مع إمكانية إعادة التسمية ══ */}
-            {cardType === 'restaurant' && (
-              <ThemeDropdown
-                themes={THEMES}
-                selectedThemeId={theme}
-                onSelect={(id) => switchTheme(id)}
-              />
-            )}
           </div>
 
           {/* Tab Nav */}
@@ -1579,6 +1648,37 @@ function PageContent() {
                     </label>
                   </div>
 
+                  {/* تخصيص زر المنيو */}
+                  <div className="bg-[#1f2937]/50 border border-white/5 p-4 rounded-xl space-y-4">
+                    <h4 className="font-bold text-white mb-1 flex items-center gap-2 text-[13px]">
+                      <LucideIcons.PenTool size={14} className="text-yellow-400" />
+                      تخصيص زر المنيو (في صفحة الزبون)
+                    </h4>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <Label>الاسم (EN)</Label>
+                        <AdminInput value={siteData.menuBtnEn || ""} onChange={v=>up("menuBtnEn", v)} placeholder="VIEW MENU" />
+                      </div>
+                      <div>
+                        <Label>الاسم (AR)</Label>
+                        <AdminInput value={siteData.menuBtnAr || ""} onChange={v=>up("menuBtnAr", v)} placeholder="عرض قائمة الطعام" />
+                      </div>
+                    </div>
+                    <div>
+                      <Label>الأيقونة (اختياري)</Label>
+                      <select value={siteData.menuBtnIcon || "Coffee"} onChange={e=>up("menuBtnIcon", e.target.value)} className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-2 text-sm text-white outline-none focus:border-yellow-500 transition-all cursor-pointer">
+                        <option value="Coffee">☕ قهوة (Coffee)</option>
+                        <option value="BookOpen">📖 كتالوج (BookOpen)</option>
+                        <option value="UtensilsCrossed">🍽️ طعام (Utensils)</option>
+                        <option value="Leaf">🌿 نبات (Leaf)</option>
+                        <option value="ShoppingBag">🛍️ تسوق (ShoppingBag)</option>
+                        <option value="Store">🏪 متجر (Store)</option>
+                        <option value="Image">🖼️ صورة (Image)</option>
+                        <option value="Menu">📋 قائمة (Menu)</option>
+                      </select>
+                    </div>
+                  </div>
+
                   {isMenuEnabled && (
                     <div className="space-y-4 pt-4 border-t border-yellow-500/10 animate-in fade-in slide-in-from-top-2">
                       <div className="flex gap-2 p-1.5 bg-black/40 rounded-xl">
@@ -1858,6 +1958,13 @@ function PageContent() {
              style={{ background:toast.ok?"#1C1C1C":"#EF4444", color:"#fff", direction:"rtl" }}>
           {toast.msg}
         </div>
+
+        <CategoryManagerModal
+          isOpen={isCategoryManagerOpen}
+          onClose={() => setIsCategoryManagerOpen(false)}
+          initialCategories={categories}
+          onSave={handleSaveCategories}
+        />
       </div>
     );
 }
