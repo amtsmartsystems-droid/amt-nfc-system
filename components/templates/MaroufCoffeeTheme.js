@@ -162,6 +162,7 @@ export default function MaroufCoffeeTheme({ cardId, siteData, siteColors, lang =
   const isAr = lang === "ar";
   const [isMenuModalOpen, setIsMenuModalOpen] = useState(false);
   const [isOffersOpen, setIsOffersOpen] = useState(false);
+  const [expandedEventId, setExpandedEventId] = useState(null);
 
   useEffect(() => {
     document.documentElement.style.setProperty('--primary-color', accent);
@@ -397,36 +398,62 @@ export default function MaroufCoffeeTheme({ cardId, siteData, siteColors, lang =
               </div>
             </BlockReveal>
 
-            {sd.events.map((ev, idx) => (
-              <BlockReveal key={ev.id || idx} delay={idx * 0.08}>
-                <div 
-                  className="rounded-2xl p-5 relative overflow-hidden group transition-all duration-500 hover:-translate-y-1"
-                  style={{ 
-                    background: "rgba(255,255,255,0.03)", 
-                    border: "1px solid rgba(255,255,255,0.06)",
-                    boxShadow: "0 10px 40px rgba(0,0,0,0.5)",
-                  }}
-                >
-                  <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" style={{ background: "radial-gradient(circle at top right, rgba(var(--primary-rgb),0.15) 0%, transparent 60%)" }} />
-                  
-                  <div className="flex items-start gap-4 relative z-10">
-                    <div className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 shadow-lg" style={{ background: "linear-gradient(135deg, rgba(var(--primary-rgb),0.2), rgba(var(--primary-rgb),0.05))", border: "1px solid rgba(var(--primary-rgb),0.3)" }}>
-                      <LucideIcons.Calendar size={22} style={{ color: accent }} className="group-hover:scale-110 transition-transform duration-500" />
-                    </div>
-                    <div>
-                      <h3 className="font-bold text-white text-[15px] mb-1.5" style={{ fontFamily: "Cairo,sans-serif" }}>
-                        {t(ev.titleEn || ev.title, ev.title)}
-                      </h3>
-                      {t(ev.descEn || ev.desc, ev.desc) && (
-                        <p className="text-[12.5px] leading-relaxed" style={{ color: "rgba(255,255,255,0.6)", fontFamily: "Cairo,sans-serif" }}>
-                          {t(ev.descEn || ev.desc, ev.desc)}
-                        </p>
-                      )}
+            {sd.events.map((ev, idx) => {
+              const IconComp = ev.icon && LucideIcons[ev.icon] ? LucideIcons[ev.icon] : getIconForLink(ev.titleEn || ev.title).IconComponent;
+              const isExpanded = expandedEventId === ev.id;
+              
+              return (
+                <BlockReveal key={ev.id || idx} delay={idx * 0.08}>
+                  <div 
+                    onClick={() => {
+                      if (ev.isCollapsible) {
+                        setExpandedEventId(isExpanded ? null : ev.id);
+                      }
+                    }}
+                    className={`rounded-2xl p-5 relative overflow-hidden group transition-all duration-500 ${ev.isCollapsible ? 'cursor-pointer hover:-translate-y-1' : ''}`}
+                    style={{ 
+                      background: "rgba(255,255,255,0.03)", 
+                      border: "1px solid rgba(255,255,255,0.06)",
+                      boxShadow: "0 10px 40px rgba(0,0,0,0.5)",
+                    }}
+                  >
+                    <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" style={{ background: "radial-gradient(circle at top right, rgba(var(--primary-rgb),0.15) 0%, transparent 60%)" }} />
+                    
+                    <div className="flex items-start gap-4 relative z-10">
+                      <div className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 shadow-lg" style={{ background: "linear-gradient(135deg, rgba(var(--primary-rgb),0.2), rgba(var(--primary-rgb),0.05))", border: "1px solid rgba(var(--primary-rgb),0.3)" }}>
+                        <IconComp size={22} style={{ color: accent }} className="group-hover:scale-110 transition-transform duration-500" />
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex justify-between items-center w-full">
+                          <h3 className="font-bold text-white text-[15px] mb-1.5" style={{ fontFamily: "Cairo,sans-serif" }}>
+                            {t(ev.titleEn || ev.title, ev.title)}
+                          </h3>
+                          {ev.isCollapsible && (
+                            <LucideIcons.ChevronDown size={16} className={`text-white/40 transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`} />
+                          )}
+                        </div>
+                        
+                        <AnimatePresence>
+                          {(!ev.isCollapsible || isExpanded) && t(ev.descEn || ev.desc, ev.desc) && (
+                            <motion.div
+                              initial={ev.isCollapsible ? { height: 0, opacity: 0 } : false}
+                              animate={{ height: "auto", opacity: 1 }}
+                              exit={ev.isCollapsible ? { height: 0, opacity: 0 } : undefined}
+                              transition={{ duration: 0.3 }}
+                              className="overflow-hidden"
+                            >
+                              <p className={`text-[12.5px] leading-relaxed ${ev.isCollapsible ? 'mt-2 pt-2 border-t border-white/5' : ''}`} style={{ color: "rgba(255,255,255,0.6)", fontFamily: "Cairo,sans-serif" }}>
+                                {t(ev.descEn || ev.desc, ev.desc)}
+                              </p>
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </BlockReveal>
-            ))}
+                </BlockReveal>
+              );
+            })}
           </div>
         );
 

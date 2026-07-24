@@ -214,7 +214,7 @@ function PageContent() {
   const [editId,     setEditId]     = useState(null);
   const [newLink,    setNewLink]    = useState({ title:"", titleAr:"", url:"" });
   const [editEvId,   setEditEvId]   = useState(null);
-  const [newEvent,   setNewEvent]   = useState({ title:"", titleEn:"", desc:"", descEn:"" });
+  const [newEvent,   setNewEvent]   = useState({ title:"", titleEn:"", desc:"", descEn:"", icon: "", isCollapsible: false });
   const [targetCardId, setTargetCardId] = useState("");
   const [saving,     setSaving]     = useState(false);
   const [publishedUrl, setPublishedUrl] = useState("");
@@ -657,8 +657,8 @@ function PageContent() {
   const addEvent = () => {
     const title = newEvent.title.trim() || newEvent.titleEn.trim();
     if (!title) return showToast("⚠️ أدخل عنوان الفعالية", false);
-    setSiteData(p => ({ ...p, events: [...(p.events||[]), { id:Date.now(), title: newEvent.title.trim()||title, titleEn: newEvent.titleEn.trim()||title, desc: newEvent.desc.trim(), descEn: newEvent.descEn.trim() }] }));
-    setNewEvent({ title:"", titleEn:"", desc:"", descEn:"" });
+    setSiteData(p => ({ ...p, events: [...(p.events||[]), { id:Date.now(), title: newEvent.title.trim()||title, titleEn: newEvent.titleEn.trim()||title, desc: newEvent.desc.trim(), descEn: newEvent.descEn.trim(), icon: newEvent.icon, isCollapsible: newEvent.isCollapsible }] }));
+    setNewEvent({ title:"", titleEn:"", desc:"", descEn:"", icon: "", isCollapsible: false });
     showToast("✅ تمت إضافة الفعالية");
   };
   const delEvent = id => { setSiteData(p=>({...p, events:(p.events||[]).filter(e=>e.id!==id)})); showToast("🗑️ تم حذف الفعالية"); };
@@ -1818,6 +1818,28 @@ function PageContent() {
                                 placeholder="Event description in English..." rows={3} dir="ltr"
                                 className="w-full px-3 py-2.5 rounded-xl text-[12px] text-white bg-white/5 border border-white/8 outline-none focus:border-yellow-400/40 transition-all resize-none placeholder:text-slate-600" />
                             </div>
+                            <div className="grid grid-cols-2 gap-2 mt-2 border-t border-white/10 pt-3">
+                              <div>
+                                <Label>الأيقونة (اختياري)</Label>
+                                <select value={ev.icon || ""} onChange={e=>updEvent(ev.id,"icon",e.target.value)} className="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-[12px] text-white outline-none focus:border-yellow-500 transition-all cursor-pointer">
+                                  <option value="">✨ تلقائي (Auto-detect)</option>
+                                  <option value="Calendar">📅 تقويم (Calendar)</option>
+                                  <option value="Star">⭐ مميز (Star)</option>
+                                  <option value="Music">🎵 موسيقى (Music)</option>
+                                  <option value="PartyPopper">🎉 حفلة (Party)</option>
+                                  <option value="Ticket">🎟️ تذكرة (Ticket)</option>
+                                  <option value="Mic">🎤 مايك (Mic)</option>
+                                  <option value="Gift">🎁 هدية (Gift)</option>
+                                </select>
+                              </div>
+                              <div className="flex flex-col justify-center">
+                                <Label className="mb-2">فعالية منسدلة (Collapsible)</Label>
+                                <label className="relative inline-flex items-center cursor-pointer">
+                                  <input type="checkbox" className="sr-only peer" checked={ev.isCollapsible || false} onChange={e => updEvent(ev.id,"isCollapsible",e.target.checked)} />
+                                  <div className="w-9 h-5 bg-white/10 peer-focus:outline-none rounded-full peer peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:right-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-yellow-500"></div>
+                                </label>
+                              </div>
+                            </div>
                           </div>
                         )}
                       </div>
@@ -1844,6 +1866,28 @@ function PageContent() {
                     <textarea value={newEvent.descEn} onChange={e=>setNewEvent(p=>({...p,descEn:e.target.value}))}
                       placeholder="Event description..." rows={2} dir="ltr"
                       className="w-full px-3 py-2.5 rounded-xl text-[12px] text-white bg-white/5 border border-white/8 outline-none focus:border-yellow-400/40 transition-all resize-none placeholder:text-slate-600" />
+                  </div>
+                  <div className="grid grid-cols-2 gap-2 mt-2 border-t border-white/10 pt-3">
+                    <div>
+                      <Label>الأيقونة (اختياري)</Label>
+                      <select value={newEvent.icon || ""} onChange={e=>setNewEvent(p=>({...p,icon:e.target.value}))} className="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-[12px] text-white outline-none focus:border-yellow-500 transition-all cursor-pointer">
+                        <option value="">✨ تلقائي (Auto-detect)</option>
+                        <option value="Calendar">📅 تقويم (Calendar)</option>
+                        <option value="Star">⭐ مميز (Star)</option>
+                        <option value="Music">🎵 موسيقى (Music)</option>
+                        <option value="PartyPopper">🎉 حفلة (Party)</option>
+                        <option value="Ticket">🎟️ تذكرة (Ticket)</option>
+                        <option value="Mic">🎤 مايك (Mic)</option>
+                        <option value="Gift">🎁 هدية (Gift)</option>
+                      </select>
+                    </div>
+                    <div className="flex flex-col justify-center">
+                      <Label className="mb-2">فعالية منسدلة (Collapsible)</Label>
+                      <label className="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" className="sr-only peer" checked={newEvent.isCollapsible || false} onChange={e => setNewEvent(p=>({...p,isCollapsible:e.target.checked}))} />
+                        <div className="w-9 h-5 bg-white/10 peer-focus:outline-none rounded-full peer peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:right-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-yellow-500"></div>
+                      </label>
+                    </div>
                   </div>
                   <button onClick={addEvent}
                     className="w-full flex items-center justify-center gap-2 py-3 rounded-xl font-black text-[13px] text-[#1C1C1C] hover:brightness-110 active:scale-95 transition-all"
