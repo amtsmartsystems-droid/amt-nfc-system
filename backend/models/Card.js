@@ -85,6 +85,8 @@ const cardSchema = new mongoose.Schema({
             titleEn: String,
             desc:    String,
             descEn:  String,
+            icon:    String,
+            isCollapsible: { type: Boolean, default: false },
         }],
         default: [],
     },
