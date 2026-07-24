@@ -1,9 +1,11 @@
 import connectDB from '../../backend/config/db';
 import Card from '../../backend/models/Card';
 import { notFound } from 'next/navigation';
+import { unstable_noStore as noStore } from 'next/cache';
 import ClientCardViewer from './ClientCardViewer';
 
-export const dynamic = 'force-dynamic'; // Always fetch fresh from MongoDB on every request
+export const dynamic = 'force-dynamic';
+export const revalidate = 0; // Never cache — always fetch fresh from MongoDB
 
 export async function generateMetadata({ params }) {
     await connectDB();
@@ -40,6 +42,7 @@ export async function generateMetadata({ params }) {
 }
 
 export default async function PublicCardPage({ params, searchParams }) {
+    noStore(); // Prevent Vercel edge cache from serving stale data
     await connectDB();
     const { cardId } = params;
     
