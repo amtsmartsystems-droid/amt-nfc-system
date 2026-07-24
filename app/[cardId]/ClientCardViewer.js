@@ -18,7 +18,7 @@ const fetcher = async (url) => {
     if (!res.ok || json.error) throw new Error(json.error || 'Failed to fetch');
     return json;
 };
-export default function ClientCardViewer({ initialCard, cardId, searchParams }) {
+export default function ClientCardViewer({ initialCard, cardId, searchParams, isPreview, onUpdateLayoutBlocks }) {
     const [lang,      setLang]      = useState('ar');
     const [wifiState, setWifiState] = useState('idle');
 
@@ -421,6 +421,8 @@ export default function ClientCardViewer({ initialCard, cardId, searchParams }) 
         showMenuImages: card.showMenuImages !== false,
         cliqConfig: card.cliqConfig || { isEnabled: false, alias: '', message: '' },
         tableNumber: tableNumber,
+        isPreview,
+        onUpdateLayoutBlocks,
         addToCart: (item) => {
             setCart(prev => {
                 const existing = prev.find(i => i.id === item.id);
