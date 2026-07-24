@@ -67,11 +67,11 @@ function GlowLinkCard({ link, accent, cardId, t, handleMenuClick, handleOffersCl
       onMouseLeave={handleMouseLeave}
       className="flex items-center gap-4 w-full p-4 rounded-2xl relative overflow-hidden group"
       style={{
-        background: "rgba(10,10,10,0.85)",
+        background: "rgba(255,255,255,0.03)",
         backdropFilter: "blur(20px)",
         WebkitBackdropFilter: "blur(20px)",
-        border: "1px solid rgba(255,255,255,0.08)",
-        boxShadow: "0 4px 24px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.05)",
+        border: "1px solid rgba(255,255,255,0.06)",
+        boxShadow: "0 10px 40px rgba(0,0,0,0.5)",
         transition: "transform 0.3s cubic-bezier(0.25,0.46,0.45,0.94), box-shadow 0.3s ease, border-color 0.3s ease",
       }}
       onMouseEnter={e => {
@@ -337,10 +337,10 @@ export default function MaroufCoffeeTheme({ cardId, siteData, siteColors, lang =
               <div
                 className="rounded-2xl p-5 flex flex-col gap-5 relative overflow-hidden"
                 style={{
-                  background: "rgba(10,10,10,0.8)",
+                  background: "rgba(255,255,255,0.03)",
                   backdropFilter: "blur(20px)",
-                  border: "1px solid rgba(255,255,255,0.07)",
-                  boxShadow: "0 4px 24px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.04)",
+                  border: "1px solid rgba(255,255,255,0.06)",
+                  boxShadow: "0 10px 40px rgba(0,0,0,0.5)",
                 }}
               >
                 <div className="absolute top-0 right-0 w-40 h-40 rounded-full pointer-events-none" style={{ background: "radial-gradient(circle, rgba(var(--primary-rgb),0.06) 0%, transparent 70%)" }} />
