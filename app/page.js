@@ -1759,6 +1759,24 @@ function PageContent() {
             {/* ═══ TAB: EVENTS MANAGER ═══ */}
             {adminTab==="events" && (
               <>
+                {/* Events Section Title Customization */}
+                <div className="bg-[#1f2937]/50 border border-white/5 p-4 rounded-xl space-y-4 mb-4">
+                  <h4 className="font-bold text-white mb-1 flex items-center gap-2 text-[13px]">
+                    <LucideIcons.PenTool size={14} className="text-yellow-400" />
+                    عنوان قسم الفعاليات (اختياري)
+                  </h4>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <Label>العنوان (EN)</Label>
+                      <AdminInput value={siteData.eventsTitleEn || ""} onChange={v=>up("eventsTitleEn", v)} placeholder="UPCOMING EVENTS" />
+                    </div>
+                    <div>
+                      <Label>العنوان (AR)</Label>
+                      <AdminInput value={siteData.eventsTitleAr || ""} onChange={v=>up("eventsTitleAr", v)} placeholder="الفعاليات القادمة" />
+                    </div>
+                  </div>
+                </div>
+
                 {/* Events list */}
                 <div className="space-y-3">
                   {(!siteData.events || siteData.events.length === 0) && (
