@@ -3,6 +3,8 @@ import jwt from 'jsonwebtoken';
 import connectDB from '../../../backend/config/db';
 import Card from '../../../backend/models/Card';
 
+export const dynamic = 'force-dynamic';
+
 const SCAN_SECRET = process.env.JWT_SECRET || 'amt_smart_waiter_super_secret';
 
 export async function GET(req) {
