@@ -22,7 +22,6 @@ export async function GET(request, { params }) {
       status: 200,
       headers: {
         'Content-Type': file.mimeType || 'application/octet-stream',
-        'Content-Disposition': `inline; filename="file"; filename*=UTF-8''${encodeURIComponent(file.name)}`,
         'Cache-Control': 'public, max-age=31536000',
       },
     });
