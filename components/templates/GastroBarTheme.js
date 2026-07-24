@@ -243,19 +243,12 @@ export default function GastroBarTheme({ cardId, siteData, siteColors, lang = "e
                         })()}
                       </section>
 
-                      <section className="px-5 pb-8" style={{ borderTop: `1px solid rgba(255,255,255,0.06)` }}>
-                        <div className="pt-7 mb-5 pointer-events-none">
-                          <STitle>{t("EVENTS", "الفعاليات")}</STitle>
-                        </div>
-
-                        {(!sd.events || sd.events.length === 0) ? (
-                          <div className="flex flex-col items-center gap-3 py-10 rounded-2xl text-center pointer-events-none" style={{ background: "rgba(255,255,255,0.03)", border: `1px dashed ${accent}33` }}>
-                            <LucideIcons.CalendarDays size={28} style={{ color: accent, opacity: 0.3 }} />
-                            <p className="text-[13px] text-white/30" style={{ fontFamily: "Cairo,sans-serif" }}>
-                              {t("No events yet — add them from the admin panel", "لا توجد فعاليات بعد — أضفها من لوحة التحكم")}
-                            </p>
+                      {(!sd.events || sd.events.length === 0) ? null : (
+                        <section className="px-5 pb-8" style={{ borderTop: `1px solid rgba(255,255,255,0.06)` }}>
+                          <div className="pt-7 mb-5 pointer-events-none">
+                            <STitle>{t(sd.eventsTitleEn || "EVENTS", sd.eventsTitleAr || "الفعاليات")}</STitle>
                           </div>
-                        ) : (
+
                           <div className="flex flex-col gap-4 pointer-events-none">
                             {sd.events.map((ev) => (
                               <div key={ev.id} className="rounded-2xl overflow-hidden" style={{ background: "rgba(255,255,255,0.05)", border: `1px solid ${accent}33` }}>
@@ -277,8 +270,8 @@ export default function GastroBarTheme({ cardId, siteData, siteColors, lang = "e
                               </div>
                             ))}
                           </div>
-                        )}
-                      </section>
+                        </section>
+                      )}
                   </div>
               );
 

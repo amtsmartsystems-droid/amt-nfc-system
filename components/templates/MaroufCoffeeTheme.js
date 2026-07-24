@@ -392,7 +392,7 @@ export default function MaroufCoffeeTheme({ cardId, siteData, siteColors, lang =
                 <span className="h-[1px] flex-1" style={{ background: "linear-gradient(90deg, transparent, rgba(var(--primary-rgb),0.4))" }} />
                 <span className="font-bold tracking-[0.2em] text-[12px] uppercase flex items-center gap-2" style={{ color: accent, fontFamily: "Cairo,sans-serif" }}>
                   <LucideIcons.CalendarDays size={14} />
-                  {t("Upcoming Events", "الفعاليات القادمة")}
+                  {t(sd.eventsTitleEn || "Upcoming Events", sd.eventsTitleAr || "الفعاليات القادمة")}
                 </span>
                 <span className="h-[1px] flex-1" style={{ background: "linear-gradient(90deg, rgba(var(--primary-rgb),0.4), transparent)" }} />
               </div>
