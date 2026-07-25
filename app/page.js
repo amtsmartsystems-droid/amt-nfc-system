@@ -1089,7 +1089,7 @@ function PageContent() {
 
                 <div className="space-y-3">
                   {(siteData.events || []).map(ev => (
-                    <AdminCard key={ev.id} className="p-4 space-y-3">
+                    <div key={ev.id} className="bg-white/5 p-4 rounded-2xl border border-white/10 space-y-3">
                       <div className="flex justify-between items-center">
                         <h4 className="font-bold text-[13px]">{ev.title || ev.titleEn}</h4>
                         <button onClick={() => delEvent(ev.id)} className="text-red-400 hover:text-red-300"><LucideIcons.Trash2 size={14}/></button>
@@ -1127,7 +1127,7 @@ function PageContent() {
                         <Label>رابط الفيديو</Label>
                         <AdminInput value={ev.videoUrl || ""} onChange={v=>updEvent(ev.id, 'videoUrl', v)} placeholder="YouTube or Instagram URL" dir="ltr" />
                       </div>
-                    </AdminCard>
+                    </div>
                   ))}
                 </div>
               </>
