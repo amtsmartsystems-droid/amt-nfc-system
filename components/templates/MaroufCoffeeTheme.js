@@ -547,7 +547,7 @@ export default function MaroufCoffeeTheme({ cardId, siteData, siteColors, lang =
 
   return (
     <div
-      className="min-h-screen text-white font-sans selection:bg-[var(--primary-color)]/30 relative overflow-hidden"
+      className="min-h-[100dvh] h-full text-white font-sans selection:bg-[var(--primary-color)]/30 relative overflow-x-hidden overflow-y-auto no-scrollbar"
       style={{ background: "var(--bg-color)" }}
       dir={isAr ? "rtl" : "ltr"}
     >
