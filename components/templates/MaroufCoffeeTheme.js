@@ -146,6 +146,29 @@ function GlowLinkCard({ link, accent, cardId, t, handleMenuClick, handleOffersCl
   );
 }
 
+// ── Helper to render clickable URLs in text ──
+function renderTextWithLinks(text) {
+  if (!text) return text;
+  const urlRegex = /(https?:\/\/[^\s]+)/g;
+  const parts = text.split(urlRegex);
+  return parts.map((part, i) => {
+    if (part.match(urlRegex)) {
+      return (
+        <a
+          key={i}
+          href={part}
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{ color: "var(--primary-color)", textDecoration: "underline", display: "inline-block", wordBreak: "break-all" }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          {part}
+        </a>
+      );
+    }
+    return part;
+  });
+}
 export default function MaroufCoffeeTheme({ cardId, siteData, siteColors, lang = "en", isMenuEnabled, menuMode, isHouseSystemActive, menuCategories, addToCart, pdfMenuUrl, offersUrl, showMenuImages, isPreview, onUpdateLayoutBlocks }) {
   
   const accent = siteColors?.primary || "#B99146";
@@ -441,8 +464,8 @@ export default function MaroufCoffeeTheme({ cardId, siteData, siteColors, lang =
                               transition={{ duration: 0.3 }}
                               className="overflow-hidden"
                             >
-                              <p className={`text-[12.5px] leading-relaxed ${ev.isCollapsible ? 'mt-2 pt-2 border-t border-white/5' : ''}`} style={{ color: "rgba(255,255,255,0.6)", fontFamily: "Cairo,sans-serif" }}>
-                                {t(ev.descEn || ev.desc, ev.desc)}
+                              <p className={`text-[12.5px] leading-relaxed ${ev.isCollapsible ? 'mt-2 pt-2 border-t border-white/5' : ''}`} style={{ color: "rgba(255,255,255,0.6)", fontFamily: "Cairo,sans-serif", whiteSpace: "pre-line" }}>
+                                {renderTextWithLinks(t(ev.descEn || ev.desc, ev.desc))}
                               </p>
                             </motion.div>
                           )}
