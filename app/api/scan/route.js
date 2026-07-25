@@ -9,7 +9,7 @@ const SCAN_SECRET = process.env.JWT_SECRET || 'amt_smart_waiter_super_secret';
 
 export async function GET(req) {
     try {
-        const { searchParams } = new URL(req.url);
+        const searchParams = req.nextUrl.searchParams;
         
         // Allow fallback between "r"/"restaurantId" and "t"/"tableNumber"
         const restaurantId = searchParams.get('restaurantId') || searchParams.get('r');
