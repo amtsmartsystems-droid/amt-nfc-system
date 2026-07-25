@@ -169,6 +169,16 @@ function renderTextWithLinks(text) {
     return part;
   });
 }
+// ── Helper to extract Video ID for YouTube / Instagram ──
+function parseVideoUrl(url) {
+  if (!url) return null;
+  const ytMatch = url.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i);
+  if (ytMatch) return { type: 'youtube', id: ytMatch[1] };
+  const igMatch = url.match(/instagram\.com\/(?:[^\/]+\/)?(?:p|reel)\/([^\/?#&]+)/i);
+  if (igMatch) return { type: 'instagram', id: igMatch[1] };
+  return null;
+}
+
 export default function MaroufCoffeeTheme({ cardId, siteData, siteColors, lang = "en", isMenuEnabled, menuMode, isHouseSystemActive, menuCategories, addToCart, pdfMenuUrl, offersUrl, showMenuImages, isPreview, onUpdateLayoutBlocks }) {
   
   const accent = siteColors?.primary || "#B99146";
@@ -467,6 +477,33 @@ export default function MaroufCoffeeTheme({ cardId, siteData, siteColors, lang =
                               <p className={`text-[12.5px] leading-relaxed ${ev.isCollapsible ? 'mt-2 pt-2 border-t border-white/5' : ''}`} style={{ color: "rgba(255,255,255,0.6)", fontFamily: "Cairo,sans-serif", whiteSpace: "pre-line" }}>
                                 {renderTextWithLinks(t(ev.descEn || ev.desc, ev.desc))}
                               </p>
+                              {ev.isVideoEmbedded && ev.videoUrl && parseVideoUrl(ev.videoUrl) && (
+                                <div className="mt-4 w-full rounded-xl overflow-hidden shadow-lg border border-white/10 relative" style={{ background: "rgba(0,0,0,0.3)" }}>
+                                  {parseVideoUrl(ev.videoUrl).type === 'youtube' && (
+                                    <div className="relative w-full aspect-video">
+                                      <iframe
+                                        src={`https://www.youtube.com/embed/${parseVideoUrl(ev.videoUrl).id}`}
+                                        title="YouTube video player"
+                                        frameBorder="0"
+                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                        allowFullScreen
+                                        className="absolute top-0 left-0 w-full h-full"
+                                      ></iframe>
+                                    </div>
+                                  )}
+                                  {parseVideoUrl(ev.videoUrl).type === 'instagram' && (
+                                    <iframe
+                                      src={`https://www.instagram.com/p/${parseVideoUrl(ev.videoUrl).id}/embed`}
+                                      width="100%"
+                                      height="400"
+                                      frameBorder="0"
+                                      scrolling="no"
+                                      allowTransparency="true"
+                                      className="w-full bg-white"
+                                    ></iframe>
+                                  )}
+                                </div>
+                              )}
                             </motion.div>
                           )}
                         </AnimatePresence>

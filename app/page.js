@@ -214,7 +214,7 @@ function PageContent() {
   const [editId,     setEditId]     = useState(null);
   const [newLink,    setNewLink]    = useState({ title:"", titleAr:"", url:"" });
   const [editEvId,   setEditEvId]   = useState(null);
-  const [newEvent,   setNewEvent]   = useState({ title:"", titleEn:"", desc:"", descEn:"", icon: "", isCollapsible: false });
+  const [newEvent,   setNewEvent]   = useState({ title:"", titleEn:"", desc:"", descEn:"", icon: "", isCollapsible: false, videoUrl: "", isVideoEmbedded: false });
   const [targetCardId, setTargetCardId] = useState("");
   const [saving,     setSaving]     = useState(false);
   const [publishedUrl, setPublishedUrl] = useState("");
@@ -657,8 +657,8 @@ function PageContent() {
   const addEvent = () => {
     const title = newEvent.title.trim() || newEvent.titleEn.trim();
     if (!title) return showToast("⚠️ أدخل عنوان الفعالية", false);
-    setSiteData(p => ({ ...p, events: [...(p.events||[]), { id:Date.now(), title: newEvent.title.trim()||title, titleEn: newEvent.titleEn.trim()||title, desc: newEvent.desc.trim(), descEn: newEvent.descEn.trim(), icon: newEvent.icon, isCollapsible: newEvent.isCollapsible }] }));
-    setNewEvent({ title:"", titleEn:"", desc:"", descEn:"", icon: "", isCollapsible: false });
+    setSiteData(p => ({ ...p, events: [...(p.events||[]), { id:Date.now(), title: newEvent.title.trim()||title, titleEn: newEvent.titleEn.trim()||title, desc: newEvent.desc.trim(), descEn: newEvent.descEn.trim(), icon: newEvent.icon, isCollapsible: newEvent.isCollapsible, videoUrl: (newEvent.videoUrl || "").trim(), isVideoEmbedded: newEvent.isVideoEmbedded }] }));
+    setNewEvent({ title:"", titleEn:"", desc:"", descEn:"", icon: "", isCollapsible: false, videoUrl: "", isVideoEmbedded: false });
     showToast("✅ تمت إضافة الفعالية");
   };
   const delEvent = id => { setSiteData(p=>({...p, events:(p.events||[]).filter(e=>e.id!==id)})); showToast("🗑️ تم حذف الفعالية"); };
@@ -1043,6 +1043,95 @@ function PageContent() {
           {/* Scrollable Tab Content */}
           <div className="flex-1 overflow-y-auto px-5 py-5 space-y-4" style={{ scrollbarWidth:"thin", scrollbarColor:"rgba(255,255,255,.1) transparent" }}>
 
+            {/* ═══ TAB: EVENTS MANAGER ═══ */}
+            {adminTab === "events" && (
+              <>
+                <div className="bg-white/5 p-4 rounded-2xl border border-white/10 space-y-3">
+                  <h3 className="font-bold text-white mb-2">➕ إضافة فعالية جديدة</h3>
+                  <div className="grid grid-cols-2 gap-2">
+                    <AdminInput value={newEvent.title} onChange={v=>setNewEvent(p=>({...p,title:v}))} placeholder="Title (EN)" dir="ltr" />
+                    <AdminInput value={newEvent.titleEn} onChange={v=>setNewEvent(p=>({...p,titleEn:v}))} placeholder="العنوان (AR)" dir="rtl" />
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <AdminInput value={newEvent.desc} onChange={v=>setNewEvent(p=>({...p,desc:v}))} placeholder="Description (EN)" dir="ltr" />
+                    <AdminInput value={newEvent.descEn} onChange={v=>setNewEvent(p=>({...p,descEn:v}))} placeholder="الوصف (AR)" dir="rtl" />
+                  </div>
+                  
+                  <div className="flex gap-4">
+                    <label className="relative flex items-center gap-2 cursor-pointer w-fit select-none">
+                      <div className="relative">
+                        <input type="checkbox" className="sr-only peer" checked={newEvent.isCollapsible || false} onChange={e => setNewEvent(p=>({...p,isCollapsible:e.target.checked}))} />
+                        <div className="w-8 h-4.5 bg-black/60 border border-white/10 rounded-full peer peer-checked:bg-yellow-500/20 peer-checked:border-yellow-500/50 transition-all duration-300"></div>
+                        <div className="absolute left-[2px] top-[2px] bg-white/40 w-3.5 h-3.5 rounded-full transition-all duration-300 peer-checked:translate-x-[14px] peer-checked:bg-yellow-500 shadow-sm"></div>
+                      </div>
+                      <span className="text-[11px] font-medium text-white/50">قابلة للطي (Accordion)</span>
+                    </label>
+
+                    <label className="relative flex items-center gap-2 cursor-pointer w-fit select-none">
+                      <div className="relative">
+                        <input type="checkbox" className="sr-only peer" checked={newEvent.isVideoEmbedded || false} onChange={e => setNewEvent(p=>({...p,isVideoEmbedded:e.target.checked}))} />
+                        <div className="w-8 h-4.5 bg-black/60 border border-white/10 rounded-full peer peer-checked:bg-yellow-500/20 peer-checked:border-yellow-500/50 transition-all duration-300"></div>
+                        <div className="absolute left-[2px] top-[2px] bg-white/40 w-3.5 h-3.5 rounded-full transition-all duration-300 peer-checked:translate-x-[14px] peer-checked:bg-yellow-500 shadow-sm"></div>
+                      </div>
+                      <span className="text-[11px] font-medium text-white/50">تضمين فيديو (Embedded)</span>
+                    </label>
+                  </div>
+
+                  <div>
+                    <Label>رابط الفيديو (يوتيوب أو إنستغرام)</Label>
+                    <AdminInput value={newEvent.videoUrl || ""} onChange={v=>setNewEvent(p=>({...p,videoUrl:v}))} placeholder="https://www.youtube.com/..." dir="ltr" />
+                  </div>
+
+                  <button onClick={addEvent} className="w-full bg-white/10 hover:bg-white/20 text-white rounded-xl py-3 mt-2 text-[12px] font-bold transition-all flex items-center justify-center gap-2 border border-white/5">
+                    <LucideIcons.Plus size={14}/> إضافة الفعالية
+                  </button>
+                </div>
+
+                <div className="space-y-3">
+                  {(siteData.events || []).map(ev => (
+                    <AdminCard key={ev.id} className="p-4 space-y-3">
+                      <div className="flex justify-between items-center">
+                        <h4 className="font-bold text-[13px]">{ev.title || ev.titleEn}</h4>
+                        <button onClick={() => delEvent(ev.id)} className="text-red-400 hover:text-red-300"><LucideIcons.Trash2 size={14}/></button>
+                      </div>
+                      <div className="grid grid-cols-2 gap-2">
+                        <AdminInput value={ev.title} onChange={v=>updEvent(ev.id, 'title', v)} placeholder="Title (EN)" dir="ltr" />
+                        <AdminInput value={ev.titleEn} onChange={v=>updEvent(ev.id, 'titleEn', v)} placeholder="العنوان (AR)" dir="rtl" />
+                      </div>
+                      <div className="grid grid-cols-2 gap-2">
+                        <AdminInput value={ev.desc} onChange={v=>updEvent(ev.id, 'desc', v)} placeholder="Desc (EN)" dir="ltr" />
+                        <AdminInput value={ev.descEn} onChange={v=>updEvent(ev.id, 'descEn', v)} placeholder="الوصف (AR)" dir="rtl" />
+                      </div>
+
+                      <div className="flex gap-4">
+                        <label className="relative flex items-center gap-2 cursor-pointer w-fit select-none">
+                          <div className="relative">
+                            <input type="checkbox" className="sr-only peer" checked={ev.isCollapsible || false} onChange={e => updEvent(ev.id, 'isCollapsible', e.target.checked)} />
+                            <div className="w-8 h-4.5 bg-black/60 border border-white/10 rounded-full peer peer-checked:bg-yellow-500/20 peer-checked:border-yellow-500/50 transition-all duration-300"></div>
+                            <div className="absolute left-[2px] top-[2px] bg-white/40 w-3.5 h-3.5 rounded-full transition-all duration-300 peer-checked:translate-x-[14px] peer-checked:bg-yellow-500 shadow-sm"></div>
+                          </div>
+                          <span className="text-[11px] font-medium text-white/50">قابلة للطي</span>
+                        </label>
+
+                        <label className="relative flex items-center gap-2 cursor-pointer w-fit select-none">
+                          <div className="relative">
+                            <input type="checkbox" className="sr-only peer" checked={ev.isVideoEmbedded || false} onChange={e => updEvent(ev.id, 'isVideoEmbedded', e.target.checked)} />
+                            <div className="w-8 h-4.5 bg-black/60 border border-white/10 rounded-full peer peer-checked:bg-yellow-500/20 peer-checked:border-yellow-500/50 transition-all duration-300"></div>
+                            <div className="absolute left-[2px] top-[2px] bg-white/40 w-3.5 h-3.5 rounded-full transition-all duration-300 peer-checked:translate-x-[14px] peer-checked:bg-yellow-500 shadow-sm"></div>
+                          </div>
+                          <span className="text-[11px] font-medium text-white/50">فيديو مدمج</span>
+                        </label>
+                      </div>
+                      
+                      <div>
+                        <Label>رابط الفيديو</Label>
+                        <AdminInput value={ev.videoUrl || ""} onChange={v=>updEvent(ev.id, 'videoUrl', v)} placeholder="YouTube or Instagram URL" dir="ltr" />
+                      </div>
+                    </AdminCard>
+                  ))}
+                </div>
+              </>
+            )}
 
             {/* ═══ TAB: IMAGES MANAGER ═══ */}
             {adminTab==="images" && (

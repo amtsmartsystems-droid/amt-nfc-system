@@ -87,6 +87,8 @@ const cardSchema = new mongoose.Schema({
             descEn:  String,
             icon:    String,
             isCollapsible: { type: Boolean, default: false },
+            videoUrl: { type: String, default: '' },
+            isVideoEmbedded: { type: Boolean, default: false },
         }],
         default: [],
     },
