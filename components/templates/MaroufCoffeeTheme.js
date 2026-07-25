@@ -466,7 +466,7 @@ export default function MaroufCoffeeTheme({ cardId, siteData, siteColors, lang =
                         </div>
                         
                         <AnimatePresence>
-                          {(!ev.isCollapsible || isExpanded) && t(ev.descEn || ev.desc, ev.desc) && (
+                          {(!ev.isCollapsible || isExpanded) && (t(ev.descEn || ev.desc, ev.desc) || (ev.isVideoEmbedded && ev.videoUrl)) && (
                             <motion.div
                               initial={ev.isCollapsible ? { height: 0, opacity: 0 } : false}
                               animate={{ height: "auto", opacity: 1 }}
@@ -474,9 +474,11 @@ export default function MaroufCoffeeTheme({ cardId, siteData, siteColors, lang =
                               transition={{ duration: 0.3 }}
                               className="overflow-hidden"
                             >
-                              <p className={`text-[12.5px] leading-relaxed ${ev.isCollapsible ? 'mt-2 pt-2 border-t border-white/5' : ''}`} style={{ color: "rgba(255,255,255,0.6)", fontFamily: "Cairo,sans-serif", whiteSpace: "pre-line" }}>
-                                {renderTextWithLinks(t(ev.descEn || ev.desc, ev.desc))}
-                              </p>
+                              {t(ev.descEn || ev.desc, ev.desc) && (
+                                <p className={`text-[12.5px] leading-relaxed ${ev.isCollapsible ? 'mt-2 pt-2 border-t border-white/5' : ''}`} style={{ color: "rgba(255,255,255,0.6)", fontFamily: "Cairo,sans-serif", whiteSpace: "pre-line" }}>
+                                  {renderTextWithLinks(t(ev.descEn || ev.desc, ev.desc))}
+                                </p>
+                              )}
                               {ev.isVideoEmbedded && ev.videoUrl && parseVideoUrl(ev.videoUrl) && (
                                 <div className="mt-4 w-full rounded-xl overflow-hidden shadow-lg border border-white/10 relative" style={{ background: "rgba(0,0,0,0.3)" }}>
                                   {parseVideoUrl(ev.videoUrl).type === 'youtube' && (
