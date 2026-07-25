@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import jwt from 'jsonwebtoken';
 import connectDB from '../../../backend/config/db';
 import Card from '../../../backend/models/Card';
+import { headers } from 'next/headers';
 
 export const dynamic = 'force-dynamic';
 
@@ -9,6 +10,7 @@ const SCAN_SECRET = process.env.JWT_SECRET || 'amt_smart_waiter_super_secret';
 
 export async function GET(req) {
     try {
+        headers(); // Opt into dynamic rendering gracefully
         const searchParams = req.nextUrl.searchParams;
         
         // Allow fallback between "r"/"restaurantId" and "t"/"tableNumber"

@@ -1,9 +1,11 @@
 import { NextResponse } from 'next/server';
 import connectDB from '../../../../backend/config/db';
 import Card from '../../../../backend/models/Card';
+import { headers } from 'next/headers';
 
 export async function GET(req) {
     try {
+        headers();
         await connectDB();
         
         // Fetch all created cards, sorting newest first
