@@ -292,6 +292,13 @@ export default function MaroufCoffeeTheme({ cardId, siteData, siteColors, lang =
       }
   });
 
+  // Always inject terrarium_bio after header if not already present
+  if (!layoutBlocks.find(b => b.type === "terrarium_bio")) {
+    const headerIdx = layoutBlocks.findIndex(b => b.type === "header");
+    const insertAt = headerIdx >= 0 ? headerIdx + 1 : 0;
+    layoutBlocks.splice(insertAt, 0, { id: "terrarium_bio", type: "terrarium_bio" });
+  }
+
   // ── Terrarium Age Calculator ──
   const terrariumBirthDate = sd.terrariumBirthDate || null;
   const terrariumAgeDays = terrariumBirthDate
