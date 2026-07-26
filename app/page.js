@@ -1848,6 +1848,28 @@ function PageContent() {
             {/* ═══ TAB: EVENTS MANAGER ═══ */}
             {adminTab==="events" && (
               <>
+                {/* Terrarium Birth Date */}
+                <div className="bg-[#0a1f0f]/60 border border-green-900/30 p-4 rounded-xl space-y-3 mb-4">
+                  <h4 className="font-bold text-white mb-1 flex items-center gap-2 text-[13px]">
+                    <LucideIcons.Leaf size={14} className="text-green-400" />
+                    سيرة التراريوم (Terrarium Bio)
+                  </h4>
+                  <div>
+                    <Label>تاريخ تأسيس التراريوم</Label>
+                    <input
+                      type="date"
+                      value={siteData.terrariumBirthDate || ""}
+                      onChange={e => up("terrariumBirthDate", e.target.value)}
+                      className="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-[13px] text-white outline-none focus:border-green-500 transition-all"
+                    />
+                    {siteData.terrariumBirthDate && (
+                      <p className="text-[11px] text-green-400 mt-1">
+                        🌱 عمر التراريوم: {Math.floor((Date.now() - new Date(siteData.terrariumBirthDate).getTime()) / (1000*60*60*24))} يوم
+                      </p>
+                    )}
+                  </div>
+                </div>
+
                 {/* Events Section Title Customization */}
                 <div className="bg-[#1f2937]/50 border border-white/5 p-4 rounded-xl space-y-4 mb-4">
                   <h4 className="font-bold text-white mb-1 flex items-center gap-2 text-[13px]">

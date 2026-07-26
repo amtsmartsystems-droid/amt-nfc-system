@@ -196,11 +196,60 @@ export default function MaroufCoffeeTheme({ cardId, siteData, siteColors, lang =
   const [isOffersOpen, setIsOffersOpen] = useState(false);
   const [expandedEventId, setExpandedEventId] = useState(null);
 
+  // ── Terrarium Smart Greeting ──
+  const [showGreeting, setShowGreeting] = useState(false);
+  const [greetingMsg, setGreetingMsg] = useState('');
+
+  // ── Terrarium Bio Editing ──
+  const [bioEditMode, setBioEditMode] = useState(false);
+  const [terrariumName, setTerrariumName] = useState(() => {
+    if (typeof window !== 'undefined') return localStorage.getItem('terrarium_name') || '';
+    return '';
+  });
+  const [terrariumPhoto, setTerrariumPhoto] = useState(() => {
+    if (typeof window !== 'undefined') return localStorage.getItem('terrarium_photo') || '';
+    return '';
+  });
+  const bioPhotoRef = useRef(null);
+
+  // ── Feedback State ──
+  const [feedbackRating, setFeedbackRating] = useState(0);
+  const [feedbackHover, setFeedbackHover] = useState(0);
+  const [feedbackNote, setFeedbackNote] = useState('');
+  const [feedbackSent, setFeedbackSent] = useState(false);
+
   useEffect(() => {
     document.documentElement.style.setProperty('--primary-color', accent);
     document.documentElement.style.setProperty('--primary-rgb', hexToRgbStr(accent));
     document.documentElement.style.setProperty('--bg-color', bgDark);
   }, [accent, bgDark]);
+
+  // ── Smart Greeting on First/Return Visit ──
+  useEffect(() => {
+    if (isPreview) return;
+    const GREETINGS_EN = [
+      "Welcome back! 🌿 I missed you!",
+      "Hello again! Ready for another visit? 🌱",
+      "You're here! Your terrarium is doing great 🌿✨",
+      "Great to see you! How am I looking today? 💚",
+    ];
+    const GREETINGS_AR = [
+      "أهلاً بعودتك! 🌿 اشتقت إليك!",
+      "مرحباً من جديد! كيف حال يومك؟ 🌱",
+      "وصلت! تراريومك بخير ويرحب بك 🌿✨",
+      "يسعدني رؤيتك! كيف أبدو اليوم؟ 💚",
+    ];
+    const FIRST_EN = ["Hello! I'm your terrarium 🌿 Glad you're here!", "Welcome! Tap me to explore my world 🌱"];
+    const FIRST_AR = ["مرحباً! أنا تراريومك 🌿 سعيد بزيارتك!", "أهلاً بك! انقر لاستكشاف عالمي 🌱"];
+    const isFirst = !localStorage.getItem('terrarium_visited');
+    localStorage.setItem('terrarium_visited', '1');
+    const msgs = isFirst ? (isAr ? FIRST_AR : FIRST_EN) : (isAr ? GREETINGS_AR : GREETINGS_EN);
+    const msg = msgs[Math.floor(Math.random() * msgs.length)];
+    setGreetingMsg(msg);
+    const t1 = setTimeout(() => setShowGreeting(true), 600);
+    const t2 = setTimeout(() => setShowGreeting(false), 4500);
+    return () => { clearTimeout(t1); clearTimeout(t2); };
+  }, [isAr, isPreview]);
 
   const t  = (en, ar) => isAr && ar ? ar : en;
   const sd = siteData || {};
@@ -226,6 +275,7 @@ export default function MaroufCoffeeTheme({ cardId, siteData, siteColors, lang =
 
   // ════ LAYOUT BLOCKS ════
   const defaultBlocks = [
+    { id: "terrarium_bio", type: "terrarium_bio" },
     { id: "header", type: "header" },
     { id: "menu_button", type: "menu_button" },
     { id: "info", type: "info" },
@@ -241,6 +291,33 @@ export default function MaroufCoffeeTheme({ cardId, siteData, siteColors, lang =
           layoutBlocks.push({ id: type, type });
       }
   });
+
+  // ── Terrarium Age Calculator ──
+  const terrariumBirthDate = sd.terrariumBirthDate || null;
+  const terrariumAgeDays = terrariumBirthDate
+    ? Math.floor((Date.now() - new Date(terrariumBirthDate).getTime()) / (1000 * 60 * 60 * 24))
+    : null;
+
+  const handleBioPhotoUpload = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      setTerrariumPhoto(ev.target.result);
+      localStorage.setItem('terrarium_photo', ev.target.result);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const saveBioName = () => {
+    localStorage.setItem('terrarium_name', terrariumName);
+    setBioEditMode(false);
+  };
+
+  const handleFeedbackSubmit = () => {
+    if (feedbackRating === 0) return;
+    setFeedbackSent(true);
+  };
 
   const renderBlock = (block) => {
     switch (block.type) {
@@ -602,6 +679,101 @@ export default function MaroufCoffeeTheme({ cardId, siteData, siteColors, lang =
           </BlockReveal>
         );
 
+      // ── TERRARIUM BIO BLOCK ──
+      case 'terrarium_bio':
+        return (
+          <BlockReveal delay={0.1}>
+            <div className="mx-5 mb-6 rounded-2xl overflow-hidden" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(var(--primary-rgb),0.2)", backdropFilter: "blur(12px)" }}>
+              {/* Header */}
+              <div className="px-5 py-3 flex items-center justify-between" style={{ background: "rgba(var(--primary-rgb),0.08)", borderBottom: "1px solid rgba(var(--primary-rgb),0.15)" }}>
+                <div className="flex items-center gap-2">
+                  <LucideIcons.BookOpen size={15} style={{ color: accent }} />
+                  <span className="text-[12px] font-black tracking-widest uppercase" style={{ color: accent, fontFamily: "Cairo,sans-serif" }}>
+                    {isAr ? 'سيرة التراريوم' : 'Terrarium Bio'}
+                  </span>
+                </div>
+                {!isPreview && (
+                  <button onClick={() => setBioEditMode(v => !v)} className="text-white/30 hover:text-white/70 transition-colors">
+                    <LucideIcons.Pencil size={13} />
+                  </button>
+                )}
+              </div>
+
+              <div className="p-5 flex gap-4 items-start">
+                {/* Photo */}
+                <div className="relative flex-shrink-0">
+                  <div className="w-20 h-20 rounded-xl overflow-hidden" style={{ border: `2px solid rgba(var(--primary-rgb),0.4)`, boxShadow: `0 0 20px rgba(var(--primary-rgb),0.2)` }}>
+                    <img
+                      src={terrariumPhoto || sd.images?.profile || 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=300'}
+                      alt="terrarium"
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  {bioEditMode && !isPreview && (
+                    <>
+                      <input ref={bioPhotoRef} type="file" accept="image/*" className="hidden" onChange={handleBioPhotoUpload} />
+                      <button
+                        onClick={() => bioPhotoRef.current?.click()}
+                        className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full flex items-center justify-center"
+                        style={{ background: accent, color: '#000' }}
+                      >
+                        <LucideIcons.Camera size={11} />
+                      </button>
+                    </>
+                  )}
+                </div>
+
+                {/* Info */}
+                <div className="flex-1 min-w-0">
+                  {bioEditMode && !isPreview ? (
+                    <div className="flex gap-2 items-center mb-3">
+                      <input
+                        value={terrariumName}
+                        onChange={e => setTerrariumName(e.target.value)}
+                        placeholder={isAr ? 'اسم تراريومك...' : 'Name your terrarium...'}
+                        className="flex-1 bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-[13px] text-white outline-none"
+                        style={{ fontFamily: "Cairo,sans-serif" }}
+                      />
+                      <button onClick={saveBioName} className="px-3 py-1.5 rounded-lg text-[12px] font-bold" style={{ background: accent, color: '#000' }}>
+                        {isAr ? 'حفظ' : 'Save'}
+                      </button>
+                    </div>
+                  ) : (
+                    <h3 className="font-black text-[17px] text-white mb-1" style={{ fontFamily: "Cairo,sans-serif" }}>
+                      {terrariumName || t(sd.name, sd.nameAr) || 'My Terrarium'}
+                    </h3>
+                  )}
+
+                  {/* Age Counter */}
+                  {terrariumAgeDays !== null && (
+                    <div className="flex items-center gap-2 mb-2">
+                      <div className="flex items-center gap-1.5 px-3 py-1 rounded-full" style={{ background: "rgba(var(--primary-rgb),0.12)", border: "1px solid rgba(var(--primary-rgb),0.25)" }}>
+                        <LucideIcons.Calendar size={11} style={{ color: accent }} />
+                        <span className="text-[12px] font-bold" style={{ color: accent, fontFamily: "Cairo,sans-serif" }}>
+                          {isAr ? `${terrariumAgeDays} يوم` : `${terrariumAgeDays} days old`}
+                        </span>
+                      </div>
+                    </div>
+                  )}
+
+                  {sd.about && (
+                    <p className="text-[12px] leading-relaxed" style={{ color: "rgba(255,255,255,0.55)", fontFamily: "Cairo,sans-serif" }}>
+                      {t(sd.about, sd.aboutAr)}
+                    </p>
+                  )}
+
+                  {/* Born date */}
+                  {terrariumBirthDate && (
+                    <p className="text-[11px] mt-2" style={{ color: "rgba(255,255,255,0.3)", fontFamily: "Cairo,sans-serif" }}>
+                      🌱 {isAr ? 'تأسس في' : 'Founded'}: {new Date(terrariumBirthDate).toLocaleDateString(isAr ? 'ar' : 'en-GB', { year: 'numeric', month: 'long', day: 'numeric' })}
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
+          </BlockReveal>
+        );
+
       default:
         return null;
     }
@@ -666,8 +838,95 @@ export default function MaroufCoffeeTheme({ cardId, siteData, siteColors, lang =
           </div>
         )}
 
+        {/* ── FEEDBACK SECTION ── */}
+        <div className="mx-5 mb-8">
+          <BlockReveal delay={0.2}>
+            <div className="rounded-2xl p-5" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(var(--primary-rgb),0.2)", backdropFilter: "blur(12px)" }}>
+              <div className="flex items-center gap-2 mb-4">
+                <LucideIcons.Star size={15} style={{ color: accent }} />
+                <span className="text-[12px] font-black tracking-widest uppercase" style={{ color: accent, fontFamily: "Cairo,sans-serif" }}>
+                  {isAr ? 'قيّم تجربتك' : 'Rate Your Experience'}
+                </span>
+              </div>
+
+              {feedbackSent ? (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  className="flex flex-col items-center gap-3 py-4"
+                >
+                  <div className="w-14 h-14 rounded-full flex items-center justify-center" style={{ background: "rgba(var(--primary-rgb),0.15)", border: `2px solid ${accent}` }}>
+                    <LucideIcons.Check size={28} style={{ color: accent }} />
+                  </div>
+                  <p className="text-[14px] font-bold text-white" style={{ fontFamily: "Cairo,sans-serif" }}>
+                    {isAr ? 'شكراً لتقييمك! 💚' : 'Thank you for your feedback! 💚'}
+                  </p>
+                </motion.div>
+              ) : (
+                <>
+                  {/* Stars */}
+                  <div className="flex gap-2 justify-center mb-4">
+                    {[1,2,3,4,5].map(star => (
+                      <button
+                        key={star}
+                        onMouseEnter={() => setFeedbackHover(star)}
+                        onMouseLeave={() => setFeedbackHover(0)}
+                        onClick={() => setFeedbackRating(star)}
+                        className="transition-all duration-200"
+                        style={{ transform: (feedbackHover || feedbackRating) >= star ? 'scale(1.2)' : 'scale(1)' }}
+                      >
+                        <LucideIcons.Star
+                          size={30}
+                          fill={(feedbackHover || feedbackRating) >= star ? accent : 'transparent'}
+                          style={{ color: (feedbackHover || feedbackRating) >= star ? accent : 'rgba(255,255,255,0.2)' }}
+                        />
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Labels */}
+                  <div className="flex justify-between px-1 mb-4">
+                    {(isAr
+                      ? ['مزعج','سيء','عادي','جيد','رائع']
+                      : ['Awful','Bad','OK','Good','Amazing']
+                    ).map((lbl, i) => (
+                      <span key={i} className="text-[10px]" style={{ color: feedbackRating === i+1 ? accent : 'rgba(255,255,255,0.25)', fontFamily: "Cairo,sans-serif", transition: 'color 0.2s' }}>{lbl}</span>
+                    ))}
+                  </div>
+
+                  {/* Note */}
+                  <textarea
+                    value={feedbackNote}
+                    onChange={e => setFeedbackNote(e.target.value)}
+                    placeholder={isAr ? 'اكتب ملاحظتك هنا (اختياري)...' : 'Write a note (optional)...'}
+                    rows={2}
+                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-[13px] text-white/80 outline-none resize-none mb-4"
+                    style={{ fontFamily: "Cairo,sans-serif" }}
+                  />
+
+                  {/* Submit */}
+                  <button
+                    onClick={handleFeedbackSubmit}
+                    disabled={feedbackRating === 0}
+                    className="w-full py-3 rounded-xl font-bold text-[14px] transition-all duration-300"
+                    style={{
+                      background: feedbackRating > 0 ? `linear-gradient(135deg, ${accent}, rgba(var(--primary-rgb),0.7))` : 'rgba(255,255,255,0.05)',
+                      color: feedbackRating > 0 ? '#000' : 'rgba(255,255,255,0.2)',
+                      fontFamily: "Cairo,sans-serif",
+                      cursor: feedbackRating > 0 ? 'pointer' : 'not-allowed',
+                      boxShadow: feedbackRating > 0 ? `0 8px 24px rgba(var(--primary-rgb),0.3)` : 'none',
+                    }}
+                  >
+                    {isAr ? 'إرسال التقييم ✨' : 'Submit Feedback ✨'}
+                  </button>
+                </>
+              )}
+            </div>
+          </BlockReveal>
+        </div>
+
         {/* ── WATERMARK ── */}
-        <div className="text-center pb-8 pt-8">
+        <div className="text-center pb-8 pt-2">
           <p
             className="text-[11px] font-semibold tracking-[0.2em] uppercase"
             style={{ color: "rgba(255,255,255,0.2)", fontFamily: "Cairo,sans-serif" }}
@@ -676,6 +935,39 @@ export default function MaroufCoffeeTheme({ cardId, siteData, siteColors, lang =
           </p>
         </div>
       </div>
+
+      {/* ── SMART GREETING TOAST ── */}
+      <AnimatePresence>
+        {showGreeting && (
+          <motion.div
+            initial={{ opacity: 0, y: 80, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 40, scale: 0.9 }}
+            transition={{ type: "spring", damping: 22, stiffness: 180 }}
+            className="fixed bottom-6 left-4 right-4 z-[500] max-w-[420px] mx-auto"
+          >
+            <div
+              className="flex items-center gap-3 px-5 py-4 rounded-2xl"
+              style={{
+                background: "rgba(5,20,10,0.96)",
+                border: `1px solid rgba(var(--primary-rgb),0.4)`,
+                backdropFilter: "blur(24px)",
+                boxShadow: `0 20px 60px rgba(0,0,0,0.7), 0 0 0 1px rgba(var(--primary-rgb),0.15)`,
+              }}
+            >
+              <div
+                className="w-10 h-10 rounded-full flex-shrink-0 flex items-center justify-center"
+                style={{ background: `rgba(var(--primary-rgb),0.15)`, border: `1px solid rgba(var(--primary-rgb),0.3)` }}
+              >
+                <span style={{ fontSize: 20 }}>🌿</span>
+              </div>
+              <p className="text-[14px] font-semibold text-white leading-snug" style={{ fontFamily: "Cairo,sans-serif" }}>
+                {greetingMsg}
+              </p>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* ── MENU MODAL ── */}
       <AnimatePresence>
