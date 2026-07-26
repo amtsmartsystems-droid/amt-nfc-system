@@ -1848,26 +1848,39 @@ function PageContent() {
             {/* ═══ TAB: EVENTS MANAGER ═══ */}
             {adminTab==="events" && (
               <>
-                {/* Terrarium Birth Date */}
+                {/* Terrarium Bio */}
                 <div className="bg-[#0a1f0f]/60 border border-green-900/30 p-4 rounded-xl space-y-3 mb-4">
                   <h4 className="font-bold text-white mb-1 flex items-center gap-2 text-[13px]">
                     <LucideIcons.Leaf size={14} className="text-green-400" />
-                    سيرة التراريوم (Terrarium Bio)
+                    وضع التراريوم الذكي 🌿
                   </h4>
-                  <div>
-                    <Label>تاريخ تأسيس التراريوم</Label>
-                    <input
-                      type="date"
-                      value={siteData.terrariumBirthDate || ""}
-                      onChange={e => up("terrariumBirthDate", e.target.value)}
-                      className="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-[13px] text-white outline-none focus:border-green-500 transition-all"
-                    />
-                    {siteData.terrariumBirthDate && (
+
+                  {/* Toggle isTerrariumMode */}
+                  <label className="flex items-center justify-between cursor-pointer select-none">
+                    <span className="text-[12px] text-white/70">تفعيل ميزات التراريوم (السيرة الذاتية، التقييم، الترحيب)</span>
+                    <div className="relative">
+                      <input type="checkbox" className="sr-only peer"
+                        checked={!!siteData.isTerrariumMode}
+                        onChange={e => up("isTerrariumMode", e.target.checked)} />
+                      <div className="w-9 h-5 bg-black/60 border border-white/10 rounded-full peer peer-checked:bg-green-500/20 peer-checked:border-green-500/50 transition-all duration-300"></div>
+                      <div className="absolute left-[2px] top-[2px] bg-white/40 w-4 h-4 rounded-full transition-all duration-300 peer-checked:translate-x-4 peer-checked:bg-green-400 shadow-sm"></div>
+                    </div>
+                  </label>
+
+                  {siteData.isTerrariumMode && (
+                    <div>
+                      <Label>تاريخ تأسيس التراريوم (اتركه فارغاً ليبدأ من اليوم)</Label>
+                      <input
+                        type="date"
+                        value={siteData.terrariumBirthDate || ""}
+                        onChange={e => up("terrariumBirthDate", e.target.value)}
+                        className="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-[13px] text-white outline-none focus:border-green-500 transition-all"
+                      />
                       <p className="text-[11px] text-green-400 mt-1">
-                        🌱 عمر التراريوم: {Math.floor((Date.now() - new Date(siteData.terrariumBirthDate).getTime()) / (1000*60*60*24))} يوم
+                        🌱 عمر التراريوم: {Math.floor((Date.now() - new Date(siteData.terrariumBirthDate || new Date().toISOString().split('T')[0]).getTime()) / (1000*60*60*24))} يوم
                       </p>
-                    )}
-                  </div>
+                    </div>
+                  )}
                 </div>
 
                 {/* Events Section Title Customization */}

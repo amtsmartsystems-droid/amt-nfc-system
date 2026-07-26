@@ -192,6 +192,7 @@ export default function MaroufCoffeeTheme({ cardId, siteData, siteColors, lang =
   };
 
   const isAr = lang === "ar";
+  const isTerrariumMode = !!(siteData?.isTerrariumMode);
   const [isMenuModalOpen, setIsMenuModalOpen] = useState(false);
   const [isOffersOpen, setIsOffersOpen] = useState(false);
   const [expandedEventId, setExpandedEventId] = useState(null);
@@ -224,9 +225,9 @@ export default function MaroufCoffeeTheme({ cardId, siteData, siteColors, lang =
     document.documentElement.style.setProperty('--bg-color', bgDark);
   }, [accent, bgDark]);
 
-  // ── Smart Greeting on First/Return Visit ──
+  // ── Smart Greeting on First/Return Visit (Terrarium Only) ──
   useEffect(() => {
-    if (isPreview) return;
+    if (isPreview || !isTerrariumMode) return;
     const GREETINGS_EN = [
       "Welcome back! 🌿 I missed you!",
       "Hello again! Ready for another visit? 🌱",
@@ -292,18 +293,25 @@ export default function MaroufCoffeeTheme({ cardId, siteData, siteColors, lang =
       }
   });
 
-  // Always inject terrarium_bio after header if not already present
-  if (!layoutBlocks.find(b => b.type === "terrarium_bio")) {
+  // Always inject terrarium_bio after header — only for terrarium cards
+  if (isTerrariumMode && !layoutBlocks.find(b => b.type === "terrarium_bio")) {
     const headerIdx = layoutBlocks.findIndex(b => b.type === "header");
     const insertAt = headerIdx >= 0 ? headerIdx + 1 : 0;
     layoutBlocks.splice(insertAt, 0, { id: "terrarium_bio", type: "terrarium_bio" });
   }
 
-  // ── Terrarium Age Calculator ──
-  const terrariumBirthDate = sd.terrariumBirthDate || null;
+  // ── Terrarium Age Calculator (auto-start from today if no date set) ──
+  const terrariumBirthDate = sd.terrariumBirthDate || (() => {
+    if (typeof window === 'undefined') return null;
+    const stored = localStorage.getItem(`terrarium_born_${cardId}`);
+    if (stored) return stored;
+    const today = new Date().toISOString().split('T')[0];
+    localStorage.setItem(`terrarium_born_${cardId}`, today);
+    return today;
+  })();
   const terrariumAgeDays = terrariumBirthDate
     ? Math.floor((Date.now() - new Date(terrariumBirthDate).getTime()) / (1000 * 60 * 60 * 24))
-    : null;
+    : 0;
 
   const handleBioPhotoUpload = (e) => {
     const file = e.target.files?.[0];
@@ -752,7 +760,7 @@ export default function MaroufCoffeeTheme({ cardId, siteData, siteColors, lang =
                   )}
 
                   {/* Age Counter */}
-                  {terrariumAgeDays !== null && (
+                  {isTerrariumMode && (
                     <div className="flex items-center gap-2 mb-2">
                       <div className="flex items-center gap-1.5 px-3 py-1 rounded-full" style={{ background: "rgba(var(--primary-rgb),0.12)", border: "1px solid rgba(var(--primary-rgb),0.25)" }}>
                         <LucideIcons.Calendar size={11} style={{ color: accent }} />
@@ -845,7 +853,8 @@ export default function MaroufCoffeeTheme({ cardId, siteData, siteColors, lang =
           </div>
         )}
 
-        {/* ── FEEDBACK SECTION ── */}
+        {/* ── FEEDBACK SECTION (Terrarium Only) ── */}
+        {isTerrariumMode && (
         <div className="mx-5 mb-8">
           <BlockReveal delay={0.2}>
             <div className="rounded-2xl p-5" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(var(--primary-rgb),0.2)", backdropFilter: "blur(12px)" }}>
@@ -931,6 +940,7 @@ export default function MaroufCoffeeTheme({ cardId, siteData, siteColors, lang =
             </div>
           </BlockReveal>
         </div>
+        )}
 
         {/* ── WATERMARK ── */}
         <div className="text-center pb-8 pt-2">
