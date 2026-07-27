@@ -699,92 +699,76 @@ export default function MaroufCoffeeTheme({ cardId, siteData, siteColors, lang =
         return (
           <BlockReveal delay={0.1}>
             <div className="mx-5 mb-6 rounded-2xl overflow-hidden" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(var(--primary-rgb),0.2)", backdropFilter: "blur(12px)" }}>
-              {/* Header */}
+
+              {/* Header bar */}
               <div className="px-5 py-3 flex items-center justify-between" style={{ background: "rgba(var(--primary-rgb),0.08)", borderBottom: "1px solid rgba(var(--primary-rgb),0.15)" }}>
                 <div className="flex items-center gap-2">
-                  <LucideIcons.BookOpen size={15} style={{ color: accent }} />
-                  <span className="text-[12px] font-black tracking-widest uppercase" style={{ color: accent, fontFamily: "Cairo,sans-serif" }}>
+                  <LucideIcons.Leaf size={14} style={{ color: accent }} />
+                  <span className="text-[11px] font-black tracking-widest uppercase" style={{ color: accent, fontFamily: "Cairo,sans-serif" }}>
                     {isAr ? 'سيرة التراريوم' : 'Terrarium Bio'}
                   </span>
                 </div>
                 {!isPreview && (
-                  <button onClick={() => setBioEditMode(v => !v)} className="text-white/30 hover:text-white/70 transition-colors">
-                    <LucideIcons.Pencil size={13} />
+                  <button onClick={() => setBioEditMode(v => !v)} className="text-white/30 hover:text-white/60 transition-colors">
+                    <LucideIcons.Pencil size={12} />
                   </button>
                 )}
               </div>
 
-              <div className="p-5 flex gap-4 items-start">
-                {/* Photo */}
-                <div className="relative flex-shrink-0">
-                  <div className="w-20 h-20 rounded-xl overflow-hidden" style={{ border: `2px solid rgba(var(--primary-rgb),0.4)`, boxShadow: `0 0 20px rgba(var(--primary-rgb),0.2)` }}>
-                    <img
-                      src={terrariumPhoto || sd.images?.profile || 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=300'}
-                      alt="terrarium"
-                      className="w-full h-full object-cover"
+              {/* Name row */}
+              <div className="px-5 pt-4 pb-2">
+                {bioEditMode && !isPreview ? (
+                  <div className="flex gap-2 items-center mb-3">
+                    <input
+                      value={terrariumName}
+                      onChange={e => setTerrariumName(e.target.value)}
+                      placeholder={isAr ? 'اسم تراريومك...' : 'Name your terrarium...'}
+                      className="flex-1 bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-[13px] text-white outline-none"
+                      style={{ fontFamily: "Cairo,sans-serif" }}
                     />
+                    <button onClick={saveBioName} className="px-3 py-1.5 rounded-lg text-[12px] font-bold" style={{ background: accent, color: '#000' }}>
+                      {isAr ? 'حفظ' : 'Save'}
+                    </button>
                   </div>
-                  {bioEditMode && !isPreview && (
-                    <>
-                      <input ref={bioPhotoRef} type="file" accept="image/*" className="hidden" onChange={handleBioPhotoUpload} />
-                      <button
-                        onClick={() => bioPhotoRef.current?.click()}
-                        className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full flex items-center justify-center"
-                        style={{ background: accent, color: '#000' }}
-                      >
-                        <LucideIcons.Camera size={11} />
-                      </button>
-                    </>
-                  )}
+                ) : (
+                  <p className="text-[15px] font-black text-white mb-3" style={{ fontFamily: "Cairo,sans-serif" }}>
+                    {terrariumName || t(sd.name, sd.nameAr) || 'My Terrarium'}
+                  </p>
+                )}
+              </div>
+
+              {/* Stats row */}
+              <div className="px-5 pb-4 grid grid-cols-2 gap-3">
+                {/* Age stat */}
+                <div className="flex flex-col gap-1 px-4 py-3 rounded-xl" style={{ background: "rgba(var(--primary-rgb),0.07)", border: "1px solid rgba(var(--primary-rgb),0.15)" }}>
+                  <div className="flex items-center gap-1.5">
+                    <LucideIcons.Clock3 size={11} style={{ color: accent }} />
+                    <span className="text-[10px] uppercase tracking-wider font-bold" style={{ color: "rgba(255,255,255,0.35)", fontFamily: "Cairo,sans-serif" }}>
+                      {isAr ? 'العمر' : 'Age'}
+                    </span>
+                  </div>
+                  <span className="text-[22px] font-black leading-none" style={{ color: accent, fontFamily: "Cairo,sans-serif" }}>
+                    {terrariumAgeDays}
+                  </span>
+                  <span className="text-[10px]" style={{ color: "rgba(255,255,255,0.4)", fontFamily: "Cairo,sans-serif" }}>
+                    {isAr ? 'يوم' : 'days old'}
+                  </span>
                 </div>
 
-                {/* Info */}
-                <div className="flex-1 min-w-0">
-                  {bioEditMode && !isPreview ? (
-                    <div className="flex gap-2 items-center mb-3">
-                      <input
-                        value={terrariumName}
-                        onChange={e => setTerrariumName(e.target.value)}
-                        placeholder={isAr ? 'اسم تراريومك...' : 'Name your terrarium...'}
-                        className="flex-1 bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-[13px] text-white outline-none"
-                        style={{ fontFamily: "Cairo,sans-serif" }}
-                      />
-                      <button onClick={saveBioName} className="px-3 py-1.5 rounded-lg text-[12px] font-bold" style={{ background: accent, color: '#000' }}>
-                        {isAr ? 'حفظ' : 'Save'}
-                      </button>
-                    </div>
-                  ) : (
-                    <h3 className="font-black text-[17px] text-white mb-1" style={{ fontFamily: "Cairo,sans-serif" }}>
-                      {terrariumName || t(sd.name, sd.nameAr) || 'My Terrarium'}
-                    </h3>
-                  )}
-
-                  {/* Age Counter */}
-                  {isTerrariumMode && (
-                    <div className="flex items-center gap-2 mb-2">
-                      <div className="flex items-center gap-1.5 px-3 py-1 rounded-full" style={{ background: "rgba(var(--primary-rgb),0.12)", border: "1px solid rgba(var(--primary-rgb),0.25)" }}>
-                        <LucideIcons.Calendar size={11} style={{ color: accent }} />
-                        <span className="text-[12px] font-bold" style={{ color: accent, fontFamily: "Cairo,sans-serif" }}>
-                          {isAr ? `${terrariumAgeDays} يوم` : `${terrariumAgeDays} days old`}
-                        </span>
-                      </div>
-                    </div>
-                  )}
-
-                  {sd.about && (
-                    <p className="text-[12px] leading-relaxed" style={{ color: "rgba(255,255,255,0.55)", fontFamily: "Cairo,sans-serif" }}>
-                      {t(sd.about, sd.aboutAr)}
-                    </p>
-                  )}
-
-                  {/* Born date */}
-                  {terrariumBirthDate && (
-                    <p className="text-[11px] mt-2" style={{ color: "rgba(255,255,255,0.3)", fontFamily: "Cairo,sans-serif" }}>
-                      🌱 {isAr ? 'تأسس في' : 'Founded'}: {new Date(terrariumBirthDate).toLocaleDateString(isAr ? 'ar' : 'en-GB', { year: 'numeric', month: 'long', day: 'numeric' })}
-                    </p>
-                  )}
+                {/* Founded stat */}
+                <div className="flex flex-col gap-1 px-4 py-3 rounded-xl" style={{ background: "rgba(var(--primary-rgb),0.07)", border: "1px solid rgba(var(--primary-rgb),0.15)" }}>
+                  <div className="flex items-center gap-1.5">
+                    <LucideIcons.Calendar size={11} style={{ color: accent }} />
+                    <span className="text-[10px] uppercase tracking-wider font-bold" style={{ color: "rgba(255,255,255,0.35)", fontFamily: "Cairo,sans-serif" }}>
+                      {isAr ? 'تأسس في' : 'Founded'}
+                    </span>
+                  </div>
+                  <span className="text-[12px] font-bold leading-snug mt-1" style={{ color: "rgba(255,255,255,0.75)", fontFamily: "Cairo,sans-serif" }}>
+                    {new Date(terrariumBirthDate || Date.now()).toLocaleDateString(isAr ? 'ar' : 'en-GB', { year: 'numeric', month: 'short', day: 'numeric' })}
+                  </span>
                 </div>
               </div>
+
             </div>
           </BlockReveal>
         );
