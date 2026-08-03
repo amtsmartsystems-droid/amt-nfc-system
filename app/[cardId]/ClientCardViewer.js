@@ -19,7 +19,7 @@ const fetcher = async (url) => {
     return json;
 };
 export default function ClientCardViewer({ initialCard, cardId, searchParams, isPreview, onUpdateLayoutBlocks }) {
-    const [lang,      setLang]      = useState('ar');
+    const [lang,      setLang]      = useState('en');
     const [wifiState, setWifiState] = useState('idle');
 
     /* ── Cart State ── */
