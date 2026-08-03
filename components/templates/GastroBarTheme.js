@@ -19,6 +19,7 @@ export default function GastroBarTheme({ cardId, siteData, siteColors, lang = "e
   const accent  = siteColors?.primary    || "#F5C518";   // gastrobar yellow
   const bgColor = siteColors?.background || "#111111";   // near-black
   const isAr    = lang === "ar";
+  const isTerrariumMode = !!(siteData?.isTerrariumMode);
   const [isMenuModalOpen, setIsMenuModalOpen] = useState(false);
 
   useEffect(() => {
@@ -152,6 +153,16 @@ export default function GastroBarTheme({ cardId, siteData, siteColors, lang = "e
           layoutBlocks.push({ id: type, type });
       }
   });
+
+  // Gate terrarium_bio — only show when isTerrariumMode is explicitly enabled
+  if (isTerrariumMode && !layoutBlocks.find(b => b.type === "terrarium_bio")) {
+    const headerIdx = layoutBlocks.findIndex(b => b.type === "header");
+    const insertAt = headerIdx >= 0 ? headerIdx + 1 : 0;
+    layoutBlocks.splice(insertAt, 0, { id: "terrarium_bio", type: "terrarium_bio" });
+  } else if (!isTerrariumMode) {
+    // Always strip it out when terrarium mode is off (even if it was saved to DB)
+    layoutBlocks = layoutBlocks.filter(b => b.type !== "terrarium_bio");
+  }
 
   const renderBlock = (block) => {
       switch (block.type) {
