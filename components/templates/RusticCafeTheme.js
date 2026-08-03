@@ -479,34 +479,13 @@ export default function RusticCafeTheme({ cardId, siteData, siteColors, lang = "
 
         {/* ── WATERMARK ── */}
         <div style={{ textAlign:'center', paddingBottom:32, paddingTop:32, display:'flex', justifyContent:'center' }}>
-          <style>{`@keyframes amtPulse{0%,100%{opacity:.45}50%{opacity:.85}}`}</style>
           <a
             href="https://amt-nfc-system.vercel.app/AMT"
             target="_blank"
             rel="noopener noreferrer"
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              padding: '10px 22px',
-              borderRadius: 14,
-              background: 'rgba(0,0,0,0.06)',
-              backdropFilter: 'blur(12px)',
-              WebkitBackdropFilter: 'blur(12px)',
-              border: '1px solid rgba(0,0,0,0.12)',
-              boxShadow: '0 4px 24px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.6)',
-              textDecoration: 'none',
-              cursor: 'pointer',
-            }}
+            className="amt-brand-link dark-bg"
           >
-            <span style={{
-              fontFamily: 'Cairo,sans-serif',
-              fontSize: 11,
-              fontWeight: 700,
-              letterSpacing: '0.18em',
-              textTransform: 'uppercase',
-              color: 'rgba(0,0,0,0.55)',
-              animation: 'amtPulse 2.5s ease-in-out infinite',
-            }}>Powered by AMT Smart Systems</span>
+            <span className="amt-brand-text dark-text">Powered by AMT Smart Systems</span>
           </a>
         </div>
       </div>

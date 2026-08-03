@@ -185,7 +185,7 @@ export default function MaroufCoffeeTheme({ cardId, siteData, siteColors, lang =
   };
 
   const isAr = lang === "ar";
-  const isTerrariumMode = !!(siteData?.isTerrariumMode);
+  const isTerrariumMode = siteData?.isTerrariumMode === true || siteData?.isTerrariumMode === "true";
   const [isMenuModalOpen, setIsMenuModalOpen] = useState(false);
   const [isOffersOpen, setIsOffersOpen] = useState(false);
   const [expandedEventId, setExpandedEventId] = useState(null);
@@ -922,34 +922,13 @@ export default function MaroufCoffeeTheme({ cardId, siteData, siteColors, lang =
 
         {/* ── WATERMARK v3 ── */}
         <div style={{ textAlign:'center', paddingBottom:32, paddingTop:8, display:'flex', justifyContent:'center' }}>
-          <style>{`@keyframes amtPulse{0%,100%{opacity:.55}50%{opacity:1}}`}</style>
           <a
             href="https://amt-nfc-system.vercel.app/AMT"
             target="_blank"
             rel="noopener noreferrer"
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              padding: '10px 22px',
-              borderRadius: 14,
-              background: 'rgba(255,255,255,0.06)',
-              backdropFilter: 'blur(12px)',
-              WebkitBackdropFilter: 'blur(12px)',
-              border: '1px solid rgba(255,255,255,0.14)',
-              boxShadow: '0 4px 24px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.12)',
-              textDecoration: 'none',
-              cursor: 'pointer',
-            }}
+            className="amt-brand-link"
           >
-            <span style={{
-              fontFamily: 'Cairo,sans-serif',
-              fontSize: 11,
-              fontWeight: 700,
-              letterSpacing: '0.18em',
-              textTransform: 'uppercase',
-              color: 'rgba(255,255,255,0.75)',
-              animation: 'amtPulse 2.5s ease-in-out infinite',
-            }}>Powered by AMT Smart Systems</span>
+            <span className="amt-brand-text">Powered by AMT Smart Systems</span>
           </a>
         </div>
       </div>

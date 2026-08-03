@@ -98,4 +98,50 @@
 
   .animate-fade-up  { animation: fadeUp 0.65s ease-out forwards; }
   .animate-scale-in { animation: scaleIn 0.5s ease-out forwards; }
+
+  /* ── AMT Branding Watermark ── */
+  @keyframes amtPulse {
+    0%, 100% { opacity: 0.55; }
+    50%       { opacity: 1;    }
+  }
+
+  /* The glass pill wrapper for the watermark link */
+  .amt-brand-link {
+    display: inline-flex !important;
+    align-items: center !important;
+    padding: 10px 22px !important;
+    border-radius: 14px !important;
+    background: rgba(255,255,255,0.07) !important;
+    backdrop-filter: blur(12px) !important;
+    -webkit-backdrop-filter: blur(12px) !important;
+    border: 1px solid rgba(255,255,255,0.15) !important;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.18), inset 0 1px 0 rgba(255,255,255,0.12) !important;
+    text-decoration: none !important;
+    cursor: pointer !important;
+    transition: transform 0.2s, box-shadow 0.2s !important;
+  }
+  .amt-brand-link:hover {
+    transform: scale(1.05) !important;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.28), inset 0 1px 0 rgba(255,255,255,0.22) !important;
+  }
+  /* Dark background variant (for light-background themes) */
+  .amt-brand-link.dark-bg {
+    background: rgba(0,0,0,0.06) !important;
+    border: 1px solid rgba(0,0,0,0.12) !important;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.5) !important;
+  }
+  /* The text inside the watermark */
+  .amt-brand-text {
+    font-family: Cairo, sans-serif !important;
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.18em !important;
+    text-transform: uppercase !important;
+    color: rgba(255,255,255,0.75) !important;
+    text-decoration: none !important;
+    animation: amtPulse 2.5s ease-in-out infinite !important;
+  }
+  .amt-brand-text.dark-text {
+    color: rgba(40,40,40,0.65) !important;
+  }
 }
