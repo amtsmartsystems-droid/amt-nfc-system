@@ -713,51 +713,34 @@ export default function ClientCardViewer({ initialCard, cardId, searchParams, is
 
                             {/* ════════ AMT Branding Footer ════════ */}
                             <div style={{ textAlign:'center', padding:'18px 16px 28px' }}>
-                                <style>{`
-                                  @keyframes amt-shimmer2 {
-                                    0%   { background-position: -200% center; }
-                                    100% { background-position:  200% center; }
-                                  }
-                                  .amt-wm2-link {
-                                    all: unset;
-                                    cursor: pointer;
-                                    display: inline-flex;
-                                    align-items: center;
-                                    padding: 10px 20px;
-                                    border-radius: 14px;
-                                    background: rgba(0,0,0,0.06);
-                                    backdrop-filter: blur(12px);
-                                    -webkit-backdrop-filter: blur(12px);
-                                    border: 1px solid rgba(0,0,0,0.10);
-                                    box-shadow: 0 4px 24px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.5);
-                                    transition: transform 0.2s, box-shadow 0.2s;
-                                  }
-                                  .amt-wm2-link:hover {
-                                    transform: scale(1.05);
-                                    box-shadow: 0 8px 32px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.7);
-                                  }
-                                  .amt-wm2-text {
-                                    font-family: Cairo,sans-serif;
-                                    font-size: 11px;
-                                    font-weight: 700;
-                                    letter-spacing: 0.18em;
-                                    text-transform: uppercase;
-                                    background: linear-gradient(110deg, rgba(80,80,80,0.5) 25%, rgba(30,30,30,1) 50%, rgba(80,80,80,0.5) 75%);
-                                    background-size: 200% auto;
-                                    -webkit-background-clip: text;
-                                    background-clip: text;
-                                    -webkit-text-fill-color: transparent;
-                                    color: transparent;
-                                    animation: amt-shimmer2 2.5s linear infinite;
-                                  }
-                                `}</style>
+                                <style>{`@keyframes amtPulse{0%,100%{opacity:.5}50%{opacity:.9}}`}</style>
                                 <a
                                     href="https://amt-nfc-system.vercel.app/AMT"
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="amt-wm2-link"
+                                    style={{
+                                        display: 'inline-flex',
+                                        alignItems: 'center',
+                                        padding: '10px 22px',
+                                        borderRadius: 14,
+                                        background: 'rgba(0,0,0,0.06)',
+                                        backdropFilter: 'blur(12px)',
+                                        WebkitBackdropFilter: 'blur(12px)',
+                                        border: '1px solid rgba(0,0,0,0.10)',
+                                        boxShadow: '0 4px 24px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.5)',
+                                        textDecoration: 'none',
+                                        cursor: 'pointer',
+                                    }}
                                 >
-                                    <span className="amt-wm2-text">Powered by AMT Smart Systems</span>
+                                    <span style={{
+                                        fontFamily: 'Cairo,sans-serif',
+                                        fontSize: 11,
+                                        fontWeight: 700,
+                                        letterSpacing: '0.18em',
+                                        textTransform: 'uppercase',
+                                        color: 'rgba(60,60,60,0.7)',
+                                        animation: 'amtPulse 2.5s ease-in-out infinite',
+                                    }}>Powered by AMT Smart Systems</span>
                                 </a>
                             </div>
                         </div>
