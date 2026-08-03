@@ -64,31 +64,32 @@ function GlowLinkCard({ link, accent, cardId, t, handleMenuClick, handleOffersCl
       ref={btnRef}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
-      className="flex items-center gap-4 w-full p-4 rounded-2xl relative overflow-hidden group"
+      className="flex items-center gap-4 w-full p-4 rounded-2xl relative overflow-hidden group transition-all duration-400"
       style={{
-        background: "rgba(255,255,255,0.03)",
-        backdropFilter: "blur(20px)",
-        WebkitBackdropFilter: "blur(20px)",
-        border: "1px solid rgba(255,255,255,0.06)",
-        boxShadow: "0 10px 40px rgba(0,0,0,0.5)",
-        transition: "transform 0.3s cubic-bezier(0.25,0.46,0.45,0.94), box-shadow 0.3s ease, border-color 0.3s ease",
+        background: "rgba(255, 255, 255, 0.03)",
+        backdropFilter: "blur(16px)",
+        WebkitBackdropFilter: "blur(16px)",
+        border: "1px solid rgba(255, 255, 255, 0.06)",
+        boxShadow: "0 4px 20px rgba(0,0,0,0.05), inset 0 1px 0 rgba(255,255,255,0.1)"
       }}
       onMouseEnter={e => {
         e.currentTarget.style.transform = "translateY(-2px)";
-        e.currentTarget.style.boxShadow = `0 8px 40px rgba(0,0,0,0.5), 0 0 0 1px rgba(var(--primary-rgb),0.4), inset 0 1px 0 rgba(255,255,255,0.08)`;
+        e.currentTarget.style.boxShadow = `0 8px 30px rgba(0,0,0,0.05), 0 0 0 1px rgba(var(--primary-rgb),0.4), inset 0 1px 0 rgba(255,255,255,0.8)`;
         e.currentTarget.style.borderColor = "rgba(var(--primary-rgb),0.5)";
+        e.currentTarget.style.background = "rgba(255,255,255,0.4)";
       }}
       onMouseOut={e => {
         e.currentTarget.style.transform = "translateY(0)";
-        e.currentTarget.style.boxShadow = "0 4px 24px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.05)";
-        e.currentTarget.style.borderColor = "rgba(255,255,255,0.08)";
+        e.currentTarget.style.boxShadow = "0 4px 20px rgba(0,0,0,0.03), inset 0 1px 0 rgba(255,255,255,0.5)";
+        e.currentTarget.style.borderColor = "rgba(255,255,255,0.2)";
+        e.currentTarget.style.background = "rgba(255, 255, 255, 0.08)";
       }}
     >
       {/* Proximity glow spot */}
       <div
         className="pointer-events-none absolute inset-0 rounded-2xl transition-opacity duration-300"
         style={{
-          background: `radial-gradient(200px circle at ${glowPos.x}% ${glowPos.y}%, rgba(var(--primary-rgb),0.18), transparent 70%)`,
+          background: `radial-gradient(250px circle at ${glowPos.x}% ${glowPos.y}%, rgba(var(--primary-rgb),0.18), transparent 70%)`,
           opacity: glowPos.opacity,
         }}
       />
@@ -107,40 +108,32 @@ function GlowLinkCard({ link, accent, cardId, t, handleMenuClick, handleOffersCl
 
       {/* Icon */}
       <div
-        className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 relative z-10 transition-all duration-500 group-hover:scale-105 overflow-hidden"
+        className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 relative z-10 transition-all duration-500 group-hover:scale-105"
         style={{
-          background: "rgba(var(--primary-rgb),0.08)",
-          border: "1px solid rgba(var(--primary-rgb),0.2)",
-          boxShadow: "0 0 0 0 rgba(var(--primary-rgb),0)",
+          background: "transparent",
           transition: "all 0.4s ease",
         }}
-        onMouseEnter={e => { e.currentTarget.style.boxShadow = "0 0 20px rgba(var(--primary-rgb),0.35)"; }}
-        onMouseLeave={e => { e.currentTarget.style.boxShadow = "0 0 0 0 rgba(var(--primary-rgb),0)"; }}
       >
         {link.iconUrl ? (
           <img src={link.iconUrl} alt={label} className="w-full h-full object-cover" />
         ) : (
-          <IconComponent size={22} style={{ color: "var(--primary-color)", filter: "drop-shadow(0 0 6px rgba(var(--primary-rgb),0.5))" }} />
+          <IconComponent size={24} style={{ color: accent, filter: `drop-shadow(0 2px 4px rgba(0,0,0,0.1))` }} />
         )}
       </div>
 
       {/* Label */}
       <span
-        className="font-semibold text-white tracking-wide flex-1 relative z-10 text-[15.5px]"
-        style={{ fontFamily: "Cairo,sans-serif", letterSpacing: "0.01em" }}
+        className="font-bold tracking-wide flex-1 relative z-10 text-[15.5px]"
+        style={{ color: accent, fontFamily: "Cairo,sans-serif", letterSpacing: "0.01em" }}
       >
         {label}
       </span>
 
       {/* Arrow */}
       <div
-        className="w-8 h-8 rounded-full flex items-center justify-center relative z-10 flex-shrink-0 transition-all duration-500 group-hover:rotate-45"
-        style={{
-          background: "rgba(var(--primary-rgb),0.08)",
-          border: "1px solid rgba(var(--primary-rgb),0.2)",
-        }}
+        className="w-8 h-8 flex items-center justify-center relative z-10 flex-shrink-0 transition-all duration-500 group-hover:rotate-45"
       >
-        <LucideIcons.ArrowUpRight size={14} style={{ color: "rgba(var(--primary-rgb),0.7)" }} />
+        <LucideIcons.ArrowUpRight size={18} style={{ color: accent, opacity: 0.7 }} />
       </div>
     </a>
   );
@@ -276,7 +269,6 @@ export default function MaroufCoffeeTheme({ cardId, siteData, siteColors, lang =
 
   // ════ LAYOUT BLOCKS ════
   const defaultBlocks = [
-    { id: "terrarium_bio", type: "terrarium_bio" },
     { id: "header", type: "header" },
     { id: "menu_button", type: "menu_button" },
     { id: "info", type: "info" },
@@ -298,6 +290,8 @@ export default function MaroufCoffeeTheme({ cardId, siteData, siteColors, lang =
     const headerIdx = layoutBlocks.findIndex(b => b.type === "header");
     const insertAt = headerIdx >= 0 ? headerIdx + 1 : 0;
     layoutBlocks.splice(insertAt, 0, { id: "terrarium_bio", type: "terrarium_bio" });
+  } else if (!isTerrariumMode) {
+    layoutBlocks = layoutBlocks.filter(b => b.type !== "terrarium_bio");
   }
 
   // ── Terrarium Age Calculator (auto-start from today if no date set) ──
@@ -927,13 +921,42 @@ export default function MaroufCoffeeTheme({ cardId, siteData, siteColors, lang =
         )}
 
         {/* ── WATERMARK ── */}
-        <div className="text-center pb-8 pt-2">
-          <p
-            className="text-[11px] font-semibold tracking-[0.2em] uppercase"
-            style={{ color: "rgba(255,255,255,0.2)", fontFamily: "Cairo,sans-serif" }}
+        <div className="text-center pb-8 pt-2 flex justify-center">
+          <style>{`
+            @keyframes watermark-shine-light {
+              0% { background-position: -200% center; }
+              100% { background-position: 200% center; }
+            }
+          `}</style>
+          <a
+            href="https://amt-nfc-system.vercel.app/AMT"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl transition-all duration-300 hover:scale-105"
+            style={{
+              textDecoration: "none",
+              background: "rgba(255, 255, 255, 0.08)",
+              backdropFilter: "blur(16px)",
+              WebkitBackdropFilter: "blur(16px)",
+              border: "1px solid rgba(255, 255, 255, 0.2)",
+              boxShadow: "0 4px 20px rgba(0,0,0,0.05), inset 0 1px 0 rgba(255,255,255,0.1)"
+            }}
           >
-            Powered by AMT Smart Systems
-          </p>
+            <span
+              className="text-[11px] font-semibold tracking-[0.2em] uppercase"
+              style={{
+                fontFamily: "Cairo,sans-serif",
+                background: "linear-gradient(110deg, rgba(255,255,255,0.2) 30%, rgba(255,255,255,0.8) 50%, rgba(255,255,255,0.2) 70%)",
+                backgroundSize: "200% auto",
+                color: "transparent",
+                WebkitBackgroundClip: "text",
+                backgroundClip: "text",
+                animation: "watermark-shine-light 3s linear infinite"
+              }}
+            >
+              Powered by AMT Smart Systems
+            </span>
+          </a>
         </div>
       </div>
 

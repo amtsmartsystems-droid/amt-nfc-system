@@ -63,11 +63,14 @@ export default function CafeTheme1({ cardId, siteData, siteColors, lang = "en", 
         onClick={handleClick}
         target={link.url && link.url !== "#" ? "_blank" : undefined}
         rel="noopener noreferrer"
-        className="group flex items-center justify-center w-full py-[18px] rounded-full font-semibold text-[14.5px] transition-all duration-300 hover:scale-[1.02] hover:shadow-xl active:scale-[0.97]"
+        className="group flex items-center justify-center w-full py-[18px] rounded-full font-semibold text-[14.5px] transition-all duration-300 hover:scale-[1.02] active:scale-[0.97]"
         style={{
-          background: "rgba(255,255,255,0.97)",
-          color: bgDark,
-          boxShadow: "0 4px 20px rgba(0,0,0,0.30)",
+          background: "rgba(255, 255, 255, 0.03)",
+          backdropFilter: "blur(16px)",
+          WebkitBackdropFilter: "blur(16px)",
+          border: "1px solid rgba(255, 255, 255, 0.06)",
+          color: "#fff",
+          boxShadow: "0 4px 20px rgba(0,0,0,0.05), inset 0 1px 0 rgba(255,255,255,0.1)",
           fontFamily: "Cairo, sans-serif",
           letterSpacing: "0.02em",
         }}

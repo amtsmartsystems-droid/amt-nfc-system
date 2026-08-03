@@ -91,7 +91,7 @@ const Label = ({ children }) => (
 // ─────────────────────────────────────────────────────────────────────
 // مكوّن منتقي القوالب — يجمع بين القائمة المنسدلة وإعادة التسمية
 // ─────────────────────────────────────────────────────────────────────
-function ThemeDropdown({ themes, selectedThemeId, onSelect }) {
+function ThemeDropdown({ themes, selectedThemeId, onSelect, onSaveName }) {
   // قائمة القوالب مع إمكانية تخصيص الأسماء محلياً
   const [localThemes, setLocalThemes] = useState(themes);
   // هل وضع التعديل مفعّل؟
@@ -111,10 +111,14 @@ function ThemeDropdown({ themes, selectedThemeId, onSelect }) {
 
   // حفظ الاسم الجديد عند الخروج من حقل النص
   const commitEdit = () => {
-    if (editText.trim()) {
+    if (editText.trim() && editText.trim() !== currentTheme.label) {
+      const newName = editText.trim();
       setLocalThemes(prev =>
-        prev.map(t => t.id === selectedThemeId ? { ...t, label: editText.trim() } : t)
+        prev.map(t => t.id === selectedThemeId ? { ...t, label: newName } : t)
       );
+      if (onSaveName) {
+        onSaveName(selectedThemeId, newName);
+      }
     }
     setIsEditing(false);
   };
@@ -244,6 +248,10 @@ function PageContent() {
   const [refreshingStats,    setRefreshingStats]    = useState(false);
   const [categories,         setCategories]         = useState(DEFAULT_THEMES); // Dynamic categories
   const [isCategoryManagerOpen, setIsCategoryManagerOpen] = useState(false);
+  const [batchInfo, setBatchInfo] = useState({ isBatch: false, batchName: '', batchSerial: null, isMerged: false, mergeStart: null, mergeEnd: null });
+  const [mergeStartInput, setMergeStartInput] = useState('');
+  const [mergeEndInput, setMergeEndInput] = useState('');
+  const [merging, setMerging] = useState(false);
   const isSuspended = subscriptionStatus === 'suspended' || !allowEditing;
 
   useEffect(() => { 
@@ -269,8 +277,8 @@ function PageContent() {
       }
     }).catch(() => {});
 
-    // Auto-load card if ?id=xyz is present
-    const idParam = searchParams.get('id');
+    // Auto-load card if ?id=xyz or ?cardId=xyz is present
+    const idParam = searchParams.get('id') || searchParams.get('cardId');
     if (idParam) {
       setTargetCardId(idParam);
       // Wait a tick for state to settle then fetch
@@ -282,6 +290,32 @@ function PageContent() {
 
   const showToast = (msg, ok=true) => {
     setToast({msg,ok}); setTimeout(()=>setToast({msg:"",ok:true}), 3500);
+  };
+
+  const handleSaveThemeName = async (themeId, newName) => {
+    if (currentUserRole !== 'Super_Admin') {
+      showToast("عذراً، فقط المدير العام يمكنه تغيير اسم القالب", false);
+      return;
+    }
+    const newCategories = categories.map(cat => ({
+      ...cat,
+      themes: cat.themes.map(th => th.id === themeId ? { ...th, label: newName } : th)
+    }));
+    setCategories(newCategories);
+    try {
+      const res = await fetch('/api/admin/settings', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ categories: newCategories })
+      });
+      if (res.ok) {
+        showToast("✅ تم تغيير اسم القالب وحفظه لجميع البطاقات");
+      } else {
+        throw new Error("فشل الحفظ");
+      }
+    } catch (e) {
+      showToast("❌ حدث خطأ أثناء الحفظ", false);
+    }
   };
 
   const up = (key, val) => setSiteData(p => ({...p, [key]: val}));
@@ -459,6 +493,32 @@ function PageContent() {
     }
   };
 
+  const handleSaveAndApplyToBatch = async () => {
+    if (!batchInfo.isBatch) return;
+    
+    // First save current card normally
+    await handleSavePublish();
+
+    // Then apply to rest of the batch
+    setSaving(true);
+    try {
+      const res = await fetch(`/api/cards/${targetCardId}/apply-to-batch`, {
+        method: "POST",
+      });
+      const data = await res.json();
+      if (res.ok) {
+        showToast(`✅ تم التطبيق على ${data.modifiedCount} بطاقة أخرى`);
+      } else {
+        showToast(data.error || "❌ فشل التطبيق على المجموعة", false);
+      }
+    } catch (error) {
+      console.error(error);
+      showToast("❌ حدث خطأ غير متوقع", false);
+    } finally {
+      setSaving(false);
+    }
+  };
+
   // ══ Save Card Mapping (per-physical-card destination URL) ══
   const handleSaveCardMapping = async () => {
     if (!targetCardId.trim()) return showToast("⚠️ يرجى تحديد رقم البطاقة أولاً", false);
@@ -535,6 +595,17 @@ function PageContent() {
             return newData;
         });
       }
+      
+      // Update batch info so the Apply to Batch button shows up
+      setBatchInfo({
+        isBatch: data.isBatch || false,
+        batchName: data.batchName || '',
+        batchSerial: data.batchSerial || null,
+        isMerged: data.isMerged || false,
+        mergeStart: data.mergeStart || null,
+        mergeEnd: data.mergeEnd || null
+      });
+
       // ── Restore cardType + theme (normalize old DB values) ──
       if (data.cardType) {
         setCardType(data.cardType);
@@ -798,6 +869,40 @@ function PageContent() {
     );
   }
 
+  // ── 6. Merge Cards Logic ──
+  const handleMergeCards = async () => {
+    if (!batchInfo.isBatch) return;
+    if (!mergeStartInput || !mergeEndInput) return alert('أدخل نطاق الدمج');
+    
+    const start = parseInt(mergeStartInput);
+    const end = parseInt(mergeEndInput);
+    if (start >= end) return alert('يجب أن تكون البداية أصغر من النهاية');
+
+    setMerging(true);
+    try {
+      const res = await fetch('/api/admin/cards/merge', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          batchName: batchInfo.batchName,
+          startSerial: start,
+          endSerial: end
+        })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        alert(data.message || 'تم الدمج بنجاح');
+        setBatchInfo(prev => ({ ...prev, isMerged: true, mergeStart: start, mergeEnd: end }));
+      } else {
+        alert(data.error || 'خطأ في الدمج');
+      }
+    } catch (err) {
+      alert('حدث خطأ');
+    } finally {
+      setMerging(false);
+    }
+  };
+
 
   // ── Admin split-screen layout ──
     return (
@@ -844,6 +949,64 @@ function PageContent() {
                     لانتهاء الاشتراك. يرجى التواصل مع الإدارة لتفعيل الحساب.
                   </p>
                 </div>
+              </div>
+            )}
+
+            {/* ════ BATCH NAVIGATION UI ════ */}
+            {batchInfo.isBatch && (
+              <div className="mb-4 p-4 rounded-2xl bg-blue-500/10 border border-blue-500/30 text-white">
+                <div className="flex items-center justify-between mb-3">
+                  <div>
+                    <h3 className="text-[13px] font-bold text-blue-400 flex items-center gap-1.5">
+                      <LucideIcons.Briefcase size={14} />
+                      مجموعة: {batchInfo.batchName}
+                    </h3>
+                    <div className="flex items-center gap-3 mt-1">
+                      <p className="text-[11px] text-blue-200/70">
+                        {batchInfo.isMerged 
+                          ? `بطاقة مدمجة (الأرقام: ${batchInfo.mergeStart} إلى ${batchInfo.mergeEnd})`
+                          : `تعديل البطاقة رقم #${batchInfo.batchSerial}`
+                        }
+                      </p>
+                      <a href="/admin/cards" className="text-[10px] text-blue-400 hover:text-blue-300 underline font-bold">العودة للوحة</a>
+                    </div>
+                  </div>
+                  {batchInfo.isMerged && (
+                    <div className="px-2 py-1 bg-blue-500/20 text-blue-400 text-[10px] rounded font-bold">
+                      مدمجة
+                    </div>
+                  )}
+                </div>
+
+                {!batchInfo.isMerged && (
+                  <div className="mt-4 pt-3 border-t border-blue-500/20">
+                    <p className="text-[10px] font-bold text-blue-300 mb-2">دمج عدة بطاقات مع هذه البطاقة:</p>
+                    <div className="flex items-center gap-2">
+                      <input 
+                        type="number" 
+                        placeholder="من رقم" 
+                        value={mergeStartInput}
+                        onChange={e => setMergeStartInput(e.target.value)}
+                        className="w-full bg-black/40 border border-blue-500/30 rounded px-2 py-1 text-xs outline-none focus:border-blue-400"
+                      />
+                      <span className="text-blue-500">-</span>
+                      <input 
+                        type="number" 
+                        placeholder="إلى رقم" 
+                        value={mergeEndInput}
+                        onChange={e => setMergeEndInput(e.target.value)}
+                        className="w-full bg-black/40 border border-blue-500/30 rounded px-2 py-1 text-xs outline-none focus:border-blue-400"
+                      />
+                      <button 
+                        onClick={handleMergeCards}
+                        disabled={merging}
+                        className="bg-blue-500 hover:bg-blue-400 text-black px-3 py-1 rounded text-xs font-bold transition-all disabled:opacity-50 whitespace-nowrap"
+                      >
+                        {merging ? 'جاري...' : 'دمج'}
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 
@@ -976,6 +1139,7 @@ function PageContent() {
                             themes={activeCategory.themes}
                             selectedThemeId={theme}
                             onSelect={(id) => switchTheme(id)}
+                            onSaveName={handleSaveThemeName}
                         />
                     );
                 }
@@ -991,6 +1155,18 @@ function PageContent() {
                 {saving ? <LucideIcons.Loader2 size={14} className="animate-spin" /> : <LucideIcons.Send size={14} />}
                 {isSuspended && currentUserRole !== 'Super_Admin' ? 'التعديل معلق ⛔' : 'حفظ ونشر التعديلات (Publish)'}
               </button>
+
+              {batchInfo?.isBatch && (
+                <button
+                  onClick={handleSaveAndApplyToBatch}
+                  disabled={saving || (isSuspended && currentUserRole !== 'Super_Admin')}
+                  className="mt-2 w-full flex items-center justify-center gap-2 py-2.5 rounded-xl font-black text-[12px] transition-all shadow-[0_0_15px_rgba(59,130,246,0.3)] disabled:opacity-40 disabled:cursor-not-allowed"
+                  style={{ background: isSuspended && currentUserRole !== 'Super_Admin' ? '#4b5563' : '#3b82f6', color: '#fff' }}
+                >
+                  {saving ? <LucideIcons.Loader2 size={14} className="animate-spin" /> : <LucideIcons.CopyCheck size={14} />}
+                  حفظ وتطبيق على كافة المجموعة
+                </button>
+              )}
 
 
               {publishedUrl && (

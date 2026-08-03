@@ -10,7 +10,7 @@ export async function GET(req) {
         
         // Fetch all created cards, sorting newest first
         const cards = await Card.find({})
-            .select('_id shortCode cardType businessName siteData.name createdAt')
+            .select('_id shortCode cardType businessName siteData.name createdAt batchName isBatch batchSerial isMerged mergeStart mergeEnd')
             .sort({ createdAt: -1 })
             .lean();
 
@@ -20,7 +20,13 @@ export async function GET(req) {
             cardId: card.shortCode, // The custom 123 identifier
             cardType: card.cardType || 'restaurant', // e.g. Restaurant, Business
             title: card.businessName || card.siteData?.name || `Card ${card.shortCode}`,
-            createdAt: card.createdAt
+            createdAt: card.createdAt,
+            batchName: card.batchName,
+            isBatch: card.isBatch,
+            batchSerial: card.batchSerial,
+            isMerged: card.isMerged,
+            mergeStart: card.mergeStart,
+            mergeEnd: card.mergeEnd
         }));
 
         return NextResponse.json(formattedCards);
@@ -69,8 +75,17 @@ export async function DELETE(req) {
         const Card = (await import('../../../../backend/models/Card')).default;
         await connectDB();
         const url = new URL(req.url);
+        
+        const idsParam = url.searchParams.get('ids');
+        if (idsParam) {
+            const idsArray = idsParam.split(',');
+            await Card.deleteMany({ _id: { $in: idsArray } });
+            return new Response(JSON.stringify({ success: true, deletedCount: idsArray.length }));
+        }
+
         const id = url.searchParams.get('id');
-        if (!id) return new Response(JSON.stringify({ error: 'ID is required' }), { status: 400 });
+        if (!id) return new Response(JSON.stringify({ error: 'ID or IDs are required' }), { status: 400 });
+        
         await Card.findByIdAndDelete(id);
         return new Response(JSON.stringify({ success: true }));
     } catch (error) {

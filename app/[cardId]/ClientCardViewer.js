@@ -468,7 +468,7 @@ export default function ClientCardViewer({ initialCard, cardId, searchParams, is
        No white wrapper, no floating pill buttons (not needed here)
     ════════════════════════════════════════════════════════════════ */
     if (card.cardType === 'business_card') {
-        return <AMTBusinessCard />;
+        return <AMTBusinessCard siteData={siteData} cardId={cardId} />;
     }
 
     /* ════════════════════════════════════════════════════════════════
@@ -718,25 +718,40 @@ export default function ClientCardViewer({ initialCard, cardId, searchParams, is
                                 borderTop:  '1px solid rgba(0,0,0,0.06)',
                                 background: 'rgba(0,0,0,0.02)',
                             }}>
+                                <style>{`
+                                  @keyframes universal-watermark-shine {
+                                    0% { background-position: -200% center; }
+                                    100% { background-position: 200% center; }
+                                  }
+                                `}</style>
                                 <a
-                                    href="/amt"
+                                    href="https://amt-nfc-system.vercel.app/AMT"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="inline-flex items-center gap-2 px-4 py-2 rounded-xl transition-all duration-300 hover:scale-105"
                                     style={{
-                                        display:        'inline-flex',
-                                        alignItems:     'center',
-                                        gap:            5,
-                                        fontSize:       11,
-                                        fontWeight:     700,
-                                        color:          'rgba(0,0,0,0.30)',
-                                        textDecoration: 'none',
-                                        fontFamily:     'Cairo,sans-serif',
-                                        transition:     'color 0.2s',
-                                        letterSpacing:  '0.02em',
+                                        textDecoration: "none",
+                                        background: "rgba(255, 255, 255, 0.08)",
+                                        backdropFilter: "blur(16px)",
+                                        WebkitBackdropFilter: "blur(16px)",
+                                        border: "1px solid rgba(255, 255, 255, 0.2)",
+                                        boxShadow: "0 4px 20px rgba(0,0,0,0.05), inset 0 1px 0 rgba(255,255,255,0.1)"
                                     }}
-                                    onMouseOver={e  => e.currentTarget.style.color = '#f5c518'}
-                                    onMouseOut={e   => e.currentTarget.style.color = 'rgba(0,0,0,0.30)'}
                                 >
-                                    <span>⚡</span>
-                                    <span>Powered by AMT Smart</span>
+                                    <span
+                                        className="text-[12px] font-bold tracking-[0.15em] uppercase"
+                                        style={{
+                                            fontFamily: "Cairo,sans-serif",
+                                            background: "linear-gradient(110deg, rgba(150,150,150,0.6) 30%, rgba(255,255,255,1) 50%, rgba(150,150,150,0.6) 70%)",
+                                            backgroundSize: "200% auto",
+                                            color: "transparent",
+                                            WebkitBackgroundClip: "text",
+                                            backgroundClip: "text",
+                                            animation: "universal-watermark-shine 3s linear infinite"
+                                        }}
+                                    >
+                                        Powered by AMT Smart Systems
+                                    </span>
                                 </a>
                             </div>
                         </div>

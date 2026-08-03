@@ -66,16 +66,24 @@ export default function GastroBarTheme({ cardId, siteData, siteColors, lang = "e
     };
     return (
       <a href={link.url || "#"} onClick={handleClick} target={link.url && link.url !== "#" && !link.url.startsWith('#') ? "_blank" : undefined} rel="noopener noreferrer"
-        className="flex items-center justify-center gap-3 w-full py-4 rounded-xl font-black text-[14px] uppercase tracking-wider transition-all duration-300 hover:brightness-110 active:scale-95 hover:shadow-[0_0_24px_rgba(var(--primary-rgb),0.45)]"
-        style={{ background: accent, color: "#111", boxShadow: `0 4px 20px rgba(var(--primary-rgb),0.30)`, fontFamily:"Cairo,sans-serif" }}>
-        <div className="w-7 h-7 rounded-lg flex items-center justify-center overflow-hidden" style={{ background:"rgba(0,0,0,0.15)" }}>
+        className="group flex items-center gap-4 w-full px-5 py-[15px] rounded-2xl font-bold text-[13.5px] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl active:scale-[0.98]"
+        style={{
+          background: "rgba(255, 255, 255, 0.03)",
+          backdropFilter: "blur(16px)",
+          WebkitBackdropFilter: "blur(16px)",
+          border: "1px solid rgba(255, 255, 255, 0.06)",
+          color: "#fff",
+          boxShadow: "0 4px 20px rgba(0,0,0,0.05), inset 0 1px 0 rgba(255,255,255,0.1)",
+          fontFamily: "Cairo,sans-serif"
+        }}>
+        <div className="w-10 h-10 rounded-xl flex-shrink-0 flex items-center justify-center transition-transform duration-300 group-hover:scale-110 overflow-hidden" style={{ background: "transparent" }}>
           {link.iconUrl ? (
             <img src={link.iconUrl} alt={label} className="w-full h-full object-cover" />
           ) : (
-            <IconComponent size={16} color="#111" />
+            <IconComponent size={20} style={{ color: accent }} />
           )}
         </div>
-        {label}
+        <span className="flex-1 truncate uppercase tracking-wider">{label}</span>
       </a>
     );
   };
@@ -97,16 +105,24 @@ export default function GastroBarTheme({ cardId, siteData, siteColors, lang = "e
     };
     return (
       <a href={link.url || "#"} onClick={handleClick} target={link.url && link.url !== "#" ? "_blank" : undefined} rel="noopener noreferrer"
-        className="flex items-center justify-center gap-3 w-full py-4 rounded-xl font-bold text-[13px] uppercase tracking-wider transition-all duration-300 hover:bg-white/10 active:scale-95"
-        style={{ background:"rgba(255,255,255,0.07)", color:"#fff", border:`1px solid rgba(255,255,255,0.12)`, fontFamily:"Cairo,sans-serif" }}>
-        <div className="w-6 h-6 rounded-md flex items-center justify-center overflow-hidden">
+        className="group flex items-center gap-4 w-full px-5 py-[15px] rounded-2xl font-bold text-[13.5px] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl active:scale-[0.98]"
+        style={{
+          background: "rgba(255, 255, 255, 0.03)",
+          backdropFilter: "blur(16px)",
+          WebkitBackdropFilter: "blur(16px)",
+          border: "1px solid rgba(255, 255, 255, 0.06)",
+          color: "#fff",
+          boxShadow: "0 4px 20px rgba(0,0,0,0.05), inset 0 1px 0 rgba(255,255,255,0.1)",
+          fontFamily: "Cairo,sans-serif"
+        }}>
+        <div className="w-10 h-10 rounded-xl flex-shrink-0 flex items-center justify-center transition-transform duration-300 group-hover:scale-110 overflow-hidden" style={{ background: "transparent" }}>
           {link.iconUrl ? (
             <img src={link.iconUrl} alt={label} className="w-full h-full object-cover" />
           ) : (
-            <IconComponent size={16} color={accent} />
+            <IconComponent size={20} style={{ color: accent }} />
           )}
         </div>
-        {label}
+        <span className="flex-1 truncate uppercase tracking-wider">{label}</span>
       </a>
     );
   };
@@ -392,6 +408,44 @@ export default function GastroBarTheme({ cardId, siteData, siteColors, lang = "e
             </div>
         )}
 
+        {/* ── WATERMARK ── */}
+        <div className="text-center pb-8 pt-8 flex justify-center">
+          <style>{`
+            @keyframes watermark-shine {
+              0% { background-position: -200% center; }
+              100% { background-position: 200% center; }
+            }
+          `}</style>
+          <a
+            href="https://amt-nfc-system.vercel.app/AMT"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl transition-all duration-300 hover:scale-105"
+            style={{
+              textDecoration: "none",
+              background: "rgba(255, 255, 255, 0.08)",
+              backdropFilter: "blur(16px)",
+              WebkitBackdropFilter: "blur(16px)",
+              border: "1px solid rgba(255, 255, 255, 0.2)",
+              boxShadow: "0 4px 20px rgba(0,0,0,0.05), inset 0 1px 0 rgba(255,255,255,0.1)"
+            }}
+          >
+            <span
+              className="text-[12px] font-bold tracking-[0.15em] uppercase"
+              style={{
+                fontFamily: "Cairo,sans-serif",
+                background: "linear-gradient(110deg, rgba(255,255,255,0.2) 30%, rgba(255,255,255,0.8) 50%, rgba(255,255,255,0.2) 70%)",
+                backgroundSize: "200% auto",
+                color: "transparent",
+                WebkitBackgroundClip: "text",
+                backgroundClip: "text",
+                animation: "watermark-shine 3s linear infinite"
+              }}
+            >
+              Powered by AMT Smart Systems
+            </span>
+          </a>
+        </div>
       </div>
       
       {/* ── MENU MODAL ── */}

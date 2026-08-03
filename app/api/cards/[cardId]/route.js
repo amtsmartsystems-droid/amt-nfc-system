@@ -112,6 +112,12 @@ export async function GET(req, { params }) {
             cardMappings:       card.cardMappings || [],
             scanCount:          card.scanCount || 0,
             totalViews:         card.totalViews || 0,
+            batchName:          card.batchName || null,
+            isBatch:            card.isBatch || false,
+            batchSerial:        card.batchSerial || null,
+            isMerged:           card.isMerged || false,
+            mergeStart:         card.mergeStart || null,
+            mergeEnd:           card.mergeEnd || null,
         });
     } catch (error) {
         return NextResponse.json({ error: 'خطأ في الخادم' }, { status: 500 });

@@ -62,11 +62,12 @@ function GlowLinkCard({ link, accent, secondaryAccent, cardId, t, handleMenuClic
       onMouseLeave={handleMouseLeave}
       className="flex items-center gap-4 w-full p-4 rounded-2xl relative overflow-hidden group transition-all duration-400"
       style={{
-        background: "rgba(255,255,255,0.2)",
-        backdropFilter: "blur(12px)",
-        WebkitBackdropFilter: "blur(12px)",
-        border: "1px solid rgba(255,255,255,0.4)",
-        boxShadow: "0 4px 20px rgba(0,0,0,0.03), inset 0 1px 0 rgba(255,255,255,0.5)",
+        background: "rgba(255, 255, 255, 0.03)",
+        backdropFilter: "blur(16px)",
+        WebkitBackdropFilter: "blur(16px)",
+        border: "1px solid rgba(255, 255, 255, 0.06)",
+        boxShadow: "0 4px 20px rgba(0,0,0,0.05), inset 0 1px 0 rgba(255,255,255,0.1)",
+        color: "#1A1A1A"
       }}
       onMouseEnter={e => {
         e.currentTarget.style.transform = "translateY(-2px)";
@@ -119,8 +120,8 @@ function GlowLinkCard({ link, accent, secondaryAccent, cardId, t, handleMenuClic
 
       {/* Label */}
       <span
-        className="font-bold text-[#1A1A1A] tracking-wide flex-1 relative z-10 text-[15.5px]"
-        style={{ fontFamily: "Cairo,sans-serif", letterSpacing: "0.01em" }}
+        className="font-bold tracking-wide flex-1 relative z-10 text-[15.5px]"
+        style={{ color: accent, fontFamily: "Cairo,sans-serif", letterSpacing: "0.01em" }}
       >
         {label}
       </span>
@@ -138,7 +139,7 @@ function GlowLinkCard({ link, accent, secondaryAccent, cardId, t, handleMenuClic
 export default function RusticCafeTheme({ cardId, siteData, siteColors, lang = "en", isMenuEnabled, menuMode, isHouseSystemActive, menuCategories, addToCart, pdfMenuUrl, showMenuImages, isPreview, onUpdateLayoutBlocks }) {
   const accent     = siteColors?.primary || "#359BB0"; // Eshq Cyan
   const bgEarthy   = siteColors?.background || "#F6EFE6"; // Eshq Beige
-  const secAccent  = "#557A46"; // Earthy Green
+  const secAccent  = accent; // Unify secondary accent to be the same as primary accent
   
   const isAr    = lang === "ar";
   const [isMenuModalOpen, setIsMenuModalOpen] = useState(false);
@@ -329,7 +330,7 @@ export default function RusticCafeTheme({ cardId, siteData, siteColors, lang = "
                     <div className="flex items-center justify-center flex-shrink-0" style={{ width: '28px' }}>
                       <LucideIcons.MapPin size={22} style={{ color: secAccent }} />
                     </div>
-                    <div className="flex-1 text-[14.5px] leading-relaxed text-[#2C3E50] font-bold" style={{ fontFamily: "Cairo,sans-serif" }}>
+                    <div className="flex-1 text-[14.5px] leading-relaxed font-bold" style={{ color: accent, fontFamily: "Cairo,sans-serif" }}>
                       {address}
                     </div>
                   </div>
@@ -340,7 +341,7 @@ export default function RusticCafeTheme({ cardId, siteData, siteColors, lang = "
                     <div className="flex items-center justify-center flex-shrink-0" style={{ width: '28px' }}>
                       <LucideIcons.Clock size={22} style={{ color: secAccent }} />
                     </div>
-                    <div className="flex-1 text-[14.5px] leading-relaxed text-[#2C3E50] font-bold" style={{ fontFamily: "Cairo,sans-serif" }}>
+                    <div className="flex-1 text-[14.5px] leading-relaxed font-bold" style={{ color: accent, fontFamily: "Cairo,sans-serif" }}>
                       {hours}
                     </div>
                   </div>
@@ -477,13 +478,42 @@ export default function RusticCafeTheme({ cardId, siteData, siteColors, lang = "
         )}
 
         {/* ── WATERMARK ── */}
-        <div className="text-center pb-8 pt-8">
-          <p
-            className="text-[12px] font-bold tracking-[0.1em] uppercase"
-            style={{ color: "rgba(0,0,0,0.25)", fontFamily: "Cairo,sans-serif" }}
+        <div className="text-center pb-8 pt-8 flex justify-center">
+          <style>{`
+            @keyframes watermark-shine {
+              0% { background-position: -200% center; }
+              100% { background-position: 200% center; }
+            }
+          `}</style>
+          <a
+            href="https://amt-nfc-system.vercel.app/AMT"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl transition-all duration-300 hover:scale-105"
+            style={{
+              textDecoration: "none",
+              background: "rgba(255, 255, 255, 0.08)",
+              backdropFilter: "blur(16px)",
+              WebkitBackdropFilter: "blur(16px)",
+              border: "1px solid rgba(255, 255, 255, 0.2)",
+              boxShadow: "0 4px 20px rgba(0,0,0,0.05), inset 0 1px 0 rgba(255,255,255,0.1)"
+            }}
           >
-            Powered by AMT Smart Systems
-          </p>
+            <span
+              className="text-[12px] font-bold tracking-[0.15em] uppercase"
+              style={{
+                fontFamily: "Cairo,sans-serif",
+                background: "linear-gradient(110deg, rgba(0,0,0,0.4) 30%, rgba(0,0,0,0.9) 50%, rgba(0,0,0,0.4) 70%)",
+                backgroundSize: "200% auto",
+                color: "transparent",
+                WebkitBackgroundClip: "text",
+                backgroundClip: "text",
+                animation: "watermark-shine 3s linear infinite"
+              }}
+            >
+              Powered by AMT Smart Systems
+            </span>
+          </a>
         </div>
       </div>
 

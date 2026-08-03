@@ -58,9 +58,17 @@ export default function CafeTheme({ cardId, siteData, siteColors, lang = "en", i
         target={link.url && link.url !== "#" ? "_blank" : undefined}
         rel="noopener noreferrer"
         className="group flex items-center gap-4 w-full px-5 py-[15px] rounded-2xl font-bold text-[13.5px] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg active:scale-[0.98]"
-        style={{ background: primary, color:"#fff", boxShadow:`0 4px 18px rgba(var(--primary-rgb),.28)`, fontFamily:"Cairo,sans-serif" }}
+        style={{
+          background: "rgba(255, 255, 255, 0.03)",
+          backdropFilter: "blur(16px)",
+          WebkitBackdropFilter: "blur(16px)",
+          border: "1px solid rgba(255, 255, 255, 0.06)",
+          color: "#fff",
+          boxShadow: "0 4px 20px rgba(0,0,0,0.05), inset 0 1px 0 rgba(255,255,255,0.1)",
+          fontFamily: "Cairo,sans-serif"
+        }}
       >
-        <div className="w-10 h-10 rounded-2xl flex-shrink-0 flex items-center justify-center transition-transform duration-300 group-hover:scale-110 overflow-hidden" style={{ background: primary }}>
+        <div className="w-10 h-10 rounded-xl flex-shrink-0 flex items-center justify-center transition-transform duration-300 group-hover:scale-110 overflow-hidden" style={{ background: "transparent" }}>
           {link.iconUrl ? (
             <img src={link.iconUrl} alt={label} className="w-full h-full object-cover" />
           ) : (

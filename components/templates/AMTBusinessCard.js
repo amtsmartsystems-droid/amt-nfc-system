@@ -16,7 +16,7 @@ const WHATSAPP_URL = `https://wa.me/966782786585?text=${WHATSAPP_MSG}`;
 const DEMO_VIDEO_URL  = "https://youtu.be/dQw4w9WgXcQ";
 const DEMO_MENU_URL   = "/hanayen";
 
-export default function AMTBusinessCard({ siteData = {}, isPreview, onUpdateLayoutBlocks }) {
+export default function AMTBusinessCard({ siteData = {}, cardId, isPreview, onUpdateLayoutBlocks }) {
 
     // ════ LAYOUT BLOCKS SYSTEM ════
     const defaultBlocks = [
@@ -88,8 +88,14 @@ export default function AMTBusinessCard({ siteData = {}, isPreview, onUpdateLayo
                             </a>
                             <a href={DEMO_MENU_URL} target="_blank" rel="noopener noreferrer"
                                onClick={(e) => { if(isPreview) e.preventDefault(); }}
-                               className="flex items-center gap-4 px-5 py-4 rounded-2xl font-bold text-[13.5px] text-white transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl active:scale-[0.98]"
-                               style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.10)" }}>
+                               className="flex items-center gap-4 px-5 py-[15px] rounded-2xl font-bold text-[13.5px] text-white transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl active:scale-[0.98]"
+                               style={{
+                                 background: "rgba(255, 255, 255, 0.03)",
+                                 backdropFilter: "blur(16px)",
+                                 WebkitBackdropFilter: "blur(16px)",
+                                 border: "1px solid rgba(255, 255, 255, 0.06)",
+                                 boxShadow: "0 4px 20px rgba(0,0,0,0.05), inset 0 1px 0 rgba(255,255,255,0.1)"
+                               }}>
                                 <div className="w-10 h-10 rounded-xl flex-shrink-0 flex items-center justify-center pointer-events-none" style={{ background: "rgba(245,197,24,0.15)" }}>
                                     <LucideIcons.UtensilsCrossed size={18} color="#f5c518" />
                                 </div>
@@ -144,6 +150,12 @@ export default function AMTBusinessCard({ siteData = {}, isPreview, onUpdateLayo
                         </div>
                         <p className="text-[11.5px] text-center pointer-events-none" style={{ color: "rgba(255,255,255,0.30)", lineHeight: 1.7 }}>
                             © 2026 AMT Tech Solutions. جميع الحقوق محفوظة.
+                            {cardId && (
+                                <>
+                                    <br/>
+                                    <span style={{ opacity: 0.5 }}>Card ID: {cardId}</span>
+                                </>
+                            )}
                         </p>
                     </footer>
                 );

@@ -225,6 +225,14 @@ const cardSchema = new mongoose.Schema({
         default: [],
     },
 
+    // 💡 Batch System Fields 💡
+    batchName: { type: String, default: null },
+    isBatch: { type: Boolean, default: false },
+    batchSerial: { type: Number, default: null }, // e.g., 1, 2, ..., 50
+    isMerged: { type: Boolean, default: false },
+    mergeStart: { type: Number, default: null },
+    mergeEnd: { type: Number, default: null },
+
 }, { timestamps: true });
 
 delete mongoose.models.Card;
