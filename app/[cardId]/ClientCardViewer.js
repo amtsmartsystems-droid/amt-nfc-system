@@ -712,43 +712,52 @@ export default function ClientCardViewer({ initialCard, cardId, searchParams, is
                             })()}
 
                             {/* ════════ AMT Branding Footer ════════ */}
-                            <div style={{
-                                textAlign:  'center',
-                                padding:    '18px 16px 22px',
-                                borderTop:  '1px solid rgba(0,0,0,0.06)',
-                                background: 'rgba(0,0,0,0.02)',
-                            }}>
+                            <div style={{ textAlign:'center', padding:'18px 16px 28px' }}>
                                 <style>{`
-                                  @keyframes universal-watermark-shine {
-                                    0%   { opacity: 0.3; }
-                                    50%  { opacity: 1;   }
-                                    100% { opacity: 0.3; }
+                                  @keyframes amt-shimmer2 {
+                                    0%   { background-position: -200% center; }
+                                    100% { background-position:  200% center; }
+                                  }
+                                  .amt-wm2-link {
+                                    all: unset;
+                                    cursor: pointer;
+                                    display: inline-flex;
+                                    align-items: center;
+                                    padding: 10px 20px;
+                                    border-radius: 14px;
+                                    background: rgba(0,0,0,0.06);
+                                    backdrop-filter: blur(12px);
+                                    -webkit-backdrop-filter: blur(12px);
+                                    border: 1px solid rgba(0,0,0,0.10);
+                                    box-shadow: 0 4px 24px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.5);
+                                    transition: transform 0.2s, box-shadow 0.2s;
+                                  }
+                                  .amt-wm2-link:hover {
+                                    transform: scale(1.05);
+                                    box-shadow: 0 8px 32px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.7);
+                                  }
+                                  .amt-wm2-text {
+                                    font-family: Cairo,sans-serif;
+                                    font-size: 11px;
+                                    font-weight: 700;
+                                    letter-spacing: 0.18em;
+                                    text-transform: uppercase;
+                                    background: linear-gradient(110deg, rgba(80,80,80,0.5) 25%, rgba(30,30,30,1) 50%, rgba(80,80,80,0.5) 75%);
+                                    background-size: 200% auto;
+                                    -webkit-background-clip: text;
+                                    background-clip: text;
+                                    -webkit-text-fill-color: transparent;
+                                    color: transparent;
+                                    animation: amt-shimmer2 2.5s linear infinite;
                                   }
                                 `}</style>
                                 <a
                                     href="https://amt-nfc-system.vercel.app/AMT"
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="inline-flex items-center gap-2 px-4 py-2 rounded-xl transition-all duration-300 hover:scale-105"
-                                    style={{
-                                        textDecoration: "none",
-                                        background: "rgba(255, 255, 255, 0.05)",
-                                        backdropFilter: "blur(16px)",
-                                        WebkitBackdropFilter: "blur(16px)",
-                                        border: "1px solid rgba(255, 255, 255, 0.12)",
-                                        boxShadow: "0 4px 20px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.1)"
-                                    }}
+                                    className="amt-wm2-link"
                                 >
-                                    <span
-                                        className="text-[11px] font-bold tracking-[0.18em] uppercase"
-                                        style={{
-                                            fontFamily: "Cairo,sans-serif",
-                                            color: "rgba(255,255,255,0.55)",
-                                            animation: "universal-watermark-shine 3s ease-in-out infinite"
-                                        }}
-                                    >
-                                        Powered by AMT Smart Systems
-                                    </span>
+                                    <span className="amt-wm2-text">Powered by AMT Smart Systems</span>
                                 </a>
                             </div>
                         </div>

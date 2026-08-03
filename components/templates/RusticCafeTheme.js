@@ -477,39 +477,53 @@ export default function RusticCafeTheme({ cardId, siteData, siteColors, lang = "
           </div>
         )}
 
-        {/* ── WATERMARK ── */}
-        <div className="text-center pb-8 pt-8 flex justify-center">
+        {/* ── WATERMARK v3 ── */}
+        <div style={{ textAlign:'center', paddingBottom:32, paddingTop:32, display:'flex', justifyContent:'center' }}>
           <style>{`
-            @keyframes watermark-shine {
-              0%   { opacity: 0.25; }
-              50%  { opacity: 0.8;  }
-              100% { opacity: 0.25; }
+            @keyframes amt-shimmer-dark {
+              0%   { background-position: -200% center; }
+              100% { background-position:  200% center; }
+            }
+            .amt-wm-link-dark {
+              all: unset;
+              cursor: pointer;
+              display: inline-flex;
+              align-items: center;
+              padding: 10px 20px;
+              border-radius: 14px;
+              background: rgba(0,0,0,0.06);
+              backdrop-filter: blur(12px);
+              -webkit-backdrop-filter: blur(12px);
+              border: 1px solid rgba(0,0,0,0.12);
+              box-shadow: 0 4px 24px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.6);
+              transition: transform 0.2s, box-shadow 0.2s;
+            }
+            .amt-wm-link-dark:hover {
+              transform: scale(1.05);
+              box-shadow: 0 8px 32px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.8);
+            }
+            .amt-wm-text-dark {
+              font-family: Cairo,sans-serif;
+              font-size: 11px;
+              font-weight: 700;
+              letter-spacing: 0.18em;
+              text-transform: uppercase;
+              background: linear-gradient(110deg, rgba(0,0,0,0.3) 25%, rgba(0,0,0,0.8) 50%, rgba(0,0,0,0.3) 75%);
+              background-size: 200% auto;
+              -webkit-background-clip: text;
+              background-clip: text;
+              -webkit-text-fill-color: transparent;
+              color: transparent;
+              animation: amt-shimmer-dark 2.5s linear infinite;
             }
           `}</style>
           <a
             href="https://amt-nfc-system.vercel.app/AMT"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl transition-all duration-300 hover:scale-105"
-            style={{
-              textDecoration: "none",
-              background: "rgba(0, 0, 0, 0.05)",
-              backdropFilter: "blur(16px)",
-              WebkitBackdropFilter: "blur(16px)",
-              border: "1px solid rgba(0, 0, 0, 0.10)",
-              boxShadow: "0 4px 20px rgba(0,0,0,0.05), inset 0 1px 0 rgba(255,255,255,0.5)"
-            }}
+            className="amt-wm-link-dark"
           >
-            <span
-              className="text-[11px] font-bold tracking-[0.18em] uppercase"
-              style={{
-                fontFamily: "Cairo,sans-serif",
-                color: "rgba(0,0,0,0.5)",
-                animation: "watermark-shine 3s ease-in-out infinite"
-              }}
-            >
-              Powered by AMT Smart Systems
-            </span>
+            <span className="amt-wm-text-dark">Powered by AMT Smart Systems</span>
           </a>
         </div>
       </div>
