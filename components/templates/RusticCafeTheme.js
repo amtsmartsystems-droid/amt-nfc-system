@@ -481,8 +481,9 @@ export default function RusticCafeTheme({ cardId, siteData, siteColors, lang = "
         <div className="text-center pb-8 pt-8 flex justify-center">
           <style>{`
             @keyframes watermark-shine {
-              0% { background-position: -200% center; }
-              100% { background-position: 200% center; }
+              0%   { opacity: 0.25; }
+              50%  { opacity: 0.8;  }
+              100% { opacity: 0.25; }
             }
           `}</style>
           <a
@@ -492,23 +493,19 @@ export default function RusticCafeTheme({ cardId, siteData, siteColors, lang = "
             className="inline-flex items-center gap-2 px-4 py-2 rounded-xl transition-all duration-300 hover:scale-105"
             style={{
               textDecoration: "none",
-              background: "rgba(255, 255, 255, 0.03)",
+              background: "rgba(0, 0, 0, 0.05)",
               backdropFilter: "blur(16px)",
               WebkitBackdropFilter: "blur(16px)",
-              border: "1px solid rgba(255, 255, 255, 0.06)",
-              boxShadow: "0 4px 20px rgba(0,0,0,0.05), inset 0 1px 0 rgba(255,255,255,0.1)"
+              border: "1px solid rgba(0, 0, 0, 0.10)",
+              boxShadow: "0 4px 20px rgba(0,0,0,0.05), inset 0 1px 0 rgba(255,255,255,0.5)"
             }}
           >
             <span
-              className="text-[12px] font-bold tracking-[0.15em] uppercase"
+              className="text-[11px] font-bold tracking-[0.18em] uppercase"
               style={{
                 fontFamily: "Cairo,sans-serif",
-                background: "linear-gradient(110deg, rgba(0,0,0,0.4) 30%, rgba(0,0,0,0.9) 50%, rgba(0,0,0,0.4) 70%)",
-                backgroundSize: "200% auto",
-                color: "transparent",
-                WebkitBackgroundClip: "text",
-                backgroundClip: "text",
-                animation: "watermark-shine 3s linear infinite"
+                color: "rgba(0,0,0,0.5)",
+                animation: "watermark-shine 3s ease-in-out infinite"
               }}
             >
               Powered by AMT Smart Systems

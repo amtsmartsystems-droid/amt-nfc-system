@@ -720,8 +720,9 @@ export default function ClientCardViewer({ initialCard, cardId, searchParams, is
                             }}>
                                 <style>{`
                                   @keyframes universal-watermark-shine {
-                                    0% { background-position: -200% center; }
-                                    100% { background-position: 200% center; }
+                                    0%   { opacity: 0.3; }
+                                    50%  { opacity: 1;   }
+                                    100% { opacity: 0.3; }
                                   }
                                 `}</style>
                                 <a
@@ -731,23 +732,19 @@ export default function ClientCardViewer({ initialCard, cardId, searchParams, is
                                     className="inline-flex items-center gap-2 px-4 py-2 rounded-xl transition-all duration-300 hover:scale-105"
                                     style={{
                                         textDecoration: "none",
-                                        background: "rgba(255, 255, 255, 0.03)",
+                                        background: "rgba(255, 255, 255, 0.05)",
                                         backdropFilter: "blur(16px)",
                                         WebkitBackdropFilter: "blur(16px)",
-                                        border: "1px solid rgba(255, 255, 255, 0.06)",
-                                        boxShadow: "0 4px 20px rgba(0,0,0,0.05), inset 0 1px 0 rgba(255,255,255,0.1)"
+                                        border: "1px solid rgba(255, 255, 255, 0.12)",
+                                        boxShadow: "0 4px 20px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.1)"
                                     }}
                                 >
                                     <span
-                                        className="text-[12px] font-bold tracking-[0.15em] uppercase"
+                                        className="text-[11px] font-bold tracking-[0.18em] uppercase"
                                         style={{
                                             fontFamily: "Cairo,sans-serif",
-                                            background: "linear-gradient(110deg, rgba(150,150,150,0.6) 30%, rgba(255,255,255,1) 50%, rgba(150,150,150,0.6) 70%)",
-                                            backgroundSize: "200% auto",
-                                            color: "transparent",
-                                            WebkitBackgroundClip: "text",
-                                            backgroundClip: "text",
-                                            animation: "universal-watermark-shine 3s linear infinite"
+                                            color: "rgba(255,255,255,0.55)",
+                                            animation: "universal-watermark-shine 3s ease-in-out infinite"
                                         }}
                                     >
                                         Powered by AMT Smart Systems
