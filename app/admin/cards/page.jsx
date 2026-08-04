@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { LayoutTemplate, Plus, Search, Trash2, Key, ChevronRight, Loader2, Database, Briefcase, X } from 'lucide-react';
+import { LayoutTemplate, Plus, Search, Trash2, Key, ChevronRight, Loader2, Database, Briefcase, X, Link2, Copy, Check } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 export default function AdminCardsDirectory() {
@@ -25,6 +25,33 @@ export default function AdminCardsDirectory() {
   const [isCreatingBatch, setIsCreatingBatch] = useState(false);
   const [selectedBatch, setSelectedBatch] = useState(null);
   const [selectedCards, setSelectedCards] = useState([]);
+
+  // Partner Share Link Modal
+  const [shareGroup, setShareGroup] = useState(null); // { batchName, groupId }
+  const [groups, setGroups] = useState([]);            // loaded from /api/admin/groups
+  const [copiedLink, setCopiedLink] = useState(false);
+
+  // Fetch partner groups for share-link mapping
+  useEffect(() => {
+    fetch('/api/admin/groups')
+      .then(r => r.json())
+      .then(d => { if (d.success) setGroups(d.groups); })
+      .catch(() => {});
+  }, []);
+
+  function getGroupForBatch(batchName) {
+    return groups.find(g =>
+      (g.assignedCards || []).some(code =>
+        code.toUpperCase() === batchName.toUpperCase()
+      )
+    );
+  }
+
+  function handleCopyShareLink(link) {
+    navigator.clipboard.writeText(link);
+    setCopiedLink(true);
+    setTimeout(() => setCopiedLink(false), 2500);
+  }
 
   // 1. Fetch Cards on Load
   const fetchCards = async () => {
@@ -321,16 +348,28 @@ export default function AdminCardsDirectory() {
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
                 {filteredItems.map((item) => (
-                  item.isBatchFolder ? (
+                  item.isBatchFolder ? (() => {
+                    const matchedGroup = getGroupForBatch(item.batchName);
+                    return (
                     <div 
                       key={item._id}
-                      onClick={() => setSelectedBatch(item.batchName)}
                       className="group bg-blue-500/5 border border-blue-500/20 rounded-2xl p-5 cursor-pointer hover:bg-blue-500/10 hover:border-blue-500/40 transition-all duration-300 relative overflow-hidden flex flex-col justify-between min-h-[160px]"
                     >
                       <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 rounded-full blur-3xl -mr-10 -mt-10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
                       <div className="relative z-10">
-                        <div className="w-12 h-12 rounded-xl bg-black/40 border border-blue-500/20 flex items-center justify-center text-blue-500 mb-4">
-                          <Briefcase size={22} />
+                        <div className="flex items-start justify-between mb-4">
+                          <div className="w-12 h-12 rounded-xl bg-black/40 border border-blue-500/20 flex items-center justify-center text-blue-500">
+                            <Briefcase size={22} />
+                          </div>
+                          {/* 🔗 Share Link Button */}
+                          <button
+                            onClick={(e) => { e.stopPropagation(); setShareGroup({ batchName: item.batchName, matchedGroup }); setCopiedLink(false); }}
+                            title="مشاركة رابط الشريك"
+                            className="w-9 h-9 rounded-xl flex items-center justify-center transition-all"
+                            style={{ background: matchedGroup ? 'rgba(185,145,70,0.15)' : 'rgba(255,255,255,0.06)', border: matchedGroup ? '1px solid rgba(185,145,70,0.4)' : '1px solid rgba(255,255,255,0.1)', color: matchedGroup ? '#B99146' : '#6b7280' }}
+                          >
+                            <Link2 size={16} />
+                          </button>
                         </div>
                         <h3 className="font-bold text-lg text-white mb-1 truncate leading-tight">
                           مجموعة: {item.batchName}
@@ -338,13 +377,20 @@ export default function AdminCardsDirectory() {
                         <p className="text-xs text-blue-400 tracking-wide font-bold">
                           {item.count} بطاقات بالداخل
                         </p>
+                        {matchedGroup && (
+                          <p className="text-[10px] mt-1" style={{ color:'#B99146' }}>🏠 {matchedGroup.name}</p>
+                        )}
                       </div>
-                      <div className="relative z-10 flex justify-end items-center mt-4 pt-4 border-t border-blue-500/10 text-gray-400 group-hover:text-blue-500 transition-colors">
+                      <div
+                        onClick={() => setSelectedBatch(item.batchName)}
+                        className="relative z-10 flex justify-end items-center mt-4 pt-4 border-t border-blue-500/10 text-gray-400 group-hover:text-blue-500 transition-colors">
                         <span className="text-xs font-bold mr-auto">فتح المجموعة</span>
                         <ChevronRight size={18} className="-translate-x-2 opacity-0 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
                       </div>
                     </div>
-                  ) : (
+                    );
+                  })()
+                  : (
                     <div 
                       key={item._id}
                       onClick={() => handleEditCard(item.cardId)}
@@ -523,6 +569,97 @@ export default function AdminCardsDirectory() {
         </div>
       )}
 
+      {/* ── Partner Share Link Modal ── */}
+      {shareGroup && (
+        <div
+          className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-end justify-center p-4"
+          onClick={e => e.target === e.currentTarget && setShareGroup(null)}
+        >
+          <div className="bg-[#111827] border border-yellow-500/20 rounded-3xl p-6 w-full max-w-md relative"
+            style={{ fontFamily: "'Cairo', sans-serif" }}
+          >
+            <button onClick={() => setShareGroup(null)}
+              className="absolute top-4 left-4 text-gray-500 hover:text-white w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center">
+              <X size={16} />
+            </button>
+
+            <div className="flex items-center gap-3 mb-5">
+              <div className="w-11 h-11 rounded-2xl flex items-center justify-center"
+                style={{ background: 'rgba(185,145,70,0.15)', border: '1px solid rgba(185,145,70,0.3)' }}>
+                <Link2 size={20} style={{ color: '#B99146' }} />
+              </div>
+              <div>
+                <p className="text-white font-black text-base">رابط مشاركة المجموعة</p>
+                <p className="text-gray-400 text-xs">مجموعة: {shareGroup.batchName}</p>
+              </div>
+            </div>
+
+            {shareGroup.matchedGroup ? (
+              <>
+                {/* Partner group found */}
+                <div className="mb-4 p-3 rounded-xl" style={{ background: 'rgba(185,145,70,0.08)', border: '1px solid rgba(185,145,70,0.2)' }}>
+                  <p className="text-xs font-bold mb-1" style={{ color: '#B99146' }}>🏠 {shareGroup.matchedGroup.name}</p>
+                  <p className="text-gray-400 text-[11px]">
+                    {(shareGroup.matchedGroup.assignedCards || []).length} بطاقة مرتبطة
+                  </p>
+                </div>
+
+                {/* Partner URL */}
+                <p className="text-xs text-gray-400 font-bold mb-2">رابط بوابة الشريك:</p>
+                <div className="flex items-center gap-2 mb-5">
+                  <input
+                    readOnly
+                    dir="ltr"
+                    value={`${typeof window !== 'undefined' ? window.location.origin : ''}/partner?g=${shareGroup.matchedGroup._id}`}
+                    className="flex-1 text-[12px] bg-black/40 text-gray-300 px-3 py-2.5 rounded-xl border border-white/10 outline-none font-mono overflow-hidden"
+                  />
+                  <button
+                    onClick={() => handleCopyShareLink(`${window.location.origin}/partner?g=${shareGroup.matchedGroup._id}`)}
+                    className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 transition-all"
+                    style={{
+                      background: copiedLink ? 'rgba(34,197,94,0.2)' : 'rgba(185,145,70,0.2)',
+                      border: copiedLink ? '1px solid rgba(34,197,94,0.4)' : '1px solid rgba(185,145,70,0.4)',
+                      color: copiedLink ? '#86efac' : '#B99146',
+                    }}
+                  >
+                    {copiedLink ? <Check size={16} /> : <Copy size={16} />}
+                  </button>
+                </div>
+
+                {copiedLink && (
+                  <p className="text-center text-xs font-bold mb-3" style={{ color: '#86efac' }}>✅ تم نسخ الرابط!</p>
+                )}
+
+                <p className="text-[11px] text-gray-500 text-center leading-relaxed">
+                  أرسل هذا الرابط للشريك. سيطلب منه إدخال PIN الذي حددته عند إنشاء الغرفة.
+                </p>
+              </>
+            ) : (
+              <>
+                {/* No group linked yet */}
+                <div className="text-center py-6">
+                  <p className="text-4xl mb-3">🔓</p>
+                  <p className="text-white font-bold mb-2">لا توجد غرفة شريك مرتبطة</p>
+                  <p className="text-gray-400 text-xs leading-relaxed mb-5">
+                    هذه المجموعة <span className="text-yellow-400 font-mono font-bold">"{shareGroup.batchName}"</span> غير مرتبطة بأي غرفة شريك بعد.
+                    <br />اذهب لـ "غرف الشركاء" وأضف رمز هذه المجموعة.
+                  </p>
+                  <a
+                    href="/superadmin/groups"
+                    target="_blank"
+                    className="inline-block px-5 py-2.5 rounded-xl text-sm font-black transition-all"
+                    style={{ background: 'linear-gradient(135deg, #B99146, #EDD98A)', color: '#1a1a1a' }}
+                  >
+                    🏠 إدارة غرف الشركاء
+                  </a>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }
+

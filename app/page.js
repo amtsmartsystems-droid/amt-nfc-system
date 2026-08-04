@@ -1168,6 +1168,10 @@ function PageContent() {
                 </button>
               )}
 
+              {/* ── زر تخصيص الهاتف ── */}
+              {targetCardId && (
+                <MobileEditorButton cardId={targetCardId} batchName={batchInfo?.batchName} />
+              )}
 
               {publishedUrl && (
                 <div className="mt-3 p-3 bg-emerald-500/10 border border-emerald-500/30 rounded-xl animate-in fade-in slide-in-from-top-2">
@@ -2329,6 +2333,59 @@ function PageContent() {
         />
       </div>
     );
+}
+
+// ══════════════════════════════════════════════════════════════════
+// MobileEditorButton — fetches partner group and opens mobile editor
+// ══════════════════════════════════════════════════════════════════
+function MobileEditorButton({ cardId, batchName }) {
+  const [groupId, setGroupId] = React.useState(null);
+  const [loading, setLoading] = React.useState(true);
+
+  React.useEffect(() => {
+    fetch('/api/admin/groups')
+      .then(r => r.json())
+      .then(d => {
+        if (d.success && batchName) {
+          const g = d.groups.find(gr =>
+            (gr.assignedCards || []).some(c => c.toUpperCase() === batchName.toUpperCase()) ||
+            (gr.assignedCards || []).some(c => c.toUpperCase() === cardId.toUpperCase())
+          );
+          if (g) setGroupId(g._id);
+        } else if (d.success) {
+          // match by cardId directly
+          const g = d.groups.find(gr =>
+            (gr.assignedCards || []).some(c => c.toUpperCase() === cardId.toUpperCase())
+          );
+          if (g) setGroupId(g._id);
+        }
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
+  }, [cardId, batchName]);
+
+  if (loading) return null;
+
+  const mobileUrl = groupId
+    ? `/partner/${groupId}/edit/${cardId}`
+    : `/partner`;
+
+  return (
+    <a
+      href={mobileUrl}
+      target="_blank"
+      rel="noreferrer"
+      className="mt-2 w-full flex items-center justify-center gap-2 py-2.5 rounded-xl font-black text-[12px] transition-all"
+      style={{
+        background: 'linear-gradient(135deg, rgba(185,145,70,0.2), rgba(237,217,138,0.15))',
+        border: '1px solid rgba(185,145,70,0.4)',
+        color: '#EDD98A',
+        textDecoration: 'none',
+      }}
+    >
+      📱 تخصيص من الهاتف (Mobile Editor)
+    </a>
+  );
 }
 
 export default function Home() {
