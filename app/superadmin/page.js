@@ -90,7 +90,19 @@ export default function SuperAdminDashboard() {
           />
           <Search size={18} className="absolute top-2.5 right-3 text-gray-400" />
         </div>
+        <a
+          href="/superadmin/groups"
+          style={{
+            padding: '9px 18px', borderRadius: 12, textDecoration: 'none',
+            background: 'linear-gradient(135deg, #B99146, #EDD98A)',
+            color: '#1a1a1a', fontWeight: 900, fontSize: 14,
+            whiteSpace: 'nowrap', fontFamily: 'Cairo, sans-serif',
+          }}
+        >
+          🏠 غرف الشركاء
+        </a>
       </header>
+
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-6 py-8">
