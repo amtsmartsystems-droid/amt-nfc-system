@@ -30,6 +30,8 @@ export default function AdminCardsDirectory() {
   const [shareGroup, setShareGroup] = useState(null); // { batchName, groupId }
   const [groups, setGroups] = useState([]);            // loaded from /api/admin/groups
   const [copiedLink, setCopiedLink] = useState(false);
+  const [quickCreateLoading, setQuickCreateLoading] = useState(false);
+  const [quickPin, setQuickPin] = useState('');
 
   // Fetch partner groups for share-link mapping
   useEffect(() => {
@@ -52,6 +54,44 @@ export default function AdminCardsDirectory() {
     setCopiedLink(true);
     setTimeout(() => setCopiedLink(false), 2500);
   }
+
+  const handleQuickCreateGroup = async (batchName) => {
+    if (!quickPin || quickPin.length < 4) {
+      alert("الرجاء إدخال PIN من 4 أرقام على الأقل");
+      return;
+    }
+    setQuickCreateLoading(true);
+    try {
+      const res = await fetch('/api/admin/groups', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          name: `غرفة ${batchName}`, 
+          pin: quickPin, 
+          assignedCards: [batchName],
+          notes: 'أنشئت تلقائياً من لوحة المجموعات'
+        }),
+      });
+      const d = await res.json();
+      if (res.ok) {
+        setQuickPin('');
+        const grpRes = await fetch('/api/admin/groups');
+        const grpData = await grpRes.json();
+        if (grpData.success) {
+           setGroups(grpData.groups);
+           const matchedGroup = grpData.groups.find(g => g._id === d.group._id);
+           setShareGroup({ batchName, matchedGroup });
+        }
+      } else {
+        alert(d.error || 'فشل إنشاء الغرفة');
+      }
+    } catch(e) {
+      console.error(e);
+      alert('حدث خطأ أثناء الاتصال بالخادم');
+    } finally {
+      setQuickCreateLoading(false);
+    }
+  };
 
   // 1. Fetch Cards on Load
   const fetchCards = async () => {
@@ -636,22 +676,41 @@ export default function AdminCardsDirectory() {
               </>
             ) : (
               <>
-                {/* No group linked yet */}
+                {/* No group linked yet -> Quick Create */}
                 <div className="text-center py-6">
-                  <p className="text-4xl mb-3">🔓</p>
-                  <p className="text-white font-bold mb-2">لا توجد غرفة شريك مرتبطة</p>
-                  <p className="text-gray-400 text-xs leading-relaxed mb-5">
-                    هذه المجموعة <span className="text-yellow-400 font-mono font-bold">"{shareGroup.batchName}"</span> غير مرتبطة بأي غرفة شريك بعد.
-                    <br />اذهب لـ "غرف الشركاء" وأضف رمز هذه المجموعة.
+                  <div className="w-16 h-16 rounded-2xl bg-yellow-500/10 border border-yellow-500/20 flex items-center justify-center mx-auto mb-4 text-yellow-500">
+                    <Plus size={32} />
+                  </div>
+                  <p className="text-white font-bold text-lg mb-2">إنشاء غرفة شريك فورية</p>
+                  <p className="text-gray-400 text-xs leading-relaxed mb-6">
+                    مجموعة <span className="text-yellow-400 font-mono font-bold">"{shareGroup.batchName}"</span> غير مرتبطة.
+                    <br />أدخل رقم PIN سري لإنشاء غرفة مخصصة لها بضغطة زر.
                   </p>
-                  <a
-                    href="/superadmin/groups"
-                    target="_blank"
-                    className="inline-block px-5 py-2.5 rounded-xl text-sm font-black transition-all"
-                    style={{ background: 'linear-gradient(135deg, #B99146, #EDD98A)', color: '#1a1a1a' }}
-                  >
-                    🏠 إدارة غرف الشركاء
-                  </a>
+                  
+                  <div className="flex flex-col gap-3">
+                    <input
+                      type="text"
+                      placeholder="رقم PIN (مثال: 1234)"
+                      value={quickPin}
+                      onChange={e => setQuickPin(e.target.value)}
+                      className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white outline-none focus:border-yellow-500/50 text-center font-mono tracking-widest"
+                      maxLength={8}
+                    />
+                    <button
+                      onClick={() => handleQuickCreateGroup(shareGroup.batchName)}
+                      disabled={quickCreateLoading || quickPin.length < 4}
+                      className="w-full bg-yellow-500 hover:bg-yellow-400 text-black font-black py-3 rounded-xl transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {quickCreateLoading ? <Loader2 size={18} className="animate-spin" /> : '🚀 إنشاء الغرفة الآن'}
+                    </button>
+                    <a
+                      href="/superadmin/groups"
+                      target="_blank"
+                      className="text-gray-500 hover:text-gray-300 text-[11px] underline mt-2"
+                    >
+                      أو انتقل للإعدادات المتقدمة
+                    </a>
+                  </div>
                 </div>
               </>
             )}
