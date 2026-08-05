@@ -2368,7 +2368,7 @@ function MobileEditorButton({ cardId, batchName }) {
 
   const mobileUrl = groupId
     ? `/partner/${groupId}/edit/${cardId}`
-    : `/partner`;
+    : `/partner/admin/edit/${cardId}`;
 
   return (
     <a

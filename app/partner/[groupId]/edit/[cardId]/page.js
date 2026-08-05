@@ -156,8 +156,8 @@ export default function PartnerEditCardPage({ params }) {
             <div style={{ textAlign:'center', color:'#ef4444' }}>
                 <div style={{ fontSize:40, marginBottom:12 }}>⚠️</div>
                 <p>{error}</p>
-                <button onClick={() => router.push(`/partner/${groupId}`)} style={{ marginTop:16, padding:'12px 24px', background:GOLD, color:'#1a1a1a', border:'none', borderRadius:10, cursor:'pointer', fontFamily:'Cairo,sans-serif', fontWeight:700 }}>
-                    العودة للغرفة
+                <button onClick={() => router.push(groupId === 'admin' ? '/admin/cards' : `/partner/${groupId}`)} style={{ marginTop:16, padding:'12px 24px', background:GOLD, color:'#1a1a1a', border:'none', borderRadius:10, cursor:'pointer', fontFamily:'Cairo,sans-serif', fontWeight:700 }}>
+                    العودة
                 </button>
             </div>
         </div>
@@ -173,7 +173,7 @@ export default function PartnerEditCardPage({ params }) {
                 position:'sticky', top:0, zIndex:50, backdropFilter:'blur(20px)',
             }}>
                 <button
-                    onClick={() => router.push(`/partner/${groupId}`)}
+                    onClick={() => router.push(groupId === 'admin' ? '/admin/cards' : `/partner/${groupId}`)}
                     style={{ width:38, height:38, borderRadius:10, background:'rgba(255,255,255,0.06)', border:`1px solid ${BORDER}`, color:'rgba(255,255,255,0.7)', fontSize:18, cursor:'pointer', flexShrink:0, display:'flex', alignItems:'center', justifyContent:'center' }}
                 >
                     ←

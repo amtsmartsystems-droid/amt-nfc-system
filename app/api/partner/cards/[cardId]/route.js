@@ -2,11 +2,16 @@ import { NextResponse } from 'next/server';
 import connectDB from '../../../../../backend/config/db';
 import Card from '../../../../../backend/models/Card';
 import Group from '../../../../../backend/models/Group';
-import { verifyToken } from '../../../../../lib/auth';
+import { verifyToken, getUser } from '../../../../../lib/auth';
 
 export const dynamic = 'force-dynamic';
 
-function getPartner(req) {
+function getActor(req) {
+    const admin = getUser(req);
+    if (admin && (admin.role === 'Admin' || admin.role === 'Super_Admin')) {
+        return { ...admin, isSystemAdmin: true };
+    }
+
     const token = req.cookies.get('amt_partner_token')?.value;
     if (!token) return null;
     const decoded = verifyToken(token);
@@ -14,8 +19,10 @@ function getPartner(req) {
     return decoded;
 }
 
-async function assertAccess(partner, cardId) {
-    const group = await Group.findById(partner.groupId);
+async function assertAccess(actor, cardId) {
+    if (actor.isSystemAdmin) return true;
+
+    const group = await Group.findById(actor.groupId);
     if (!group || !group.isActive) return false;
     return group.assignedCards.includes(cardId);
 }
@@ -26,14 +33,14 @@ async function assertAccess(partner, cardId) {
  * Returns full card data for editing (partner-safe subset).
  */
 export async function GET(req, { params }) {
-    const partner = getPartner(req);
-    if (!partner) return NextResponse.json({ error: 'غير مصرح.' }, { status: 401 });
+    const actor = getActor(req);
+    if (!actor) return NextResponse.json({ error: 'غير مصرح.' }, { status: 401 });
 
     try {
         await connectDB();
         const { cardId } = params;
 
-        const hasAccess = await assertAccess(partner, cardId);
+        const hasAccess = await assertAccess(actor, cardId);
         if (!hasAccess) return NextResponse.json({ error: 'لا صلاحية لهذه البطاقة.' }, { status: 403 });
 
         const card = await Card.findOne({ shortCode: cardId }).lean();
@@ -77,14 +84,14 @@ export async function GET(req, { params }) {
  * siteData.hours, links[], siteData.images.profile (uploaded separately).
  */
 export async function PATCH(req, { params }) {
-    const partner = getPartner(req);
-    if (!partner) return NextResponse.json({ error: 'غير مصرح.' }, { status: 401 });
+    const actor = getActor(req);
+    if (!actor) return NextResponse.json({ error: 'غير مصرح.' }, { status: 401 });
 
     try {
         await connectDB();
         const { cardId } = params;
 
-        const hasAccess = await assertAccess(partner, cardId);
+        const hasAccess = await assertAccess(actor, cardId);
         if (!hasAccess) return NextResponse.json({ error: 'لا صلاحية لهذه البطاقة.' }, { status: 403 });
 
         const card = await Card.findOne({ shortCode: cardId });
