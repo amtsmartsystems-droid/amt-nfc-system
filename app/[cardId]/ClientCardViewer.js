@@ -292,7 +292,7 @@ export default function ClientCardViewer({ initialCard, cardId, searchParams, is
     };
 
     /* ── SWR ── */
-    const { data: fetchedCard } = useSWR(`/api/cards/${cardId}`, fetcher, {
+    const { data: fetchedCard } = useSWR(isPreview ? null : `/api/cards/${cardId}`, fetcher, {
         fallbackData:       initialCard,
         revalidateOnMount:  true,      // Always fetch fresh when page loads
         revalidateOnFocus:  false,

@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
+import ClientCardViewer from '../../../../[cardId]/ClientCardViewer';
 
 // ── Smart link icon detector ──────────────────────────────────────────
 function detectLinkIcon(url = '') {
@@ -163,8 +164,29 @@ export default function PartnerEditCardPage({ params }) {
         </div>
     );
 
+    const liveCard = card ? {
+        ...card,
+        businessName: name,
+        siteData: {
+            ...(card.siteData || {}),
+            name,
+            subtitle,
+            address,
+            hours,
+            images: {
+                ...(card.siteData?.images || {}),
+                profile: profileImg
+            }
+        },
+        links: links
+    } : null;
+
     return (
-        <div style={{ minHeight:'100dvh', background:`linear-gradient(160deg, ${BG} 0%, #1a1a2e 100%)`, fontFamily:"'Cairo', sans-serif", direction:'rtl', paddingBottom:120 }}>
+        <div className="flex flex-col lg:flex-row w-full min-h-screen" style={{ background:`linear-gradient(160deg, ${BG} 0%, #1a1a2e 100%)`, fontFamily:"'Cairo', sans-serif", direction:'rtl' }}>
+            
+            {/* Editor Side */}
+            <div className="flex-1 lg:max-w-2xl lg:border-l border-[rgba(185,145,70,0.18)] relative min-h-screen" style={{ paddingBottom:120 }}>
+
 
             {/* ── Header ── */}
             <div style={{
@@ -348,8 +370,7 @@ export default function PartnerEditCardPage({ params }) {
             </div>
 
             {/* ── Fixed Save Button ── */}
-            <div style={{
-                position:'fixed', bottom:0, left:0, right:0,
+            <div className="fixed bottom-0 left-0 right-0 lg:absolute lg:bottom-0 lg:left-auto lg:right-0 lg:w-full lg:max-w-2xl" style={{
                 padding:'16px', background:'rgba(10,10,20,0.95)',
                 borderTop:`1px solid ${BORDER}`, backdropFilter:'blur(20px)',
                 zIndex:100,
@@ -377,6 +398,26 @@ export default function PartnerEditCardPage({ params }) {
                     {saved ? '✅ تم الحفظ بنجاح!' : saving ? '⏳ جاري الحفظ...' : '💾 حفظ التعديلات'}
                 </button>
             </div>
+            
+            </div> {/* End Editor Side */}
+
+            {/* Preview Side (Desktop only) */}
+            <div className="hidden lg:flex flex-1 items-center justify-center relative p-8 h-screen sticky top-0 overflow-hidden" style={{ background: '#0a0a0f' }}>
+                <div className="absolute top-4 right-6 px-4 py-2 bg-yellow-500/10 text-yellow-500 border border-yellow-500/20 rounded-xl text-sm font-bold flex items-center gap-2 z-50">
+                    <span className="relative flex h-3 w-3">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-3 w-3 bg-yellow-500"></span>
+                    </span>
+                    معاينة مباشرة
+                </div>
+                
+                {/* Phone Mockup */}
+                <div className="relative w-[375px] h-[812px] bg-black rounded-[40px] border-[8px] border-gray-900 shadow-2xl overflow-hidden overflow-y-auto" style={{ scrollbarWidth: 'none' }}>
+                    <div className="absolute top-0 inset-x-0 h-6 bg-black z-50 rounded-b-xl max-w-[150px] mx-auto"></div>
+                    {liveCard && <ClientCardViewer initialCard={liveCard} cardId={cardId} isPreview={true} />}
+                </div>
+            </div>
+
         </div>
     );
 }
