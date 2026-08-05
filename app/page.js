@@ -2339,10 +2339,10 @@ function PageContent() {
 // MobileEditorButton — fetches partner group and opens mobile editor
 // ══════════════════════════════════════════════════════════════════
 function MobileEditorButton({ cardId, batchName }) {
-  const [groupId, setGroupId] = React.useState(null);
-  const [loading, setLoading] = React.useState(true);
+  const [groupId, setGroupId] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  React.useEffect(() => {
+  useEffect(() => {
     fetch('/api/admin/groups')
       .then(r => r.json())
       .then(d => {
