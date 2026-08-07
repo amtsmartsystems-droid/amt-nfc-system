@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef } from "react";
 import * as LucideIcons from "lucide-react";
 import { getIconForLink } from "../../utils/icons";
+import { EditableText, EditableImage } from "../EditableElements";
 import { motion, AnimatePresence, Reorder, useInView } from "framer-motion";
 
 // ══════════════════════════════════════════════════════════════════════
@@ -25,7 +26,7 @@ function BlockReveal({ children, delay = 0 }) {
 }
 
 // ── Glow Button — proximity-aware edge glow ──
-function GlowLinkCard({ link, accent, cardId, t, handleMenuClick, handleOffersClick }) {
+function GlowLinkCard({ link, accent, cardId, t, handleMenuClick, handleOffersClick, isWYSIWYG, onEditLink }) {
   const label = t(link.title, link.titleAr);
   const { IconComponent } = getIconForLink(link.title || link.titleAr || "");
   const btnRef = useRef(null);
@@ -44,6 +45,11 @@ function GlowLinkCard({ link, accent, cardId, t, handleMenuClick, handleOffersCl
   };
 
   const handleClick = (e) => {
+    if (isWYSIWYG) {
+      e.preventDefault();
+      if (onEditLink) onEditLink(link._key || link.id);
+      return;
+    }
     if (cardId) fetch('/api/clicks', { method: 'POST', body: JSON.stringify({ cardId, linkId: link.id || link._id }) }).catch(() => {});
     if (link.url === '#menu-section') {
       e.preventDefault();
@@ -172,7 +178,7 @@ function parseVideoUrl(url) {
   return null;
 }
 
-export default function MaroufCoffeeTheme({ cardId, siteData, siteColors, lang = "en", isMenuEnabled, menuMode, isHouseSystemActive, menuCategories, addToCart, pdfMenuUrl, offersUrl, showMenuImages, isPreview, onUpdateLayoutBlocks }) {
+export default function MaroufCoffeeTheme({ cardId, siteData, siteColors, lang = "en", isMenuEnabled, menuMode, isHouseSystemActive, menuCategories, addToCart, pdfMenuUrl, offersUrl, showMenuImages, isPreview, onUpdateLayoutBlocks, isWYSIWYG, onUpdateField, onImageUpload, onAddLink, onUpdateLink, onRemoveLink, onEditLink, footerComponent }) {
   
   const accent = siteColors?.primary || "#B99146";
   const bgDark = siteColors?.background || "#050505";
@@ -257,7 +263,7 @@ export default function MaroufCoffeeTheme({ cardId, siteData, siteColors, lang =
   const hours   = sd.hours   || "";
   const links   = sd.links   || [];
 
-  const profileImg = sd.images?.profile || sd.profileImage || "https://maroufcoffee.com/wp-content/uploads/2022/11/Marouf-Coffee-Logo-4.png";
+  const profileImg = sd.images?.profile || sd.profileImage || "https://placehold.co/400x400/111111/FFFFFF?text=LOGO";
 
   const handleMenuClick = (e) => {
     if (menuMode === 'pdf' && pdfMenuUrl) {
@@ -351,27 +357,30 @@ export default function MaroufCoffeeTheme({ cardId, siteData, siteColors, lang =
                     boxShadow: `0 0 0 2px rgba(var(--primary-rgb),0.5), 0 0 40px rgba(var(--primary-rgb),0.3), 0 20px 60px rgba(0,0,0,0.6)`,
                   }}
                 >
-                  <img
+                  <EditableImage
                     src={profileImg}
                     alt={name}
+                    isWYSIWYG={isWYSIWYG}
+                    onImageUpload={(file) => onImageUpload && onImageUpload('profile', file)}
                     className="w-full h-full object-cover"
-                    draggable="false"
                   />
                 </div>
               </div>
             </BlockReveal>
 
             <BlockReveal delay={0.08}>
-              <h1
+              <EditableText
+                value={name}
+                onChange={(v) => onUpdateField && onUpdateField('name', v)}
+                isWYSIWYG={isWYSIWYG}
+                tagName="h1"
                 className="text-[34px] font-black mb-3 tracking-wide uppercase text-white"
                 style={{
                   fontFamily: "Cairo,sans-serif",
                   textShadow: "0 0 60px rgba(var(--primary-rgb),0.3)",
                   letterSpacing: "0.04em",
                 }}
-              >
-                {name}
-              </h1>
+              />
 
               {tagline && (
                 <div
@@ -382,24 +391,28 @@ export default function MaroufCoffeeTheme({ cardId, siteData, siteColors, lang =
                     backdropFilter: "blur(10px)",
                   }}
                 >
-                  <p
+                  <EditableText
+                    value={tagline}
+                    onChange={(v) => onUpdateField && onUpdateField('subtitle', v)}
+                    isWYSIWYG={isWYSIWYG}
+                    tagName="p"
                     className="font-bold tracking-widest text-[12px] uppercase"
                     style={{ color: accent, fontFamily: "Cairo,sans-serif" }}
-                  >
-                    {tagline}
-                  </p>
+                  />
                 </div>
               )}
             </BlockReveal>
 
             <BlockReveal delay={0.14}>
               {about && (
-                <p
-                  className="text-[16px] leading-relaxed max-w-[88%] mx-auto text-gray-400 font-light"
+                <EditableText
+                  value={about}
+                  onChange={(v) => onUpdateField && onUpdateField('about', v)}
+                  isWYSIWYG={isWYSIWYG}
+                  tagName="p"
+                  className="text-[16px] leading-relaxed max-w-[88%] mx-auto text-gray-400 font-light pointer-events-none"
                   style={{ fontFamily: "Cairo,sans-serif" }}
-                >
-                  {about}
-                </p>
+                />
               )}
             </BlockReveal>
           </div>
@@ -474,9 +487,13 @@ export default function MaroufCoffeeTheme({ cardId, siteData, siteColors, lang =
                     >
                       <LucideIcons.MapPin size={18} style={{ color: accent, filter: "drop-shadow(0 0 6px rgba(var(--primary-rgb),0.4))" }} />
                     </div>
-                    <div className="flex-1 pt-2.5 text-[14.5px] leading-relaxed text-gray-300 font-medium" style={{ fontFamily: "Cairo,sans-serif" }}>
-                      {address}
-                    </div>
+                    <EditableText
+                      value={address}
+                      onChange={(v) => onUpdateField && onUpdateField('address', v)}
+                      isWYSIWYG={isWYSIWYG}
+                      className="flex-1 pt-2.5 text-[14.5px] leading-relaxed text-gray-300 font-medium" 
+                      style={{ fontFamily: "Cairo,sans-serif" }}
+                    />
                   </div>
                 )}
 
@@ -491,9 +508,13 @@ export default function MaroufCoffeeTheme({ cardId, siteData, siteColors, lang =
                     >
                       <LucideIcons.Clock size={18} style={{ color: accent, filter: "drop-shadow(0 0 6px rgba(var(--primary-rgb),0.4))" }} />
                     </div>
-                    <div className="flex-1 pt-2.5 text-[14.5px] leading-relaxed text-gray-300 font-medium" style={{ fontFamily: "Cairo,sans-serif" }}>
-                      {hours}
-                    </div>
+                    <EditableText
+                      value={hours}
+                      onChange={(v) => onUpdateField && onUpdateField('hours', v)}
+                      isWYSIWYG={isWYSIWYG}
+                      className="flex-1 pt-2.5 text-[14.5px] leading-relaxed text-gray-300 font-medium" 
+                      style={{ fontFamily: "Cairo,sans-serif" }}
+                    />
                   </div>
                 )}
               </div>
@@ -619,7 +640,7 @@ export default function MaroufCoffeeTheme({ cardId, siteData, siteColors, lang =
             </BlockReveal>
 
             {links.map((link, idx) => (
-              <BlockReveal key={link.id || idx} delay={idx * 0.06}>
+              <BlockReveal key={link._key || link.id || idx} delay={idx * 0.06}>
                 <GlowLinkCard
                   link={link}
                   accent={accent}
@@ -627,9 +648,24 @@ export default function MaroufCoffeeTheme({ cardId, siteData, siteColors, lang =
                   t={t}
                   handleMenuClick={handleMenuClick}
                   handleOffersClick={() => setIsOffersOpen(true)}
+                  isWYSIWYG={isWYSIWYG}
+                  onEditLink={onEditLink}
                 />
               </BlockReveal>
             ))}
+            
+            {isWYSIWYG && (
+              <BlockReveal delay={(links.length + 1) * 0.06}>
+                <button
+                  onClick={onAddLink}
+                  className="w-full py-4 rounded-2xl font-bold text-[14px] text-white flex items-center justify-center gap-2 transition-all duration-300 hover:bg-white/10"
+                  style={{ border: '1px dashed rgba(255,255,255,0.3)', background: 'rgba(255,255,255,0.02)' }}
+                >
+                  <LucideIcons.Plus size={18} />
+                  إضافة رابط
+                </button>
+              </BlockReveal>
+            )}
           </div>
         );
 
@@ -919,6 +955,8 @@ export default function MaroufCoffeeTheme({ cardId, siteData, siteColors, lang =
           </BlockReveal>
         </div>
         )}
+
+        {footerComponent}
 
         {/* ── WATERMARK v3 ── */}
         <div style={{ textAlign:'center', paddingBottom:32, paddingTop:8, display:'flex', justifyContent:'center' }}>

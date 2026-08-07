@@ -241,6 +241,52 @@ export default function AdminCardsDirectory() {
     }
   };
 
+  const handleAssignToBatch = async () => {
+    if (selectedCards.length === 0) return;
+    const newBatchName = prompt('أدخل اسم المجموعة لنقل البطاقات إليها:');
+    if (newBatchName === null) return;
+    if (newBatchName.trim() === '') {
+       alert('يجب إدخال اسم المجموعة'); return;
+    }
+    
+    try {
+      const res = await fetch('/api/admin/cards', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ids: selectedCards, batchName: newBatchName.trim() })
+      });
+      if (res.ok) {
+        setSelectedCards([]);
+        fetchCards();
+      } else {
+        alert('حدث خطأ أثناء التحديث');
+      }
+    } catch (error) {
+      console.error(error);
+      alert('حدث خطأ في الاتصال');
+    }
+  };
+
+  const handleRemoveFromBatch = async () => {
+    if (selectedCards.length === 0) return;
+    if (!confirm('هل أنت متأكد من إزالة البطاقات من هذه المجموعة؟')) return;
+    try {
+      const res = await fetch('/api/admin/cards', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ids: selectedCards, batchName: null })
+      });
+      if (res.ok) {
+        setSelectedCards([]);
+        fetchCards();
+      } else {
+        alert('حدث خطأ أثناء التحديث');
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   const handleSelectCard = (e, dbId) => {
     e.stopPropagation();
     if (e.target.checked) {
@@ -355,13 +401,31 @@ export default function AdminCardsDirectory() {
             </div>
             
             {selectedCards.length > 0 && (
-              <button 
-                onClick={handleBulkDelete}
-                className="flex items-center gap-1.5 px-3 py-1.5 bg-red-500/10 text-red-500 hover:bg-red-500/20 hover:text-red-400 rounded-lg text-xs font-bold transition-colors"
-              >
-                <Trash2 size={14} />
-                حذف المحدد ({selectedCards.length})
-              </button>
+              <div className="flex gap-2">
+                <button 
+                  onClick={handleAssignToBatch}
+                  className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-500/10 text-blue-500 hover:bg-blue-500/20 rounded-lg text-xs font-bold transition-colors"
+                >
+                  <Briefcase size={14} />
+                  نقل لمجموعة ({selectedCards.length})
+                </button>
+                {selectedBatch && (
+                  <button 
+                    onClick={handleRemoveFromBatch}
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-yellow-500/10 text-yellow-500 hover:bg-yellow-500/20 rounded-lg text-xs font-bold transition-colors"
+                  >
+                    <X size={14} />
+                    إزالة من المجموعة ({selectedCards.length})
+                  </button>
+                )}
+                <button 
+                  onClick={handleBulkDelete}
+                  className="flex items-center gap-1.5 px-3 py-1.5 bg-red-500/10 text-red-500 hover:bg-red-500/20 hover:text-red-400 rounded-lg text-xs font-bold transition-colors"
+                >
+                  <Trash2 size={14} />
+                  حذف ({selectedCards.length})
+                </button>
+              </div>
             )}
           </div>
         )}

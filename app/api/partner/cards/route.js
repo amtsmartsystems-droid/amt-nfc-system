@@ -53,7 +53,12 @@ export async function GET(req) {
             return c;
         });
 
-        return NextResponse.json({ success: true, cards: safeCards, groupName: group.name });
+        return NextResponse.json({ 
+            success: true, 
+            cards: safeCards, 
+            groupName: group.name,
+            subgroups: group.subgroups || []
+        });
     } catch (err) {
         console.error('[/api/partner/cards GET]', err);
         return NextResponse.json({ error: 'خطأ في الخادم.' }, { status: 500 });

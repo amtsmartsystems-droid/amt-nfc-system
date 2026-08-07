@@ -193,6 +193,7 @@ const cardSchema = new mongoose.Schema({
                 desc: String,
                 descAr: String,
                 price: Number,
+                priceLabel: { type: String, default: '' },
                 image: String,
                 available: { type: Boolean, default: true }
             }]

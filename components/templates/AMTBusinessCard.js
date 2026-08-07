@@ -3,6 +3,7 @@
 import Image from "next/image";
 import * as LucideIcons from "lucide-react";
 import { motion, Reorder } from "framer-motion";
+import { EditableText } from "../EditableElements";
 
 // ══════════════════════════════════════════════════════════════════════
 //  AMTBusinessCard — صفحة الهبوط الشخصية لشركة AMT Tech Solutions
@@ -16,7 +17,7 @@ const WHATSAPP_URL = `https://wa.me/966782786585?text=${WHATSAPP_MSG}`;
 const DEMO_VIDEO_URL  = "https://youtu.be/dQw4w9WgXcQ";
 const DEMO_MENU_URL   = "/hanayen";
 
-export default function AMTBusinessCard({ siteData = {}, cardId, isPreview, onUpdateLayoutBlocks }) {
+export default function AMTBusinessCard({ cardId, siteData = {}, siteColors, lang = "en", isPreview, onUpdateLayoutBlocks, isWYSIWYG, onUpdateField, onImageUpload, onAddLink, onEditLink, onUpdateLink, onRemoveLink, footerComponent }) {
 
     // ════ LAYOUT BLOCKS SYSTEM ════
     const defaultBlocks = [
@@ -36,16 +37,31 @@ export default function AMTBusinessCard({ siteData = {}, cardId, isPreview, onUp
                         {/* شعار دائري */}
                         <div className="w-28 h-28 rounded-full flex items-center justify-center mb-5 shadow-2xl pointer-events-none"
                              style={{ background: "linear-gradient(135deg,#f5c518 0%,#e8a800 100%)", boxShadow: "0 0 0 4px rgba(245,197,24,0.18), 0 12px 40px rgba(245,197,24,0.30)" }}>
-                            <span className="font-black tracking-tight" style={{ fontSize: 32, color: "#0a0f1c", letterSpacing: "-0.05em", lineHeight: 1 }}>
-                                AMT
-                            </span>
+                            <EditableText
+                                value={siteData.logoText || "AMT"}
+                                onChange={(v) => onUpdateField && onUpdateField('logoText', v)}
+                                isWYSIWYG={isWYSIWYG}
+                                tagName="span"
+                                className="font-black tracking-tight"
+                                style={{ fontSize: 32, color: "#0a0f1c", letterSpacing: "-0.05em", lineHeight: 1 }}
+                            />
                         </div>
-                        <h1 className="font-black text-white mb-3 pointer-events-none" style={{ fontSize: "clamp(22px,7vw,28px)", letterSpacing: "-0.02em", lineHeight: 1.2 }}>
-                            AMT Tech Solutions
-                        </h1>
-                        <p className="text-[14px] leading-[1.8] max-w-[280px] pointer-events-none" style={{ color: "rgba(255,255,255,0.62)" }}>
-                            نؤتمت مطعمك ونحوّل طاولاتك إلى نقاط بيع ذكية 🚀
-                        </p>
+                        <EditableText
+                            value={siteData.name || "AMT Tech Solutions"}
+                            onChange={(v) => onUpdateField && onUpdateField('name', v)}
+                            isWYSIWYG={isWYSIWYG}
+                            tagName="h1"
+                            className="font-black text-white mb-3"
+                            style={{ fontSize: "clamp(22px,7vw,28px)", letterSpacing: "-0.02em", lineHeight: 1.2 }}
+                        />
+                        <EditableText
+                            value={siteData.subtitle || "نؤتمت مطعمك ونحوّل طاولاتك إلى نقاط بيع ذكية 🚀"}
+                            onChange={(v) => onUpdateField && onUpdateField('subtitle', v)}
+                            isWYSIWYG={isWYSIWYG}
+                            tagName="p"
+                            className="text-[14px] leading-[1.8] max-w-[280px] mx-auto"
+                            style={{ color: "rgba(255,255,255,0.62)" }}
+                        />
                     </section>
                 );
 
@@ -196,6 +212,7 @@ export default function AMTBusinessCard({ siteData = {}, cardId, isPreview, onUp
                     ))}
                 </div>
             )}
+            {footerComponent}
         </div>
     );
 }

@@ -9,7 +9,9 @@ import CafeTheme1       from '../../components/templates/CafeTheme1';
 import GastroBarTheme   from '../../components/templates/GastroBarTheme';
 import MaroufCoffeeTheme from '../../components/templates/MaroufCoffeeTheme';
 import RusticCafeTheme from '../../components/templates/RusticCafeTheme';
+import DoctorTheme      from '../../components/templates/DoctorTheme';
 import AMTBusinessCard  from '../../components/templates/AMTBusinessCard';
+import ContactFormsModule from '../../components/modules/ContactFormsModule';
 
 // Always bypass browser cache so we get the latest data from MongoDB
 const fetcher = async (url) => {
@@ -18,7 +20,10 @@ const fetcher = async (url) => {
     if (!res.ok || json.error) throw new Error(json.error || 'Failed to fetch');
     return json;
 };
-export default function ClientCardViewer({ initialCard, cardId, searchParams, isPreview, onUpdateLayoutBlocks }) {
+export default function ClientCardViewer({ 
+    initialCard, cardId, searchParams, isPreview, onUpdateLayoutBlocks,
+    isWYSIWYG, onUpdateField, onImageUpload, onAddLink, onUpdateLink, onRemoveLink, onEditLink
+}) {
     const [lang,      setLang]      = useState('en');
     const [wifiState, setWifiState] = useState('idle');
 
@@ -423,6 +428,13 @@ export default function ClientCardViewer({ initialCard, cardId, searchParams, is
         tableNumber: tableNumber,
         isPreview,
         onUpdateLayoutBlocks,
+        isWYSIWYG,
+        onUpdateField,
+        onImageUpload,
+        onAddLink,
+        onUpdateLink,
+        onRemoveLink,
+        onEditLink,
         addToCart: (item) => {
             setCart(prev => {
                 const existing = prev.find(i => i.id === item.id);
@@ -468,7 +480,7 @@ export default function ClientCardViewer({ initialCard, cardId, searchParams, is
        No white wrapper, no floating pill buttons (not needed here)
     ════════════════════════════════════════════════════════════════ */
     if (card.cardType === 'business_card') {
-        return <AMTBusinessCard siteData={siteData} cardId={cardId} />;
+        return <AMTBusinessCard siteData={siteData} cardId={cardId} {...props} />;
     }
 
     /* ════════════════════════════════════════════════════════════════
@@ -702,13 +714,16 @@ export default function ClientCardViewer({ initialCard, cardId, searchParams, is
                                 </div>
                             </div>
 
-                            {/* ════════ Restaurant / Cafe Theme Content ════════ */}
                             {(() => {
                                 const tn2 = (card.themeName || '').toLowerCase().trim();
-                                if (tn2 === 'cafe' || tn2 === 'cafetheme')          return <CafeTheme      {...props} />;
-                                if (tn2 === 'cafe1' || tn2 === 'cafetheme1')        return <CafeTheme1     {...props} />;
-                                if (tn2 === 'gastro' || tn2 === 'gastrobartheme')   return <GastroBarTheme {...props} />;
-                                return <RestaurantTheme {...props} />;
+                                const formsModule = <ContactFormsModule siteData={props.siteData} links={card.links} />;
+                                const themeProps = { ...props, footerComponent: formsModule };
+
+                                if (tn2 === 'cafe' || tn2 === 'cafetheme')          return <CafeTheme      {...themeProps} />;
+                                if (tn2 === 'cafe1' || tn2 === 'cafetheme1')        return <CafeTheme1     {...themeProps} />;
+                                if (tn2 === 'gastro' || tn2 === 'gastrobartheme')   return <GastroBarTheme {...themeProps} />;
+                                if (tn2 === 'doctor' || tn2 === 'doctortheme')      return <DoctorTheme    {...themeProps} />;
+                                return <RestaurantTheme {...themeProps} />;
                             })()}
 
                             {/* ════════ AMT Branding Footer ════════ */}

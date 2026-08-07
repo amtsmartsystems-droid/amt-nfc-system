@@ -27,6 +27,15 @@ const groupSchema = new mongoose.Schema({
         type:    [String],
         default: [],
     },
+    // Subgroups/Folders to organize cards
+    subgroups: {
+        type: [{
+            id: { type: String, required: true },
+            name: { type: String, required: true },
+            cards: { type: [String], default: [] }
+        }],
+        default: []
+    },
     // Optional description / notes for the superadmin
     notes: {
         type:    String,

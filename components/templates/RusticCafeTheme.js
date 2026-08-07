@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef } from "react";
 import * as LucideIcons from "lucide-react";
 import { getIconForLink } from "../../utils/icons";
+import { EditableText, EditableImage } from "../EditableElements";
 import { motion, AnimatePresence, Reorder } from "framer-motion";
 
 // ══════════════════════════════════════════════════════════════════════
@@ -25,7 +26,7 @@ function BlockReveal({ children, delay = 0 }) {
 }
 
 // ── Glow Button — proximity-aware edge glow for light theme ──
-function GlowLinkCard({ link, accent, secondaryAccent, cardId, t, handleMenuClick }) {
+function GlowLinkCard({ link, accent, secondaryAccent, cardId, t, handleMenuClick, isWYSIWYG, onEditLink }) {
   const label = t(link.title, link.titleAr);
   const { IconComponent } = getIconForLink(link.title || link.titleAr || "");
   const btnRef = useRef(null);
@@ -44,6 +45,11 @@ function GlowLinkCard({ link, accent, secondaryAccent, cardId, t, handleMenuClic
   };
 
   const handleClick = (e) => {
+    if (isWYSIWYG) {
+      e.preventDefault();
+      if (onEditLink) onEditLink(link._key || link.id);
+      return;
+    }
     if (cardId) fetch('/api/clicks', { method: 'POST', body: JSON.stringify({ cardId, linkId: link.id || link._id }) }).catch(() => {});
     if (link.url === '#menu-section') {
       e.preventDefault();
@@ -136,7 +142,7 @@ function GlowLinkCard({ link, accent, secondaryAccent, cardId, t, handleMenuClic
   );
 }
 
-export default function RusticCafeTheme({ cardId, siteData, siteColors, lang = "en", isMenuEnabled, menuMode, isHouseSystemActive, menuCategories, addToCart, pdfMenuUrl, showMenuImages, isPreview, onUpdateLayoutBlocks }) {
+export default function RusticCafeTheme({ cardId, siteData, siteColors, lang = "en", isMenuEnabled, menuMode, isHouseSystemActive, menuCategories, addToCart, pdfMenuUrl, showMenuImages, isPreview, onUpdateLayoutBlocks, isWYSIWYG, onUpdateField, onImageUpload, onAddLink, onEditLink, onUpdateLink, onRemoveLink, footerComponent }) {
   const accent     = siteColors?.primary || "#359BB0"; // Eshq Cyan
   const bgEarthy   = siteColors?.background || "#F6EFE6"; // Eshq Beige
   const secAccent  = accent; // Unify secondary accent to be the same as primary accent
@@ -211,27 +217,30 @@ export default function RusticCafeTheme({ cardId, siteData, siteColors, lang = "
                     boxShadow: `0 10px 40px ${accent}33, 0 20px 50px rgba(0,0,0,0.15)`,
                   }}
                 >
-                  <img
+                  <EditableImage
                     src={profileImg}
                     alt={name}
+                    isWYSIWYG={isWYSIWYG}
+                    onImageUpload={(file) => onImageUpload && onImageUpload('profile', file)}
                     className="w-full h-full object-cover rounded-full"
-                    draggable="false"
                   />
                 </div>
               </div>
             </BlockReveal>
 
             <BlockReveal delay={0.08}>
-              <h1
+              <EditableText
+                value={name}
+                onChange={(v) => onUpdateField && onUpdateField('name', v)}
+                isWYSIWYG={isWYSIWYG}
+                tagName="h1"
                 className="text-[36px] font-black mb-3 tracking-wide text-[#1E293B]"
                 style={{
                   fontFamily: "Cairo,sans-serif",
                   textShadow: "0 4px 20px rgba(0,0,0,0.05)",
                   letterSpacing: "0.02em",
                 }}
-              >
-                {name}
-              </h1>
+              />
 
               {tagline && (
                 <div
@@ -242,24 +251,28 @@ export default function RusticCafeTheme({ cardId, siteData, siteColors, lang = "
                     backdropFilter: "blur(10px)",
                   }}
                 >
-                  <p
+                  <EditableText
+                    value={tagline}
+                    onChange={(v) => onUpdateField && onUpdateField('subtitle', v)}
+                    isWYSIWYG={isWYSIWYG}
+                    tagName="p"
                     className="font-bold tracking-wider text-[13px]"
                     style={{ color: secAccent, fontFamily: "Cairo,sans-serif" }}
-                  >
-                    {tagline}
-                  </p>
+                  />
                 </div>
               )}
             </BlockReveal>
 
             <BlockReveal delay={0.14}>
               {about && (
-                <p
-                  className="text-[16px] leading-relaxed max-w-[90%] mx-auto text-[#475569] font-medium"
+                <EditableText
+                  value={about}
+                  onChange={(v) => onUpdateField && onUpdateField('about', v)}
+                  isWYSIWYG={isWYSIWYG}
+                  tagName="p"
+                  className="text-[16px] leading-relaxed max-w-[90%] mx-auto text-[#475569] font-medium pointer-events-none"
                   style={{ fontFamily: "Cairo,sans-serif" }}
-                >
-                  {about}
-                </p>
+                />
               )}
             </BlockReveal>
           </div>
@@ -330,9 +343,13 @@ export default function RusticCafeTheme({ cardId, siteData, siteColors, lang = "
                     <div className="flex items-center justify-center flex-shrink-0" style={{ width: '28px' }}>
                       <LucideIcons.MapPin size={22} style={{ color: secAccent }} />
                     </div>
-                    <div className="flex-1 text-[14.5px] leading-relaxed font-bold" style={{ color: accent, fontFamily: "Cairo,sans-serif" }}>
-                      {address}
-                    </div>
+                    <EditableText
+                      value={address}
+                      onChange={(v) => onUpdateField && onUpdateField('address', v)}
+                      isWYSIWYG={isWYSIWYG}
+                      className="flex-1 text-[14.5px] leading-relaxed font-bold" 
+                      style={{ color: accent, fontFamily: "Cairo,sans-serif" }}
+                    />
                   </div>
                 )}
 
@@ -341,9 +358,13 @@ export default function RusticCafeTheme({ cardId, siteData, siteColors, lang = "
                     <div className="flex items-center justify-center flex-shrink-0" style={{ width: '28px' }}>
                       <LucideIcons.Clock size={22} style={{ color: secAccent }} />
                     </div>
-                    <div className="flex-1 text-[14.5px] leading-relaxed font-bold" style={{ color: accent, fontFamily: "Cairo,sans-serif" }}>
-                      {hours}
-                    </div>
+                    <EditableText
+                      value={hours}
+                      onChange={(v) => onUpdateField && onUpdateField('hours', v)}
+                      isWYSIWYG={isWYSIWYG}
+                      className="flex-1 text-[14.5px] leading-relaxed font-bold" 
+                      style={{ color: accent, fontFamily: "Cairo,sans-serif" }}
+                    />
                   </div>
                 )}
               </div>
@@ -373,7 +394,7 @@ export default function RusticCafeTheme({ cardId, siteData, siteColors, lang = "
             </BlockReveal>
 
             {displayLinks.map((link, idx) => (
-              <BlockReveal key={link.id || idx} delay={idx * 0.06}>
+              <BlockReveal key={link._key || link.id || idx} delay={idx * 0.06}>
                 <GlowLinkCard
                   link={link}
                   accent={accent}
@@ -381,9 +402,24 @@ export default function RusticCafeTheme({ cardId, siteData, siteColors, lang = "
                   cardId={cardId}
                   t={t}
                   handleMenuClick={handleMenuClick}
+                  isWYSIWYG={isWYSIWYG}
+                  onEditLink={onEditLink}
                 />
               </BlockReveal>
             ))}
+            
+            {isWYSIWYG && (
+              <BlockReveal delay={(displayLinks.length + 1) * 0.06}>
+                <button
+                  onClick={onAddLink}
+                  className="w-full py-4 rounded-2xl font-bold text-[14px] flex items-center justify-center gap-2 transition-all duration-300 hover:bg-white/40"
+                  style={{ border: `1px dashed ${accent}80`, background: "rgba(255,255,255,0.2)", color: accent }}
+                >
+                  <LucideIcons.Plus size={18} />
+                  إضافة رابط
+                </button>
+              </BlockReveal>
+            )}
           </div>
         );
 
@@ -476,6 +512,8 @@ export default function RusticCafeTheme({ cardId, siteData, siteColors, lang = "
             ))}
           </div>
         )}
+
+        {footerComponent}
 
         {/* ── WATERMARK ── */}
         <div style={{ textAlign:'center', paddingBottom:32, paddingTop:32, display:'flex', justifyContent:'center' }}>

@@ -10,7 +10,9 @@ import CafeTheme1       from "../components/templates/CafeTheme1";
 import GastroBarTheme   from "../components/templates/GastroBarTheme";
 import MaroufCoffeeTheme from "../components/templates/MaroufCoffeeTheme";
 import RusticCafeTheme  from "../components/templates/RusticCafeTheme";
+import DoctorTheme      from "../components/templates/DoctorTheme";
 import AMTBusinessCard  from "../components/templates/AMTBusinessCard";
+import ContactFormsModule from "../components/modules/ContactFormsModule";
 import QRCodeGenerator  from "../components/QRCodeGenerator";
 import { getIconForLink } from "../utils/icons";
 import CategoryManagerModal from "../components/CategoryManagerModal";
@@ -19,29 +21,29 @@ import CategoryManagerModal from "../components/CategoryManagerModal";
 // DEFAULT DATA
 // ─────────────────────────────────────────────────────────────────────
 const DEFAULT = {
-  name:"MEATY STORY", nameAr:"ميتي ستوري",
-  subtitle:"Bold burgers, real flavors", subtitleAr:"برغر جريء، نكهة حقيقية",
-  about:"We make food where every detail counts. Top-quality ingredients, precise methods, true flavors — no shortcuts.",
-  aboutAr:"نصنع الطعام بعناية فائقة. أجود المكونات، أدق الطرق، نكهات حقيقية — بلا اختصارات.",
-  principlesTitle:"PRINCIPLES THAT DEFINED THE TASTE", principlesTitleAr:"مبادئنا في تعريف الطعم",
-  principlesSubtitle:"Precision, consistency, and respect for your time.", principlesSubtitleAr:"الدقة والاتساق واحترام وقتك.",
+  name:"Your Name", nameAr:"ما اسمك",
+  subtitle:"Your Slogan", subtitleAr:"ما شعارك",
+  about:"Write a brief description about yourself or your business here.",
+  aboutAr:"اكتب وصفاً موجزاً عن نفسك أو عملك هنا.",
+  principlesTitle:"OUR PRINCIPLES", principlesTitleAr:"مبادئنا",
+  principlesSubtitle:"What we stand for.", principlesSubtitleAr:"ما نمثله.",
   contactsTitle:"CONTACTS", contactsTitleAr:"تواصل معنا",
-  address:"123 Main Street, New York", hours:"10:00 AM — 11:00 PM",
+  address:"123 Main Street, City", hours:"09:00 AM — 05:00 PM",
   principles:[
-    { num:"I",  title:"HONEST PRESENTATION", titleAr:"تقديم صادق",  desc:"Exactly as served.",      descAr:"كما يُقدَّم تماماً." },
-    { num:"II", title:"STREAMLINED PROCESS", titleAr:"عملية مبسّطة",desc:"Clear, minimal waiting.", descAr:"واضحة وانتظار أقل." },
-    { num:"III",title:"ON-TIME DELIVERY",    titleAr:"توصيل في وقته",desc:"Always on schedule.",     descAr:"دائماً في موعده." },
+    { num:"I",  title:"QUALITY", titleAr:"الجودة",  desc:"Delivering the best.",      descAr:"تقديم الأفضل دائماً." },
+    { num:"II", title:"INTEGRITY", titleAr:"النزاهة",desc:"Honest and transparent.", descAr:"صدق وشفافية في العمل." },
+    { num:"III",title:"COMMITMENT",    titleAr:"الالتزام",desc:"Always on time.",     descAr:"الالتزام بالمواعيد." },
   ],
   links:[
-    { id:1, title:"View Menu",     titleAr:"عرض القائمة", url:"#" },
-    { id:2, title:"Reserve Table", titleAr:"احجز طاولة",  url:"#" },
+    { id:1, title:"Portfolio",     titleAr:"معرض الأعمال", url:"#" },
+    { id:2, title:"Contact Us", titleAr:"اتصل بنا",  url:"#" },
     { id:3, title:"WhatsApp",      titleAr:"واتساب",       url:"#" },
     { id:4, title:"Instagram",     titleAr:"انستغرام",     url:"#" },
     { id:5, title:"Location",      titleAr:"الموقع",       url:"#" },
   ],
   events:[
-    { id:1, title:"أمسية عائلية مميزة",       titleEn:"Special Family Evening",   desc:"عشاء فاخر مع الأهل في أجواء مريحة، قائمة خاصة من أفخر الأطباق", descEn:"A premium family dinner with a specially curated menu." },
-    { id:2, title:"جلسة تذوق المشويات",       titleEn:"Grill Tasting Session",    desc:"تجربة فريدة لتذوق أفضل المشويات بإشراف الشيف مباشرة",           descEn:"A unique experience tasting our finest grills with the head chef." },
+    { id:1, title:"حدث مميز",       titleEn:"Special Event",   desc:"وصف للحدث المميز الخاص بك هنا", descEn:"Description of your special event goes here." },
+    { id:2, title:"عرض جديد",       titleEn:"New Offer",    desc:"تفاصيل العرض الجديد الخاص بك",           descEn:"Details of your new offer." },
   ],
 };
 
@@ -54,25 +56,36 @@ const DEFAULT_COLORS = {
   rustic_cafe: { primary:"#3B9FB1", background:"#F3E9DD" },
 };
 
+const VIP_COOL_THEMES = [
+    { id: 'marouf_coffee', label: 'VIP', icon: 'Star' },
+    { id: 'rustic_cafe', label: 'cool', icon: 'Sparkles' }
+];
+
+const COOL_VIP_THEMES = [
+    { id: 'rustic_cafe', label: 'cool', icon: 'Sparkles' },
+    { id: 'marouf_coffee', label: 'VIP', icon: 'Star' }
+];
+
 const DEFAULT_THEMES = [
   {
       id: 'restaurant',
       name: 'منيو مطعم',
-      themes: [
-          { id: 'restaurant', label: 'مطعم فاخر', icon: 'Utensils' },
-          { id: 'cafe', label: 'مقهى منيمل', icon: 'Coffee' },
-          { id: 'cafe1', label: 'مقهى حديث', icon: 'Bean' },
-          { id: 'gastro', label: 'مطعم فاخر', icon: 'UtensilsCrossed' },
-          { id: 'marouf_coffee', label: 'بن معروف ✓', icon: 'Coffee' },
-          { id: 'rustic_cafe', label: 'عشق البوهيمي', icon: 'Tent' }
-      ]
+      themes: VIP_COOL_THEMES
   },
   {
       id: 'business_card',
       name: 'بطاقة أعمال',
-      themes: [
-          { id: 'business_card', label: 'بطاقة رقمية', icon: 'IdCard' }
-      ]
+      themes: VIP_COOL_THEMES
+  },
+  {
+      id: 'online_business',
+      name: 'online business',
+      themes: VIP_COOL_THEMES
+  },
+  {
+      id: 'medical_card',
+      name: 'بطاقة طبيب',
+      themes: COOL_VIP_THEMES
   }
 ];
 
@@ -94,6 +107,11 @@ const Label = ({ children }) => (
 function ThemeDropdown({ themes, selectedThemeId, onSelect, onSaveName }) {
   // قائمة القوالب مع إمكانية تخصيص الأسماء محلياً
   const [localThemes, setLocalThemes] = useState(themes);
+  
+  useEffect(() => {
+    setLocalThemes(themes);
+  }, [themes]);
+
   // هل وضع التعديل مفعّل؟
   const [isEditing, setIsEditing] = useState(false);
   // النص المؤقت أثناء التعديل
@@ -572,6 +590,7 @@ function PageContent() {
     if (n === 'marouf_coffee')                     return 'marouf_coffee';
     if (n === 'rustic_cafe')                       return 'rustic_cafe';
     if (n === 'business_card')                     return 'business_card';
+    if (n === 'doctor' || n === 'doctortheme' || n === 'doc1') return 'doc1';
     return 'restaurant'; // covers 'restauranttheme', 'luxury', etc.
   };
 
@@ -598,7 +617,7 @@ function PageContent() {
       
       // Update batch info so the Apply to Batch button shows up
       setBatchInfo({
-        isBatch: data.isBatch || false,
+        isBatch: data.isBatch || !!data.batchName || false,
         batchName: data.batchName || '',
         batchSerial: data.batchSerial || null,
         isMerged: data.isMerged || false,
@@ -782,6 +801,7 @@ function PageContent() {
   };
 
   const renderTheme = () => {
+    const formsModule = <ContactFormsModule siteData={siteData} links={siteData.links || []} />;
     const props = { 
       siteData, 
       siteColors, 
@@ -794,7 +814,8 @@ function PageContent() {
       menuCategories, 
       showMenuImages,
       isPreview: true,
-      onUpdateLayoutBlocks: (newBlocks) => setSiteData(p => ({ ...p, layoutBlocks: newBlocks }))
+      onUpdateLayoutBlocks: (newBlocks) => setSiteData(p => ({ ...p, layoutBlocks: newBlocks })),
+      footerComponent: formsModule
     };
     if (theme === 'business_card') return <AMTBusinessCard {...props} />;
     switch (theme) {
@@ -803,6 +824,8 @@ function PageContent() {
       case "gastro": return <GastroBarTheme {...props} />;
       case "marouf_coffee": return <MaroufCoffeeTheme {...props} />;
       case "rustic_cafe": return <RusticCafeTheme {...props} />;
+      case "doctor": 
+      case "doc1": return <DoctorTheme {...props} />;
       default:       return <RestaurantTheme {...props} />;
     }
   };
@@ -914,8 +937,8 @@ function PageContent() {
         <div className="flex-1 flex items-center justify-center p-8 bg-[#070A10] border-l border-white/5 overflow-hidden">
           <div className="relative">
             {/* Phone frame */}
-            <div className="relative rounded-[40px] overflow-hidden shadow-[0_32px_80px_rgba(0,0,0,0.7)] border-[6px] border-slate-700 bg-white"
-                 style={{ width:360, height:700 }}>
+            <div className="relative rounded-[40px] overflow-hidden shadow-[0_32px_80px_rgba(0,0,0,0.7)] border-[6px] border-slate-700"
+                 style={{ width:360, height:700, background: siteColors.background || '#ffffff' }}>
               {/* Notch */}
               <div className="absolute top-3 left-1/2 -translate-x-1/2 w-20 h-5 bg-slate-800 rounded-full z-50" />
               {/* Scrollable content */}
@@ -1146,6 +1169,7 @@ function PageContent() {
                 return null;
             })()}
 
+              {/* ══ Action Buttons ══ */}
               <button
                 onClick={handleSavePublish}
                 disabled={saving || (isSuspended && currentUserRole !== 'Super_Admin')}
@@ -1168,46 +1192,24 @@ function PageContent() {
                 </button>
               )}
 
-              {/* ── زر تخصيص الهاتف ── */}
               {targetCardId && (
-                <MobileEditorButton cardId={targetCardId} batchName={batchInfo?.batchName} />
-              )}
-
-              {publishedUrl && (
-                <div className="mt-3 p-3 bg-emerald-500/10 border border-emerald-500/30 rounded-xl animate-in fade-in slide-in-from-top-2">
-                  <p className="text-[11px] text-emerald-400 font-bold mb-2 flex items-center gap-1.5"><LucideIcons.CheckCircle2 size={14}/> الرابط المباشر للبطاقة:</p>
-                  <div className="flex items-center gap-2">
-                    <input type="text" readOnly value={publishedUrl} className="w-full text-[11px] bg-black/40 text-slate-300 px-2 py-2 rounded-lg border border-white/5 outline-none font-mono" dir="ltr" />
-                    <button onClick={()=>{navigator.clipboard.writeText(publishedUrl); showToast("✅ تم نسخ الرابط بنجاح");}} className="p-2 bg-emerald-500 hover:bg-emerald-400 text-white rounded-lg transition-all shadow-lg shrink-0" title="نسخ الرابط">
-                      <LucideIcons.Copy size={14} />
-                    </button>
-                    <a href={publishedUrl} target="_blank" rel="noreferrer" className="p-2 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-all shrink-0" title="فتح الرابط">
-                      <LucideIcons.ExternalLink size={14} />
-                    </a>
-                  </div>
-                  
-                  {/* General QR Code */}
-                  <div className="mt-4 pt-4 border-t border-emerald-500/20">
-                    <QRCodeGenerator 
-                      baseUrl={publishedUrl} 
-                      label="رمز الـ QR للرابط العام"
-                      downloadName={`${targetCardId}_General_QR.png`}
-                    />
-                  </div>
+                <div className="mt-2">
+                  <MobileEditorButton cardId={targetCardId} batchName={batchInfo?.batchName} />
                 </div>
               )}
             </div>
           </div>
 
-          {/* Tab Nav */}
+          {/* ══ Tab Nav ══ */}
           <div className="flex-shrink-0 flex flex-wrap gap-1 px-4 py-3 border-b border-white/5">
             {[
               { id:"links",  label:"روابط",   icon:"Link2"        },
-              ...(cardType === 'restaurant' ? [{ id:"menu", label:"المنيو", icon:"UtensilsCrossed" }] : []),
-              { id:"events", label:"فعاليات", icon:"CalendarDays" },
+              { id:"menu", label: cardType === 'restaurant' ? "المنيو" : "كتالوج", icon: cardType === 'restaurant' ? "UtensilsCrossed" : "BookOpen" },
+              { id:"events", label: "فعاليات", icon: cardType === 'doctor' ? "MessageSquare" : "CalendarDays" },
               { id:"images", label:"صـور",    icon:"Image"        },
               { id:"ai",     label:"AI",       icon:"Sparkles"    },
               { id:"design", label:"تصميم",   icon:"Palette"      },
+              { id:"publish",label:"نشر",     icon:"Share2"       },
             ].map(tb => {
               const Ic = LucideIcons[tb.icon]||LucideIcons.Circle;
               const active = adminTab===tb.id;
@@ -1222,6 +1224,61 @@ function PageContent() {
 
           {/* Scrollable Tab Content */}
           <div className="flex-1 overflow-y-auto px-5 py-5 space-y-4" style={{ scrollbarWidth:"thin", scrollbarColor:"rgba(255,255,255,.1) transparent" }}>
+
+
+            {adminTab === "publish" && (
+              <div className="space-y-6">
+                {/* ═══ NFC LINK GENERATOR (Temporarily Hidden) ═══ */}
+                {false && targetCardId && (
+                  <div className="rounded-2xl p-4 mb-4 space-y-4" style={{ background:"rgba(59,130,246,0.08)", border:"1.5px dashed rgba(59,130,246,0.4)" }}>
+                    <div className="flex items-center gap-2 mb-1">
+                      <LucideIcons.Nfc size={15} className="text-blue-400" />
+                      <Label className="font-bold text-blue-300 text-[12px] mb-0">
+                        مُولّد روابط البطاقات (NFC)
+                      </Label>
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-2">
+                      <div>
+                        <Label className="text-[10px] text-slate-400 mb-1">رقم البطاقة</Label>
+                        <AdminInput value={nfcTableNum} onChange={setNfcTableNum} type="number" dir="ltr" />
+                      </div>
+                      <div>
+                        <Label className="text-[10px] text-slate-400 mb-1">رابط الوجهة</Label>
+                        <AdminInput value={nfcDestUrl} onChange={setNfcDestUrl} type="url" dir="ltr" />
+                      </div>
+                    </div>
+                    {nfcTableNum && (
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2 p-2 bg-blue-500/10 rounded-lg border border-blue-500/20">
+                          <input type="text" readOnly value={`https://amt-nfc-system.vercel.app/api/scan?r=${targetCardId}&t=${nfcTableNum}`} className="w-full text-[10px] bg-black/40 text-blue-200 px-2 py-2 rounded border border-white/5 outline-none font-mono" dir="ltr" />
+                          <button onClick={() => {navigator.clipboard.writeText(`https://amt-nfc-system.vercel.app/api/scan?r=${targetCardId}&t=${nfcTableNum}`); showToast("✅ تم النسخ");}} className="px-3 py-2 bg-blue-600 text-white text-[11px] font-bold rounded transition-all"><LucideIcons.Copy size={13}/></button>
+                        </div>
+                        <button onClick={handleSaveCardMapping} className="w-full py-2.5 rounded-xl font-black text-[12px] bg-blue-600 text-white">💾 حفظ البطاقة</button>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* ═══ SHARE URL ═══ */}
+                {targetCardId ? (
+                  <div className="p-5 bg-emerald-500/10 border border-emerald-500/30 rounded-2xl animate-in fade-in slide-in-from-top-2">
+                    <h3 className="font-bold text-emerald-400 mb-4 flex items-center gap-2"><LucideIcons.Share2 size={18}/> مشاركة البطاقة</h3>
+                    <div className="flex items-center gap-2 mb-6">
+                      <input type="text" readOnly value={publishedUrl || `https://amt-nfc-system.vercel.app/${targetCardId}`} className="w-full text-[12px] bg-black/40 text-slate-300 px-3 py-3 rounded-xl border border-emerald-500/20 outline-none font-mono" dir="ltr" />
+                      <button onClick={()=>{navigator.clipboard.writeText(publishedUrl || `https://amt-nfc-system.vercel.app/${targetCardId}`); showToast("✅ تم نسخ الرابط");}} className="p-3 bg-emerald-500 hover:bg-emerald-400 text-white rounded-xl transition-all"><LucideIcons.Copy size={16} /></button>
+                      <a href={publishedUrl || `https://amt-nfc-system.vercel.app/${targetCardId}`} target="_blank" rel="noreferrer" className="p-3 bg-white/10 hover:bg-white/20 text-white rounded-xl transition-all"><LucideIcons.ExternalLink size={16} /></a>
+                    </div>
+                    <div className="pt-4 border-t border-emerald-500/20">
+                      <p className="text-[11px] text-emerald-400/80 font-bold mb-4">رمز الاستجابة السريعة (QR Code):</p>
+                      <QRCodeGenerator baseUrl={publishedUrl || `https://amt-nfc-system.vercel.app/${targetCardId}`} label="QR Code العام" downloadName={`${targetCardId}_QR.png`} />
+                    </div>
+                  </div>
+                ) : (
+                  <div className="p-6 bg-white/5 border border-white/10 rounded-2xl text-center text-white/50 text-[12px]">يرجى إدخال رقم البطاقة (Card ID) أولاً.</div>
+                )}
+              </div>
+            )}
 
             {/* ═══ TAB: EVENTS MANAGER ═══ */}
             {adminTab === "events" && (
@@ -1266,6 +1323,54 @@ function PageContent() {
                     <LucideIcons.Plus size={14}/> إضافة الفعالية
                   </button>
                 </div>
+
+                {/* ══ Doctor Specific Settings in Events Tab ══ */}
+                <div className="space-y-4 pt-4 border-t border-white/10 mt-6">
+                    {/* Green Toggle Block */}
+                    <div className="rounded-2xl p-4 flex items-center justify-between" style={{ background:"rgba(20,83,45,0.4)", border:"1px solid rgba(34,197,94,0.3)" }}>
+                      <label className="relative flex items-center gap-2 cursor-pointer w-fit select-none shrink-0" dir="ltr">
+                        <div className="relative">
+                          <input 
+                            type="checkbox" 
+                            className="sr-only peer" 
+                            checked={siteData.showAppointmentForm !== false && siteData.showContactForm !== false} 
+                            onChange={e => {
+                              up("showAppointmentForm", e.target.checked);
+                              up("showContactForm", e.target.checked);
+                            }} 
+                          />
+                          <div className="w-12 h-6 bg-black/60 border border-white/10 rounded-full peer peer-checked:bg-emerald-500 peer-checked:border-emerald-500 transition-all duration-300"></div>
+                          <div className="absolute left-[3px] top-[3px] bg-white/70 w-4.5 h-4.5 rounded-full transition-all duration-300 peer-checked:translate-x-[24px] peer-checked:bg-white shadow-sm"></div>
+                        </div>
+                      </label>
+
+                      <div className="text-right">
+                        <div className="flex items-center gap-2 justify-end mb-1.5">
+                          <h3 className="font-bold text-white text-[14px]">نماذج التواصل والحجوزات</h3>
+                          <LucideIcons.MessageSquare size={16} className="text-emerald-400" />
+                        </div>
+                        <p className="text-[11px] text-emerald-100/60 font-medium">
+                          تفعيل ميزات النماذج (طلب موعد، تواصل معنا)
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* WhatsApp Input (Visible only if enabled) */}
+                    {(siteData.showAppointmentForm !== false || siteData.showContactForm !== false) && (
+                      <div className="bg-white/5 p-4 rounded-2xl border border-white/10 space-y-2 animate-in fade-in slide-in-from-top-2">
+                        <Label>رقم الواتساب للاستشارات (مع رمز الدولة)</Label>
+                        <p className="text-[10px] text-slate-400 mb-2">
+                          إذا تركته فارغاً سيتم استخدام رقم الواتساب من الروابط العامة.
+                        </p>
+                        <AdminInput 
+                          value={siteData.whatsappNumber || ""} 
+                          onChange={v => up("whatsappNumber", v)} 
+                          placeholder="مثال: 962790000000" 
+                          dir="ltr" 
+                        />
+                      </div>
+                    )}
+                  </div>
 
                 <div className="space-y-3">
                   {(siteData.events || []).map(ev => (
@@ -1512,6 +1617,7 @@ function PageContent() {
             {adminTab==="links" && (
               <>
                 {/* ═══ SMART WAITER (Telegram) ═══ */}
+                {cardType === 'restaurant' && (
                 <div className="rounded-2xl p-4 mb-4 space-y-4" style={{ background:"rgba(16,185,129,0.08)", border:"1.5px dashed rgba(16,185,129,0.5)" }}>
                   <div className="flex items-center justify-between">
                     <Label className="font-bold flex items-center gap-2 text-emerald-300 text-[12px]">
@@ -1553,6 +1659,7 @@ function PageContent() {
                     </>
                   )}
                 </div>
+                )}
 
                 {/* ═══ CLIQ PAYMENT CONFIG ═══ */}
                 <div className="rounded-2xl p-4 mb-4 space-y-4" style={{ background:"rgba(234,179,8,0.08)", border:"1.5px dashed rgba(234,179,8,0.5)" }}>
@@ -1592,130 +1699,6 @@ function PageContent() {
                     </div>
                   )}
                 </div>
-
-                {/* ═══ NFC LINK GENERATOR + TARGETED UPDATE ═══ */}
-                {targetCardId && (
-                  <div className="rounded-2xl p-4 mb-4 space-y-4" style={{ background:"rgba(59,130,246,0.08)", border:"1.5px dashed rgba(59,130,246,0.4)" }}>
-                    <div className="flex items-center gap-2 mb-1">
-                      <LucideIcons.Nfc size={15} className="text-blue-400" />
-                      <Label className="font-bold text-blue-300 text-[12px] mb-0">
-                        مُولّد روابط البطاقات (NFC) — التحديث المستهدف
-                      </Label>
-                    </div>
-                    <p className="text-[10px] text-slate-400 leading-relaxed">
-                      أدخل رقم البطاقة المادية ورابط الوجهة (واتساب أو غيره) ثم احفظ. كل بطاقة تُحدَّث باستقلالية تامة دون المساس بالأخريات.
-                    </p>
-
-                    {/* ── Inputs Row ── */}
-                    <div className="grid grid-cols-2 gap-2">
-                      <div>
-                        <div className="flex justify-between items-end mb-1">
-                          <Label className="text-[10px] text-slate-400">رقم البطاقة المادية</Label>
-                          <span className={`text-[9px] font-bold flex items-center gap-1 ${scanCount > 0 ? 'text-blue-400' : 'text-slate-500'}`}>
-                            📊 عدد المسحات: {scanCount || 0}
-                          </span>
-                        </div>
-                        <AdminInput
-                          value={nfcTableNum}
-                          onChange={setNfcTableNum}
-                          placeholder="مثال: 1"
-                          type="number"
-                          dir="ltr"
-                        />
-                      </div>
-                      <div>
-                        <Label className="text-[10px] text-slate-400 mb-1">رابط الوجهة</Label>
-                        <AdminInput
-                          value={nfcDestUrl}
-                          onChange={setNfcDestUrl}
-                          placeholder="https://wa.me/962..."
-                          type="url"
-                          dir="ltr"
-                        />
-                      </div>
-                    </div>
-
-                    {/* ── NFC Scan URL + Copy & Save buttons ── */}
-                    {nfcTableNum && (
-                      <div className="space-y-2">
-                        {/* Scan URL row */}
-                        <div className="flex items-center gap-2 p-2 bg-blue-500/10 rounded-lg border border-blue-500/20">
-                          <input
-                            type="text"
-                            readOnly
-                            value={`https://amt-nfc-system.vercel.app/api/scan?r=${targetCardId}&t=${nfcTableNum}`}
-                            className="w-full text-[10px] bg-black/40 text-blue-200 px-2 py-2 rounded border border-white/5 outline-none font-mono"
-                            dir="ltr"
-                          />
-                          <button
-                            onClick={() => {
-                              navigator.clipboard.writeText(`https://amt-nfc-system.vercel.app/api/scan?r=${targetCardId}&t=${nfcTableNum}`);
-                              showToast("✅ تم نسخ رابط الـ NFC");
-                            }}
-                            className="px-3 py-2 bg-blue-600 hover:bg-blue-500 text-white text-[11px] font-bold rounded transition-all flex items-center gap-1 shrink-0"
-                          >
-                            <LucideIcons.Copy size={13} /> نسخ
-                          </button>
-                        </div>
-
-                        {/* Save mapping button */}
-                        <button
-                          onClick={handleSaveCardMapping}
-                          disabled={savingMapping || !nfcDestUrl.trim()}
-                          className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl font-black text-[12px] transition-all disabled:opacity-40 disabled:cursor-not-allowed"
-                          style={{ background: savingMapping ? '#1d4ed8' : 'linear-gradient(135deg,#2563eb,#1d4ed8)', color: '#fff', boxShadow: '0 4px 15px rgba(37,99,235,0.3)' }}
-                        >
-                          {savingMapping
-                            ? <LucideIcons.Loader2 size={14} className="animate-spin" />
-                            : <LucideIcons.Save size={14} />}
-                          {savingMapping ? 'جاري الحفظ...' : `💾 حفظ للبطاقة رقم ${nfcTableNum}`}
-                        </button>
-                        
-                        {/* QR Code Generator */}
-                        <div className="mt-4 pt-4 border-t border-blue-500/20">
-                          <QRCodeGenerator 
-                            tableNumber={nfcTableNum} 
-                            baseUrl={`https://amt-nfc-system.vercel.app/api/scan?r=${targetCardId}&t=[tableNumber]`} 
-                          />
-                        </div>
-                      </div>
-                    )}
-
-                    {/* ── Saved Mappings List ── */}
-                    {cardMappings.length > 0 && (
-                      <div className="pt-3 border-t border-blue-500/20 space-y-2">
-                        <Label className="text-[10px] text-blue-300 font-bold flex items-center gap-1">
-                          <LucideIcons.List size={11} /> البطاقات المحفوظة ({cardMappings.length})
-                        </Label>
-                        {[...cardMappings].sort((a,b) => a.cardNumber - b.cardNumber).map(m => (
-                          <div key={m.cardNumber} className="flex items-center gap-2 p-2 rounded-lg bg-blue-500/5 border border-blue-500/15">
-                            <div className="w-7 h-7 rounded-lg bg-blue-600/20 text-blue-300 flex items-center justify-center text-[11px] font-black flex-shrink-0">
-                              {m.cardNumber}
-                            </div>
-                            <p className="flex-1 text-[10px] text-slate-400 truncate font-mono" dir="ltr">
-                              {m.destinationUrl}
-                            </p>
-                            <button
-                              onClick={() => { setNfcTableNum(String(m.cardNumber)); setNfcDestUrl(m.destinationUrl); }}
-                              title="تعديل"
-                              className="p-1 rounded text-slate-500 hover:text-blue-400 transition-all"
-                            >
-                              <LucideIcons.PenLine size={11} />
-                            </button>
-                            <button
-                              onClick={() => handleDeleteCardMapping(m.cardNumber)}
-                              title="حذف"
-                              className="p-1 rounded text-slate-600 hover:text-red-400 transition-all"
-                            >
-                              <LucideIcons.Trash2 size={11} />
-                            </button>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                )}
-
 
                 {/* Link List */}
                 <div className="space-y-2">
@@ -1857,7 +1840,35 @@ function PageContent() {
                     <div><Label>إنجليزي</Label><AdminInput value={newLink.title} onChange={v=>setNewLink(p=>({...p,title:v}))} placeholder="Instagram" dir="ltr" /></div>
                     <div><Label>عربي</Label><AdminInput value={newLink.titleAr} onChange={v=>setNewLink(p=>({...p,titleAr:v}))} placeholder="انستغرام" dir="rtl" /></div>
                   </div>
-                  <div><Label>الرابط</Label><AdminInput value={newLink.url} onChange={v=>setNewLink(p=>({...p,url:v}))} placeholder="https://..." type="url" dir="ltr" /></div>
+                  <div>
+                    <div className="flex justify-between items-center mb-1.5">
+                      <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-0">الرابط</p>
+                      <label className="text-[10px] text-yellow-400 hover:text-yellow-300 cursor-pointer flex items-center gap-1 bg-yellow-400/10 hover:bg-yellow-400/20 px-2 py-1 rounded transition-all">
+                        {uploadingPdf === 'link' ? <LucideIcons.Loader2 size={12} className="animate-spin" /> : <LucideIcons.Upload size={12} />}
+                        رفع PDF كـ رابط
+                        <input type="file" accept="application/pdf" className="hidden" disabled={uploadingPdf === 'link'}
+                          onChange={async (e) => {
+                            const file = e.target.files[0];
+                            if (!file) return;
+                            const formData = new FormData();
+                            formData.append('file', file);
+                            setUploadingPdf('link');
+                            try {
+                              const res = await fetch('/api/upload', { method: 'POST', body: formData });
+                              const data = await res.json();
+                              if (data.url) {
+                                setNewLink(p => ({ ...p, url: data.url }));
+                                showToast('✅ تم رفع الملف وإضافته كرابط بنجاح!');
+                              }
+                            } catch(err) {
+                              showToast('❌ خطأ في الرفع', false);
+                            } finally { setUploadingPdf(null); }
+                          }}
+                        />
+                      </label>
+                    </div>
+                    <AdminInput value={newLink.url} onChange={v=>setNewLink(p=>({...p,url:v}))} placeholder="https://..." type="url" dir="ltr" />
+                  </div>
                   {(newLink.title||newLink.titleAr) && (()=>{
                     const { IconComponent:Ic, color:c, bg:b } = getIconForLink(newLink.title||newLink.titleAr);
                     return (
@@ -1875,13 +1886,13 @@ function PageContent() {
             )}
 
             {/* ═══ TAB: MENU BUILDER ═══ */}
-            {adminTab === "menu" && cardType === 'restaurant' && (
+            {adminTab === "menu" && (
               <div className="space-y-4">
                 <div className="p-4 rounded-2xl border border-yellow-500/30 bg-yellow-500/5">
                   <div className="flex items-center justify-between mb-4">
                     <Label className="flex items-center gap-2 mb-0 font-bold text-yellow-400 text-[14px]">
                       <LucideIcons.Utensils size={18} />
-                      تفعيل قائمة الطعام (Menu)
+                      {cardType === 'restaurant' ? 'تفعيل قائمة الطعام (Menu)' : 'تفعيل الكتالوج (Catalog)'}
                     </Label>
                     <label className="relative inline-flex items-center cursor-pointer">
                       <input type="checkbox" className="sr-only peer" checked={isMenuEnabled} onChange={(e) => {
@@ -1891,37 +1902,41 @@ function PageContent() {
                     </label>
                   </div>
 
-                  <div className="flex items-center justify-between bg-[#1f2937]/50 border border-white/5 p-4 rounded-xl">
-                    <div>
-                      <h4 className="font-bold text-white mb-1">تفعيل نظام الهاوس (House System)</h4>
-                      <p className="text-[12px] text-white/50">للطلبات الذاتية من الطاولة مباشرة (نظام الكارت)</p>
-                    </div>
-                    <label className="relative inline-flex items-center cursor-pointer">
-                      <input type="checkbox" className="sr-only peer" checked={isHouseSystemActive} onChange={(e) => {
-                        setIsHouseSystemActive(e.target.checked);
-                      }} />
-                      <div className="w-11 h-6 bg-white/10 peer-focus:outline-none rounded-full peer peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:right-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-yellow-500"></div>
-                    </label>
-                  </div>
+                  {cardType === 'restaurant' && (
+                    <>
+                      <div className="flex items-center justify-between bg-[#1f2937]/50 border border-white/5 p-4 rounded-xl">
+                        <div>
+                          <h4 className="font-bold text-white mb-1">تفعيل نظام الهاوس (House System)</h4>
+                          <p className="text-[12px] text-white/50">للطلبات الذاتية من الطاولة مباشرة (نظام الكارت)</p>
+                        </div>
+                        <label className="relative inline-flex items-center cursor-pointer">
+                          <input type="checkbox" className="sr-only peer" checked={isHouseSystemActive} onChange={(e) => {
+                            setIsHouseSystemActive(e.target.checked);
+                          }} />
+                          <div className="w-11 h-6 bg-white/10 peer-focus:outline-none rounded-full peer peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:right-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-yellow-500"></div>
+                        </label>
+                      </div>
 
-                  <div className="flex items-center justify-between bg-[#1f2937]/50 border border-white/5 p-4 rounded-xl">
-                    <div>
-                      <h4 className="font-bold text-white mb-1">تفعيل الطلبات الخارجية (التيك أوي)</h4>
-                      <p className="text-[12px] text-white/50">السماح للزبائن بالطلب من خارج المطعم (بدون مسح كارت)</p>
-                    </div>
-                    <label className="relative inline-flex items-center cursor-pointer">
-                      <input type="checkbox" className="sr-only peer" checked={isTakeawayEnabled} onChange={(e) => {
-                        setIsTakeawayEnabled(e.target.checked);
-                      }} />
-                      <div className="w-11 h-6 bg-white/10 peer-focus:outline-none rounded-full peer peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:right-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-yellow-500"></div>
-                    </label>
-                  </div>
+                      <div className="flex items-center justify-between bg-[#1f2937]/50 border border-white/5 p-4 rounded-xl">
+                        <div>
+                          <h4 className="font-bold text-white mb-1">تفعيل الطلبات الخارجية (التيك أوي)</h4>
+                          <p className="text-[12px] text-white/50">السماح للزبائن بالطلب من خارج المطعم (بدون مسح كارت)</p>
+                        </div>
+                        <label className="relative inline-flex items-center cursor-pointer">
+                          <input type="checkbox" className="sr-only peer" checked={isTakeawayEnabled} onChange={(e) => {
+                            setIsTakeawayEnabled(e.target.checked);
+                          }} />
+                          <div className="w-11 h-6 bg-white/10 peer-focus:outline-none rounded-full peer peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:right-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-yellow-500"></div>
+                        </label>
+                      </div>
+                    </>
+                  )}
 
                   {/* تخصيص زر المنيو */}
                   <div className="bg-[#1f2937]/50 border border-white/5 p-4 rounded-xl space-y-4">
                     <h4 className="font-bold text-white mb-1 flex items-center gap-2 text-[13px]">
                       <LucideIcons.PenTool size={14} className="text-yellow-400" />
-                      تخصيص زر المنيو (في صفحة الزبون)
+                      {cardType === 'restaurant' ? 'تخصيص زر المنيو (في صفحة الزبون)' : 'تخصيص زر الكتالوج (في صفحة الزبون)'}
                     </h4>
                     <div className="grid grid-cols-2 gap-3">
                       <div>

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
+import { EditableText, EditableImage } from "../EditableElements";
 import { getIconForLink } from "../../utils/icons";
 import * as LucideIcons from "lucide-react";
 import ScrollReveal from "../ScrollReveal";
@@ -12,7 +13,7 @@ import { motion, Reorder } from "framer-motion";
 //  Dark espresso bg · circular logo badge · pill buttons · social icons
 //  Props: { siteData, siteColors, lang }
 // ══════════════════════════════════════════════════════════════════════
-export default function CafeTheme1({ cardId, siteData, siteColors, lang = "en", isMenuEnabled, menuMode, isHouseSystemActive, menuCategories, addToCart, pdfMenuUrl, showMenuImages, isPreview, onUpdateLayoutBlocks }) {
+export default function CafeTheme1({ cardId, siteData, siteColors, lang = "en", isMenuEnabled, menuMode, isHouseSystemActive, menuCategories, addToCart, pdfMenuUrl, showMenuImages, isPreview, onUpdateLayoutBlocks, isWYSIWYG, onUpdateField, onImageUpload, onAddLink, onEditLink, onUpdateLink, onRemoveLink, footerComponent }) {
   const primary    = siteColors?.primary    || "#C9A96E";   // warm gold
   const bgDark     = siteColors?.background || "#2C1503";   // espresso brown
   const isAr       = lang === "ar";
@@ -47,6 +48,11 @@ export default function CafeTheme1({ cardId, siteData, siteColors, lang = "en", 
   const PillBtn = ({ link }) => {
     const label = t(link.title, link.titleAr);
     const handleClick = (e) => {
+      if (isWYSIWYG) {
+        e.preventDefault();
+        if (onEditLink) onEditLink(link._key || link.id);
+        return;
+      }
       if(cardId && !isPreview) fetch('/api/clicks', { method: 'POST', body: JSON.stringify({ cardId, linkId: link.id || link._id }) }).catch(()=>{});
       if (link.url === '#menu-section') {
           e.preventDefault();
@@ -84,6 +90,11 @@ export default function CafeTheme1({ cardId, siteData, siteColors, lang = "en", 
   const SocialBtn = ({ link }) => {
     const { IconComponent } = getIconForLink(link.title || link.titleAr || "");
     const handleClick = (e) => {
+      if (isWYSIWYG) {
+        e.preventDefault();
+        if (onEditLink) onEditLink(link._key || link.id);
+        return;
+      }
       if(cardId && !isPreview) fetch('/api/clicks', { method: 'POST', body: JSON.stringify({ cardId, linkId: link.id || link._id }) }).catch(()=>{});
       if (link.url === '#menu-section') {
         e.preventDefault();
@@ -142,22 +153,43 @@ export default function CafeTheme1({ cardId, siteData, siteColors, lang = "en", 
                         <Image src={hero1} alt="Hero" fill priority style={{ objectFit: 'cover' }} draggable="false" />
                         <div className="absolute inset-0" style={{ background: `linear-gradient(180deg, transparent 0%, transparent 45%, ${bgDark}CC 80%, ${bgDark} 100%)` }} />
                         <div className="absolute inset-x-0 top-0 flex justify-center pt-10 z-10">
-                          <div className="w-[88px] h-[88px] rounded-full flex flex-col items-center justify-center shadow-2xl border-2 border-white/20"
-                               style={{ background: `radial-gradient(circle at 35% 35%, ${primary}EE, ${primary}AA)`, boxShadow: `0 8px 32px rgba(0,0,0,0.45), 0 0 0 3px rgba(var(--primary-rgb), 0.25)` }}>
-                            <span className="text-white font-black text-center leading-tight uppercase"
-                                  style={{ fontSize: name.length > 8 ? "9px" : "11px", textShadow: "0 1px 3px rgba(0,0,0,0.4)", maxWidth: "70px", wordBreak: "break-word", textAlign: "center" }}>
-                              {name}
-                            </span>
-                          </div>
+                          <EditableImage
+                              src={imgs.profile || null}
+                              alt={name}
+                              isWYSIWYG={isWYSIWYG}
+                              onImageUpload={(file) => onImageUpload && onImageUpload('profile', file)}
+                              wrapperClass="w-[88px] h-[88px] rounded-full flex flex-col items-center justify-center shadow-2xl border-2 border-white/20"
+                              className="w-full h-full object-cover rounded-full"
+                              style={{ background: `radial-gradient(circle at 35% 35%, ${primary}EE, ${primary}AA)`, boxShadow: `0 8px 32px rgba(0,0,0,0.45), 0 0 0 3px rgba(var(--primary-rgb), 0.25)` }}
+                          >
+                             <EditableText
+                                   value={name}
+                                   onChange={(v) => onUpdateField && onUpdateField('name', v)}
+                                   isWYSIWYG={isWYSIWYG}
+                                   tagName="span"
+                                   className="text-white font-black text-center leading-tight uppercase relative z-10"
+                                   style={{ fontSize: name?.length > 8 ? "9px" : "11px", textShadow: "0 1px 3px rgba(0,0,0,0.4)", maxWidth: "70px", wordBreak: "break-word", textAlign: "center" }}
+                             />
+                          </EditableImage>
                         </div>
                       </section>
                       <section className="px-6 pt-5 pb-6 text-center pointer-events-none">
-                        <h1 className="font-black text-white text-[22px] mb-1 tracking-wide" style={{ fontFamily: "Cairo, sans-serif" }}>
-                          {name}
-                        </h1>
-                        <p className="text-[13.5px] font-medium" style={{ color: "rgba(255,255,255,0.50)", fontFamily: "Cairo, sans-serif" }}>
-                          {subtitle}
-                        </p>
+                        <EditableText
+                          value={name}
+                          onChange={(v) => onUpdateField && onUpdateField('name', v)}
+                          isWYSIWYG={isWYSIWYG}
+                          tagName="h1"
+                          className="font-black text-white text-[22px] mb-1 tracking-wide" 
+                          style={{ fontFamily: "Cairo, sans-serif" }}
+                        />
+                        <EditableText
+                          value={subtitle}
+                          onChange={(v) => onUpdateField && onUpdateField('subtitle', v)}
+                          isWYSIWYG={isWYSIWYG}
+                          tagName="p"
+                          className="text-[13.5px] font-medium" 
+                          style={{ color: "rgba(255,255,255,0.50)", fontFamily: "Cairo, sans-serif" }}
+                        />
                       </section>
                   </div>
               );
@@ -212,15 +244,15 @@ export default function CafeTheme1({ cardId, siteData, siteColors, lang = "en", 
                       </div>
 
                       {socialLinks.length > 0 ? (
-                        <div className="flex justify-center gap-4">
+                        <div className="flex justify-center gap-4 mb-6">
                           {socialLinks.map((lk) => (
-                            <ScrollReveal key={lk.id} yOffset={20}>
+                            <ScrollReveal key={lk._key || lk.id} yOffset={20}>
                               <SocialBtn link={lk} />
                             </ScrollReveal>
                           ))}
                         </div>
                       ) : (
-                        <div className="flex justify-center gap-4">
+                        <div className="flex justify-center gap-4 mb-6">
                           {[LucideIcons.Camera, LucideIcons.Music2, LucideIcons.Play].map((Ic, i) => (
                             <div key={i} className="w-12 h-12 rounded-full flex items-center justify-center opacity-20 pointer-events-none"
                                  style={{ background: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.15)" }}>
@@ -228,6 +260,17 @@ export default function CafeTheme1({ cardId, siteData, siteColors, lang = "en", 
                             </div>
                           ))}
                         </div>
+                      )}
+                      
+                      {isWYSIWYG && (
+                        <button
+                          onClick={onAddLink}
+                          className="w-full py-[18px] rounded-full font-bold text-[14px] text-white flex items-center justify-center gap-2 transition-all duration-300 hover:bg-white/10"
+                          style={{ border: '1px dashed rgba(255,255,255,0.3)', background: 'rgba(255,255,255,0.02)' }}
+                        >
+                          <LucideIcons.Plus size={18} />
+                          إضافة رابط
+                        </button>
                       )}
                   </section>
               );
@@ -278,6 +321,7 @@ export default function CafeTheme1({ cardId, siteData, siteColors, lang = "en", 
                 ))}
             </div>
         )}
+        {footerComponent}
       </div>
       
       {/* ── MENU MODAL ── */}

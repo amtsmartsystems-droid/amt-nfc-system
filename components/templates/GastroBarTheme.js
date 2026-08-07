@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
+import { EditableText, EditableImage } from "../EditableElements";
 import { getIconForLink } from "../../utils/icons";
 import * as LucideIcons from "lucide-react";
 import ScrollReveal from "../ScrollReveal";
@@ -15,7 +16,7 @@ import { motion, Reorder } from "framer-motion";
 
 const SOCIAL_KW = ["instagram","انستا","telegram","تيليغرام","whatsapp","واتس","tiktok","تيك","facebook","فيسبوك","twitter","تويتر","youtube","يوتيوب","vk","snapchat","سناب","linkedin"];
 
-export default function GastroBarTheme({ cardId, siteData, siteColors, lang = "en", isMenuEnabled, menuMode, isHouseSystemActive, menuCategories, addToCart, pdfMenuUrl, showMenuImages, isPreview, onUpdateLayoutBlocks }) {
+export default function GastroBarTheme({ cardId, siteData, siteColors, lang = "en", isMenuEnabled, menuMode, isHouseSystemActive, menuCategories, addToCart, pdfMenuUrl, showMenuImages, isPreview, onUpdateLayoutBlocks, isWYSIWYG, onUpdateField, onImageUpload, onAddLink, onEditLink, onUpdateLink, onRemoveLink, footerComponent }) {
   const accent  = siteColors?.primary    || "#F5C518";   // gastrobar yellow
   const bgColor = siteColors?.background || "#111111";   // near-black
   const isAr    = lang === "ar";
@@ -55,6 +56,11 @@ export default function GastroBarTheme({ cardId, siteData, siteColors, lang = "e
     const label = t(link.title, link.titleAr);
     const { IconComponent } = getIconForLink(link.title || link.titleAr || "");
     const handleClick = (e) => { 
+      if (isWYSIWYG) {
+        e.preventDefault();
+        if (onEditLink) onEditLink(link._key || link.id);
+        return;
+      }
       if(cardId && !isPreview) fetch('/api/clicks', { method: 'POST', body: JSON.stringify({ cardId, linkId: link.id || link._id }) }).catch(()=>{}); 
       if (link.url === '#menu-section') {
           e.preventDefault();
@@ -94,6 +100,11 @@ export default function GastroBarTheme({ cardId, siteData, siteColors, lang = "e
     const label = t(link.title, link.titleAr);
     const { IconComponent } = getIconForLink(link.title || link.titleAr || "");
     const handleClick = (e) => { 
+      if (isWYSIWYG) {
+        e.preventDefault();
+        if (onEditLink) onEditLink(link._key || link.id);
+        return;
+      }
       if(cardId && !isPreview) fetch('/api/clicks', { method: 'POST', body: JSON.stringify({ cardId, linkId: link.id || link._id }) }).catch(()=>{}); 
       if (link.url === '#menu-section') {
         e.preventDefault();
@@ -192,9 +203,22 @@ export default function GastroBarTheme({ cardId, siteData, siteColors, lang = "e
                                style={{ background: "rgba(255,255,255,0.2)", backdropFilter: "blur(12px)", border: "1px solid rgba(255,255,255,0.3)", borderTop: "none" }}>
                             <div className="flex items-center gap-2 justify-center">
                               <LucideIcons.UtensilsCrossed size={18} style={{ color: "#ffffff", filter: "drop-shadow(0px 1px 2px rgba(0,0,0,0.5))" }} />
-                              <span className="font-black text-white text-[15px] uppercase tracking-[0.2em]" style={{ textShadow: "0 1px 3px rgba(0,0,0,0.8)" }}>{name}</span>
+                              <EditableText 
+                                  value={name} 
+                                  onChange={(v) => onUpdateField && onUpdateField('name', v)} 
+                                  isWYSIWYG={isWYSIWYG}
+                                  className="font-black text-white text-[15px] uppercase tracking-[0.2em]" 
+                                  style={{ textShadow: "0 1px 3px rgba(0,0,0,0.8)" }} 
+                              />
                             </div>
-                            <p className="text-[10px] uppercase tracking-[0.25em] mt-0.5 text-white" style={{ textShadow: "0 1px 2px rgba(0,0,0,0.8)" }}>{tagline}</p>
+                            <EditableText 
+                                value={tagline} 
+                                onChange={(v) => onUpdateField && onUpdateField('subtitle', v)} 
+                                isWYSIWYG={isWYSIWYG}
+                                tagName="p"
+                                className="text-[10px] uppercase tracking-[0.25em] mt-0.5 text-white" 
+                                style={{ textShadow: "0 1px 2px rgba(0,0,0,0.8)" }} 
+                            />
                           </div>
                         </div>
                       </section>
@@ -334,10 +358,23 @@ export default function GastroBarTheme({ cardId, siteData, siteColors, lang = "e
                       {primaryLinks.length > 2 && (
                         <div className="flex flex-col gap-3 mt-3">
                           {primaryLinks.slice(2).map(lk => (
-                            <ScrollReveal key={lk.id} yOffset={30}>
+                            <ScrollReveal key={lk._key || lk.id} yOffset={30}>
                               <YellowBtn link={lk} />
                             </ScrollReveal>
                           ))}
+                        </div>
+                      )}
+                      
+                      {isWYSIWYG && (
+                        <div className="mt-6">
+                          <button
+                            onClick={onAddLink}
+                            className="w-full py-[15px] rounded-2xl font-bold text-[14px] text-white flex items-center justify-center gap-2 transition-all duration-300 hover:bg-white/10"
+                            style={{ border: '1px dashed rgba(255,255,255,0.3)', background: 'rgba(255,255,255,0.02)' }}
+                          >
+                            <LucideIcons.Plus size={18} />
+                            إضافة رابط
+                          </button>
                         </div>
                       )}
                   </section>
@@ -418,6 +455,8 @@ export default function GastroBarTheme({ cardId, siteData, siteColors, lang = "e
                 ))}
             </div>
         )}
+
+        {footerComponent}
 
         {/* ── WATERMARK ── */}
         <div style={{ textAlign:'center', paddingBottom:32, paddingTop:32, display:'flex', justifyContent:'center' }}>

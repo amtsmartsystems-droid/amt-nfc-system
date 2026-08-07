@@ -69,6 +69,32 @@ export async function POST(req) {
     }
 }
 
+export async function PUT(req) {
+    try {
+        await connectDB();
+        const body = await req.json();
+        const { ids, batchName } = body;
+        
+        if (!ids || !Array.isArray(ids)) {
+            return NextResponse.json({ error: 'ids array is required' }, { status: 400 });
+        }
+
+        // Update cards batchName and set isBatch to true if batchName exists
+        await Card.updateMany(
+            { _id: { $in: ids } },
+            { $set: { 
+                batchName: batchName || null,
+                isBatch: !!batchName
+            } }
+        );
+
+        return NextResponse.json({ success: true, updatedCount: ids.length });
+    } catch (error) {
+        console.error('Update Cards Batch Error:', error);
+        return NextResponse.json({ error: 'Failed to update cards' }, { status: 500 });
+    }
+}
+
 export async function DELETE(req) {
     try {
         const connectDB = (await import('../../../../backend/config/db')).default;

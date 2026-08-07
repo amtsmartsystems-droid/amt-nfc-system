@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import { getIconForLink } from "../../utils/icons";
 import * as LucideIcons from "lucide-react";
+import { EditableText, EditableImage } from "../EditableElements";
 import ScrollReveal from "../ScrollReveal";
 import { motion, Reorder } from "framer-motion";
 
@@ -11,7 +12,7 @@ import { motion, Reorder } from "framer-motion";
 //  RestaurantTheme — Dark Elegant "Meaty Story" style
 //  Props: { siteData, siteColors, lang }
 // ══════════════════════════════════════════════════════════════════════
-export default function RestaurantTheme({ cardId, siteData, siteColors, lang = "en", isMenuEnabled, menuMode, isHouseSystemActive, pdfMenuUrl, menuCategories, addToCart, showMenuImages, isPreview, onUpdateLayoutBlocks }) {
+export default function RestaurantTheme({ cardId, siteData, siteColors, lang = "en", isMenuEnabled, menuMode, isHouseSystemActive, pdfMenuUrl, menuCategories, addToCart, showMenuImages, isPreview, onUpdateLayoutBlocks, isWYSIWYG, onUpdateField, onImageUpload, onAddLink, onUpdateLink, onRemoveLink, onEditLink, footerComponent }) {
   const primary = siteColors?.primary    || "#EDD98A";
   const bgCream = siteColors?.background || "#F5EDD6";
   const isAr    = lang === "ar";
@@ -118,10 +119,21 @@ export default function RestaurantTheme({ cardId, siteData, siteColors, lang = "
                       <Image src={hero1} alt="hero" fill priority style={{ objectFit: 'cover' }} className="absolute inset-0" draggable="false" />
                       <div className="absolute inset-0 pointer-events-none" style={{ background:"linear-gradient(180deg,rgba(0,0,0,.5) 0%,rgba(0,0,0,.15) 38%,rgba(0,0,0,.70) 100%)" }} />
                       <div className="relative z-10 px-6 pb-12 pt-16 pointer-events-none">
-                        <h1 className="text-[50px] font-black text-white leading-none tracking-tight mb-3 drop-shadow-lg uppercase" style={{ fontFamily:"Cairo,sans-serif" }}>
-                          {name}
-                        </h1>
-                        <p className="text-white/80 text-[14px] leading-relaxed max-w-[270px] drop-shadow-md">{sub}</p>
+                        <EditableText
+                          value={name}
+                          onChange={(v) => onUpdateField && onUpdateField('name', v)}
+                          isWYSIWYG={isWYSIWYG}
+                          tagName="h1"
+                          className="text-[50px] font-black text-white leading-none tracking-tight mb-3 drop-shadow-lg uppercase pointer-events-none" 
+                          style={{ fontFamily:"Cairo,sans-serif" }}
+                        />
+                        <EditableText
+                          value={sub}
+                          onChange={(v) => onUpdateField && onUpdateField('subtitle', v)}
+                          isWYSIWYG={isWYSIWYG}
+                          tagName="p"
+                          className="text-white/80 text-[14px] leading-relaxed max-w-[270px] drop-shadow-md pointer-events-none"
+                        />
                       </div>
                   </section>
               );
@@ -160,21 +172,45 @@ export default function RestaurantTheme({ cardId, siteData, siteColors, lang = "
                       <div className="relative rounded-[20px] overflow-hidden mb-7 shadow-card h-[190px]">
                         <Image src={about1} alt="interior" fill style={{ objectFit: 'cover' }} draggable="false" />
                       </div>
-                      <STitle>{name}</STitle>
-                      <div className="mb-4"><Body>{about}</Body></div>
+                      <STitle>
+                        <EditableText
+                          value={name}
+                          onChange={(v) => onUpdateField && onUpdateField('name', v)}
+                          isWYSIWYG={isWYSIWYG}
+                        />
+                      </STitle>
+                      <div className="mb-4">
+                        <Body>
+                          <EditableText
+                            value={about}
+                            onChange={(v) => onUpdateField && onUpdateField('about', v)}
+                            isWYSIWYG={isWYSIWYG}
+                          />
+                        </Body>
+                      </div>
                       
                       {(hours || address) && (
                         <div className="flex flex-col gap-3 mt-6 p-5 rounded-2xl bg-gray-50 border border-gray-100">
                            {address && (
                              <div className="flex items-start gap-3">
                                <LucideIcons.MapPin size={18} className="text-[#555] mt-0.5" />
-                               <span className="text-[14px] text-[#444] font-medium leading-relaxed font-[Cairo]">{address}</span>
+                               <EditableText
+                                  value={address}
+                                  onChange={(v) => onUpdateField && onUpdateField('address', v)}
+                                  isWYSIWYG={isWYSIWYG}
+                                  className="text-[14px] text-[#444] font-medium leading-relaxed font-[Cairo]"
+                               />
                              </div>
                            )}
                            {hours && (
                              <div className="flex items-start gap-3">
                                <LucideIcons.Clock size={18} className="text-[#555] mt-0.5" />
-                               <span className="text-[14px] text-[#444] font-medium leading-relaxed font-[Cairo]">{hours}</span>
+                               <EditableText
+                                  value={hours}
+                                  onChange={(v) => onUpdateField && onUpdateField('hours', v)}
+                                  isWYSIWYG={isWYSIWYG}
+                                  className="text-[14px] text-[#444] font-medium leading-relaxed font-[Cairo]"
+                               />
                              </div>
                            )}
                         </div>
@@ -232,6 +268,8 @@ export default function RestaurantTheme({ cardId, siteData, siteColors, lang = "
               ))}
           </div>
       )}
+
+      {footerComponent}
 
       {/* ── MENU MODAL ── */}
       {isMenuModalOpen && (
