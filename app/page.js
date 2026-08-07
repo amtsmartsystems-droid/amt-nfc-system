@@ -1333,7 +1333,7 @@ function PageContent() {
                           <input 
                             type="checkbox" 
                             className="sr-only peer" 
-                            checked={siteData.showAppointmentForm !== false && siteData.showContactForm !== false} 
+                            checked={siteData.showAppointmentForm === true && siteData.showContactForm === true} 
                             onChange={e => {
                               up("showAppointmentForm", e.target.checked);
                               up("showContactForm", e.target.checked);
@@ -1356,7 +1356,7 @@ function PageContent() {
                     </div>
 
                     {/* WhatsApp Input (Visible only if enabled) */}
-                    {(siteData.showAppointmentForm !== false || siteData.showContactForm !== false) && (
+                    {(siteData.showAppointmentForm === true || siteData.showContactForm === true) && (
                       <div className="bg-white/5 p-4 rounded-2xl border border-white/10 space-y-2 animate-in fade-in slide-in-from-top-2">
                         <Label>رقم الواتساب للاستشارات (مع رمز الدولة)</Label>
                         <p className="text-[10px] text-slate-400 mb-2">

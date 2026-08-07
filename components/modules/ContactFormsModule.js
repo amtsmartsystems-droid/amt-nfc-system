@@ -7,8 +7,8 @@ import ScrollReveal from "../ScrollReveal";
 export default function ContactFormsModule({ siteData, links }) {
   const sd = siteData || {};
   const whatsappNumber = sd.whatsappNumber || "";
-  const showAppointmentForm = sd.showAppointmentForm !== false;
-  const showContactForm = sd.showContactForm !== false;
+  const showAppointmentForm = sd.showAppointmentForm === true;
+  const showContactForm = sd.showContactForm === true;
   const hasAnyForm = showAppointmentForm || showContactForm;
 
   if (!hasAnyForm) return null;
