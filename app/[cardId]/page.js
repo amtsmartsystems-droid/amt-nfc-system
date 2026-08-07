@@ -168,6 +168,16 @@ export default async function PublicCardPage({ params, searchParams }) {
         }
 
         // Patch both links arrays so nothing can overwrite them (always apply merged links)
+        if (serializedCard.siteData?.showVcardButton === true && serializedCard.siteData?.vcardNumber) {
+            effectiveLinks.unshift({
+                id: 'vcard_btn_dynamic',
+                title: 'Save Contact',
+                titleAr: 'حفظ جهة الاتصال',
+                url: `/api/vcard?phone=${serializedCard.siteData.vcardNumber}&name=${encodeURIComponent(serializedCard.siteData.name || '')}`,
+                isVcard: true
+            });
+        }
+
         serializedCard.links    = effectiveLinks;
         serializedCard.siteData = { ...serializedCard.siteData, links: effectiveLinks };
     };

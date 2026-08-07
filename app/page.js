@@ -1370,7 +1370,50 @@ function PageContent() {
                         />
                       </div>
                     )}
-                  </div>
+
+                    {/* VCard Button Toggle */}
+                    <div className="rounded-2xl p-4 flex items-center justify-between mt-4" style={{ background:"rgba(59,130,246,0.2)", border:"1px solid rgba(59,130,246,0.3)" }}>
+                      <label className="relative flex items-center gap-2 cursor-pointer w-fit select-none shrink-0" dir="ltr">
+                        <div className="relative">
+                          <input 
+                            type="checkbox" 
+                            className="sr-only peer" 
+                            checked={siteData.showVcardButton === true} 
+                            onChange={e => up("showVcardButton", e.target.checked)} 
+                          />
+                          <div className="w-12 h-6 bg-black/60 border border-white/10 rounded-full peer peer-checked:bg-blue-500 peer-checked:border-blue-500 transition-all duration-300"></div>
+                          <div className="absolute left-[3px] top-[3px] bg-white/70 w-4.5 h-4.5 rounded-full transition-all duration-300 peer-checked:translate-x-[24px] peer-checked:bg-white shadow-sm"></div>
+                        </div>
+                      </label>
+
+                      <div className="text-right">
+                        <div className="flex items-center gap-2 justify-end mb-1.5">
+                          <h3 className="font-bold text-white text-[14px]">زر حفظ جهة الاتصال (Save Contact)</h3>
+                          <LucideIcons.UserPlus size={16} className="text-blue-400" />
+                        </div>
+                        <p className="text-[11px] text-blue-100/60 font-medium">
+                          إظهار زر يتيح للعملاء حفظ رقم المطعم في جهات الاتصال لديهم بضغطة واحدة
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* VCard Number Input (Visible only if enabled) */}
+                    {siteData.showVcardButton === true && (
+                      <div className="bg-white/5 p-4 rounded-2xl border border-white/10 space-y-2 animate-in fade-in slide-in-from-top-2 mt-2">
+                        <Label>رقم الهاتف المراد حفظه (مع رمز الدولة)</Label>
+                        <p className="text-[10px] text-slate-400 mb-2">
+                          اكتب الرقم الذي سيتم تنزيله كجهة اتصال (مثال: 966500000000)
+                        </p>
+                        <AdminInput 
+                          value={siteData.vcardNumber || siteData.whatsappNumber || ""} 
+                          onChange={v => up("vcardNumber", v)} 
+                          placeholder="مثال: 966500000000" 
+                          dir="ltr" 
+                        />
+                      </div>
+                    )}
+
+                </div>
 
                 <div className="space-y-3">
                   {(siteData.events || []).map(ev => (

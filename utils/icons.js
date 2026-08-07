@@ -27,6 +27,7 @@ const RULES = [
   { kw: ["coffee","قهوة","كافيه","cafe","espresso"],          icon:"Coffee",        color:"#6B4226", bg:"#efebe9" },
 
   // Contact & Location
+  { kw: ["save", "contact", "حفظ", "جهة اتصال", "vcard"], icon:"UserPlus", color:"#10B981", bg:"#d1fae5" },
   { kw: ["location","موقع","خريطة","map","directions","اتجاهات","لوكيشن"], icon:"MapPin", color:"#EF4444", bg:"#fee2e2" },
   { kw: ["phone","call","هاتف","اتصل","اتصال","تلفون"],      icon:"Phone",         color:"#3B82F6", bg:"#dbeafe" },
   { kw: ["email","mail","بريد","إيميل","ايميل"],              icon:"Mail",          color:"#6366F1", bg:"#ede9fe" },
