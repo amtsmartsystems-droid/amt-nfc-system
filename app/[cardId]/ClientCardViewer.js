@@ -413,7 +413,10 @@ export default function ClientCardViewer({
     siteData.links = _applyRouting(siteData.links);
     siteData.events = card.events || [];
 
+    const formsModule = <ContactFormsModule siteData={siteData} links={card.links} />;
+
     const props = {
+        footerComponent: formsModule,
         cardId:     card.shortCode || cardId,
         siteData,
         siteColors: { primary, background: card.background || '#F5EDD6' },
@@ -716,14 +719,11 @@ export default function ClientCardViewer({
 
                             {(() => {
                                 const tn2 = (card.themeName || '').toLowerCase().trim();
-                                const formsModule = <ContactFormsModule siteData={props.siteData} links={card.links} />;
-                                const themeProps = { ...props, footerComponent: formsModule };
-
-                                if (tn2 === 'cafe' || tn2 === 'cafetheme')          return <CafeTheme      {...themeProps} />;
-                                if (tn2 === 'cafe1' || tn2 === 'cafetheme1')        return <CafeTheme1     {...themeProps} />;
-                                if (tn2 === 'gastro' || tn2 === 'gastrobartheme')   return <GastroBarTheme {...themeProps} />;
-                                if (tn2 === 'doctor' || tn2 === 'doctortheme')      return <DoctorTheme    {...themeProps} />;
-                                return <RestaurantTheme {...themeProps} />;
+                                if (tn2 === 'cafe' || tn2 === 'cafetheme')          return <CafeTheme      {...props} />;
+                                if (tn2 === 'cafe1' || tn2 === 'cafetheme1')        return <CafeTheme1     {...props} />;
+                                if (tn2 === 'gastro' || tn2 === 'gastrobartheme')   return <GastroBarTheme {...props} />;
+                                if (tn2 === 'doctor' || tn2 === 'doctortheme')      return <DoctorTheme    {...props} />;
+                                return <RestaurantTheme {...props} />;
                             })()}
 
                             {/* ════════ AMT Branding Footer ════════ */}
