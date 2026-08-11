@@ -404,7 +404,7 @@ export default function MaroufCoffeeTheme({ cardId, siteData, siteColors, lang =
             </BlockReveal>
 
             <BlockReveal delay={0.14}>
-              {about && (
+              {(about || isPreview) && (
                 <EditableText
                   value={about}
                   onChange={(v) => onUpdateField && onUpdateField('about', v)}

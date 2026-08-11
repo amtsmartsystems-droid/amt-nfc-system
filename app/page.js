@@ -23,8 +23,8 @@ import CategoryManagerModal from "../components/CategoryManagerModal";
 const DEFAULT = {
   name:"Your Name", nameAr:"ما اسمك",
   subtitle:"Your Slogan", subtitleAr:"ما شعارك",
-  about:"Write a brief description about yourself or your business here.",
-  aboutAr:"اكتب وصفاً موجزاً عن نفسك أو عملك هنا.",
+  about:"",
+  aboutAr:"",
   principlesTitle:"OUR PRINCIPLES", principlesTitleAr:"مبادئنا",
   principlesSubtitle:"What we stand for.", principlesSubtitleAr:"ما نمثله.",
   contactsTitle:"CONTACTS", contactsTitleAr:"تواصل معنا",
