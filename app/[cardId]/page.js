@@ -20,7 +20,7 @@ export async function generateMetadata({ params }) {
             openGraph: {
                 title: 'AMT Tech Solutions',
                 description: 'نؤتمت مطعمك ونحوّل طاولاتك إلى نقاط بيع ذكية 🚀',
-                images: ['https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=800&auto=format&fit=crop'],
+                images: ['https://amt-nfc-system.vercel.app/amt-logo.png'],
             },
         };
     }
@@ -36,7 +36,7 @@ export async function generateMetadata({ params }) {
         openGraph: {
             title: title,
             description: description,
-            images: ['https://images.unsplash.com/photo-1568901346375-23c9450c58cd?q=80&w=800&auto=format&fit=crop'],
+            images: ['https://amt-nfc-system.vercel.app/amt-logo.png'],
         }
     };
 }
