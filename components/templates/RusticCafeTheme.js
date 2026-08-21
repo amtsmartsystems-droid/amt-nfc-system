@@ -708,23 +708,23 @@ export default function RusticCafeTheme({ cardId, siteData, siteColors, lang = "
                       <span className="font-black text-red-600 px-3 py-1 bg-red-50 rounded-lg">{sd.bloodType}</span>
                     </div>
                   )}
-                  {((lang === 'en' ? sd.allergiesEn : sd.allergiesAr) || sd.allergies) && (
+                  {(lang === 'en' ? (sd.allergiesEn ?? sd.allergies) : (sd.allergiesAr ?? sd.allergies)) && (
                     <div>
                       <span className="block text-red-400 text-[11px] mb-1 font-bold">{t("Allergies", "الحساسية")}</span>
-                      <p className="bg-white/50 p-3 rounded-xl border border-red-100">{(lang === 'en' ? sd.allergiesEn : sd.allergiesAr) || sd.allergies}</p>
+                      <p className="bg-white/50 p-3 rounded-xl border border-red-100">{lang === 'en' ? (sd.allergiesEn ?? sd.allergies) : (sd.allergiesAr ?? sd.allergies)}</p>
                     </div>
                   )}
-                  {((lang === 'en' ? sd.chronicDiseasesEn : sd.chronicDiseasesAr) || sd.chronicDiseases) && (
+                  {(lang === 'en' ? (sd.chronicDiseasesEn ?? sd.chronicDiseases) : (sd.chronicDiseasesAr ?? sd.chronicDiseases)) && (
                     <div>
                       <span className="block text-red-400 text-[11px] mb-1 font-bold">{t("Chronic Diseases", "أمراض مزمنة")}</span>
-                      <p className="bg-white/50 p-3 rounded-xl border border-red-100">{(lang === 'en' ? sd.chronicDiseasesEn : sd.chronicDiseasesAr) || sd.chronicDiseases}</p>
+                      <p className="bg-white/50 p-3 rounded-xl border border-red-100">{lang === 'en' ? (sd.chronicDiseasesEn ?? sd.chronicDiseases) : (sd.chronicDiseasesAr ?? sd.chronicDiseases)}</p>
                     </div>
                   )}
-                  {((lang === 'en' ? sd.medicalNotesEn : sd.medicalNotesAr) || sd.medicalNotes) && (
+                  {(lang === 'en' ? (sd.medicalNotesEn ?? sd.medicalNotes) : (sd.medicalNotesAr ?? sd.medicalNotes)) && (
                     <div>
                       <span className="block text-red-400 text-[11px] mb-1 font-bold">{t("Medical Notes", "ملاحظات طبية")}</span>
                       <p className="bg-white/50 p-3 rounded-xl border border-red-100 leading-relaxed text-slate-600 italic">
-                        {(lang === 'en' ? sd.medicalNotesEn : sd.medicalNotesAr) || sd.medicalNotes}
+                        {lang === 'en' ? (sd.medicalNotesEn ?? sd.medicalNotes) : (sd.medicalNotesAr ?? sd.medicalNotes)}
                       </p>
                     </div>
                   )}
