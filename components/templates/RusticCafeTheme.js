@@ -488,7 +488,7 @@ export default function RusticCafeTheme({ cardId, siteData, siteColors, lang = "
         );
 
       case 'vcard_btn':
-        if (!sd.showVcardButton && !vcardPhone) return null;
+        if (!sd.showVcardButton) return null;
         return (
           <BlockReveal delay={0}>
             <div className="px-6 mt-6" style={{ cursor: isPreview ? "grab" : "default" }}>

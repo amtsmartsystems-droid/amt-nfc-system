@@ -492,8 +492,8 @@ export default function ClientCardViewer({
     ════════════════════════════════════════════════════════════════ */
     if (card.cardType === 'business_card') {
         const tnBC = (card.themeName || '').toLowerCase().trim();
-        // If a "cool" (rustic_cafe) theme is explicitly chosen for business_card, use it
-        if (tnBC === 'rustic_cafe' || tnBC === 'cool') {
+        // If a new VIP/cool theme is explicitly chosen for business_card, use it
+        if (['rustic_cafe', 'cool', 'marouf_coffee', 'vip'].includes(tnBC)) {
             // Fall through to the full-screen theme renderer below
         } else {
             return <AMTBusinessCard siteData={siteData} cardId={cardId} {...props} />;

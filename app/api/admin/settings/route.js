@@ -32,13 +32,16 @@ export async function GET(req) {
             { id: 'restaurant', name: 'منيو مطعم', themes: VIP_COOL_THEMES },
             { id: 'business_card', name: 'بطاقة أعمال', themes: VIP_COOL_THEMES },
             { id: 'online_business', name: 'online business', themes: VIP_COOL_THEMES },
-            { id: 'medical_card', name: 'بطاقة طبيب', themes: COOL_VIP_THEMES }
+            { id: 'medical_card', name: 'بطاقة طبيب', themes: COOL_VIP_THEMES },
+            { id: 'school_card', name: 'بطاقة مدارس AMT', themes: [{ id: 'school', label: 'school', icon: 'GraduationCap' }] }
         ];
 
         // Enforce themes on existing categories
         cats.forEach(c => {
             if (c.id === 'medical_card') {
                 c.themes = COOL_VIP_THEMES;
+            } else if (c.id === 'school_card') {
+                c.themes = [{ id: 'school', label: 'school', icon: 'GraduationCap' }];
             } else {
                 c.themes = VIP_COOL_THEMES;
             }
