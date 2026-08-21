@@ -1340,19 +1340,22 @@ function PageContent() {
                     </div>
                     
                     <div className="grid grid-cols-2 gap-3">
-                      <div>
+                      <div className="space-y-2">
                         <Label>رقم هاتف الأب</Label>
                         <AdminInput value={siteData.fatherPhone || ""} onChange={v => up("fatherPhone", v)} placeholder="9627..." dir="ltr" />
+                        <AdminInput value={siteData.fatherLabel || ""} onChange={v => up("fatherLabel", v)} placeholder="اسم الزر (مثال: اتصال بوالده)" />
                       </div>
-                      <div>
+                      <div className="space-y-2">
                         <Label>رقم هاتف الأم</Label>
                         <AdminInput value={siteData.motherPhone || ""} onChange={v => up("motherPhone", v)} placeholder="9627..." dir="ltr" />
+                        <AdminInput value={siteData.motherLabel || ""} onChange={v => up("motherLabel", v)} placeholder="اسم الزر (مثال: اتصال بوالدته)" />
                       </div>
                     </div>
                     
-                    <div>
+                    <div className="space-y-2">
                       <Label>رقم الواتساب للطوارئ (عاجل)</Label>
                       <AdminInput value={siteData.emergencyWhatsapp || ""} onChange={v => up("emergencyWhatsapp", v)} placeholder="9627..." dir="ltr" />
+                      <AdminInput value={siteData.emergencyWhatsappLabel || ""} onChange={v => up("emergencyWhatsappLabel", v)} placeholder="اسم الزر (مثال: واتساب عاجل)" />
                     </div>
 
                     <div className="pt-3 border-t border-red-500/10">

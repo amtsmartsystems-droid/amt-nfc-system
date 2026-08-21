@@ -960,51 +960,33 @@ export default function MaroufCoffeeTheme({ cardId, siteData, siteColors, lang =
         <BlockReveal delay={0.2}>
           <div className="px-6 flex flex-col gap-3 mt-8">
             {sd.fatherPhone && (
-              <a
-                href={`tel:${sd.fatherPhone}`}
-                className="w-full py-3.5 rounded-2xl font-black text-white text-[14px] flex items-center justify-center gap-2 relative overflow-hidden transition-all duration-300"
-                style={{
-                  background: 'linear-gradient(135deg, #ef4444, #dc2626)',
-                  boxShadow: '0 8px 24px rgba(239, 68, 68, 0.4), inset 0 1px 0 rgba(255,255,255,0.2)',
-                  fontFamily: 'Cairo,sans-serif'
-                }}
-              >
-                <div className="absolute inset-0 bg-white/20 animate-pulse opacity-0 hover:opacity-100 transition-opacity"></div>
-                <LucideIcons.PhoneCall size={18} className="animate-pulse" />
-                {t("Call Father", "اتصال بوالده")}
-              </a>
+              <GlowLinkCard
+                link={{ url: `tel:${sd.fatherPhone}`, title: sd.fatherLabel || t("Call Father", "اتصال بوالده") }}
+                accent={accent}
+                cardId={cardId}
+                t={(en, ar) => en}
+                handleMenuClick={()=>{}}
+              />
             )}
             
             {sd.motherPhone && (
-              <a
-                href={`tel:${sd.motherPhone}`}
-                className="w-full py-3.5 rounded-2xl font-black text-white text-[14px] flex items-center justify-center gap-2 relative overflow-hidden transition-all duration-300 hover:scale-[1.02]"
-                style={{
-                  background: 'linear-gradient(135deg, #a855f7, #9333ea)',
-                  boxShadow: '0 8px 24px rgba(168, 85, 247, 0.4), inset 0 1px 0 rgba(255,255,255,0.2)',
-                  fontFamily: 'Cairo,sans-serif'
-                }}
-              >
-                <LucideIcons.Phone size={18} />
-                {t("Call Mother", "اتصال بوالدته")}
-              </a>
+              <GlowLinkCard
+                link={{ url: `tel:${sd.motherPhone}`, title: sd.motherLabel || t("Call Mother", "اتصال بوالدته") }}
+                accent={accent}
+                cardId={cardId}
+                t={(en, ar) => en}
+                handleMenuClick={()=>{}}
+              />
             )}
 
             {sd.emergencyWhatsapp && (
-              <a
-                href={`https://wa.me/${sd.emergencyWhatsapp}?text=مرحباً، أرجو التواصل بخصوص حالة طارئة`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-full py-3.5 rounded-2xl font-black text-white text-[14px] flex items-center justify-center gap-2 transition-all duration-300 hover:scale-[1.02]"
-                style={{
-                  background: '#25D366',
-                  boxShadow: '0 8px 24px rgba(37, 211, 102, 0.4)',
-                  fontFamily: 'Cairo,sans-serif'
-                }}
-              >
-                <LucideIcons.MessageCircle size={18} />
-                {t("Emergency WhatsApp", "واتساب عاجل")}
-              </a>
+              <GlowLinkCard
+                link={{ url: `https://wa.me/${sd.emergencyWhatsapp}?text=مرحباً، أرجو التواصل بخصوص حالة طارئة`, title: sd.emergencyWhatsappLabel || t("Emergency WhatsApp", "واتساب عاجل") }}
+                accent={accent}
+                cardId={cardId}
+                t={(en, ar) => en}
+                handleMenuClick={()=>{}}
+              />
             )}
           </div>
         </BlockReveal>
