@@ -11,7 +11,7 @@ import MaroufCoffeeTheme from '../../components/templates/MaroufCoffeeTheme';
 import RusticCafeTheme from '../../components/templates/RusticCafeTheme';
 import DoctorTheme      from '../../components/templates/DoctorTheme';
 import AMTBusinessCard  from '../../components/templates/AMTBusinessCard';
-import SchoolCardTheme  from '../../components/templates/SchoolCardTheme';
+
 import ContactFormsModule from '../../components/modules/ContactFormsModule';
 
 // Always bypass browser cache so we get the latest data from MongoDB
@@ -478,13 +478,6 @@ export default function ClientCardViewer({
             : { background: 'rgba(0,0,0,0.48)',      color: primary,   border: `1.5px solid ${primary}50`,          boxShadow: `0 4px 18px rgba(0,0,0,0.32), 0 0 0 1px rgba(0,0,0,0.08)` }
         ),
     });
-
-    /* ════════════════════════════════════════════════════════════════
-       AMT SCHOOL CARD — child safety card with emergency contacts
-    ════════════════════════════════════════════════════════════════ */
-    if (card.cardType === 'school_card') {
-        return <SchoolCardTheme siteData={siteData} cardId={cardId} lang={lang} siteColors={props.siteColors} footerComponent={props.footerComponent} />;
-    }
 
     /* ════════════════════════════════════════════════════════════════
        AMT BUSINESS CARD — full-bleed dark landing page
