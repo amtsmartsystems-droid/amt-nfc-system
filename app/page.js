@@ -1331,6 +1331,59 @@ function PageContent() {
                   </button>
                 </div>
 
+                {/* ══ School Card Settings ══ */}
+                {cardType === 'school_card' && (
+                  <div className="space-y-4 pt-4 border-t border-white/10 mt-6 bg-red-900/10 p-4 rounded-2xl border-red-500/20">
+                    <div className="flex items-center gap-2 mb-4">
+                      <LucideIcons.ShieldAlert size={18} className="text-red-400" />
+                      <h3 className="font-bold text-white text-[14px]">إعدادات بطاقة الطفل والطوارئ</h3>
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <Label>رقم هاتف الأب</Label>
+                        <AdminInput value={siteData.fatherPhone || ""} onChange={v => up("fatherPhone", v)} placeholder="9627..." dir="ltr" />
+                      </div>
+                      <div>
+                        <Label>رقم هاتف الأم</Label>
+                        <AdminInput value={siteData.motherPhone || ""} onChange={v => up("motherPhone", v)} placeholder="9627..." dir="ltr" />
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <Label>رقم الواتساب للطوارئ (عاجل)</Label>
+                      <AdminInput value={siteData.emergencyWhatsapp || ""} onChange={v => up("emergencyWhatsapp", v)} placeholder="9627..." dir="ltr" />
+                    </div>
+
+                    <div className="pt-3 border-t border-red-500/10">
+                      <h4 className="font-bold text-red-200 text-[12px] mb-3">الملف الطبي للطفل</h4>
+                      <div className="space-y-3">
+                        <div>
+                          <Label>فصيلة الدم</Label>
+                          <AdminInput value={siteData.bloodType || ""} onChange={v => up("bloodType", v)} placeholder="مثال: O+" dir="ltr" />
+                        </div>
+                        <div>
+                          <Label>الحساسية</Label>
+                          <AdminInput value={siteData.allergies || ""} onChange={v => up("allergies", v)} placeholder="مثال: حساسية البنسلين، الفول السوداني..." />
+                        </div>
+                        <div>
+                          <Label>أمراض مزمنة</Label>
+                          <AdminInput value={siteData.chronicDiseases || ""} onChange={v => up("chronicDiseases", v)} placeholder="مثال: ربو، سكري..." />
+                        </div>
+                        <div>
+                          <Label>ملاحظات طبية أخرى</Label>
+                          <textarea
+                            value={siteData.medicalNotes || ""}
+                            onChange={e => up("medicalNotes", e.target.value)}
+                            className="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-white text-[12px] min-h-[60px]"
+                            placeholder="أي ملاحظات هامة في حالات الطوارئ..."
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 {/* ══ Doctor Specific Settings in Events Tab ══ */}
                 <div className="space-y-4 pt-4 border-t border-white/10 mt-6">
                     {/* Green Toggle Block */}

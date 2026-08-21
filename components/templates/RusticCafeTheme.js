@@ -636,6 +636,113 @@ export default function RusticCafeTheme({ cardId, siteData, siteColors, lang = "
           </div>
         )}
 
+        {/* ── SCHOOL EMERGENCY BLOCKS ── */}
+        <BlockReveal delay={0.2}>
+          <div className="px-6 flex flex-col gap-3 mt-8">
+            {sd.fatherPhone && (
+              <a
+                href={`tel:${sd.fatherPhone}`}
+                className="w-full py-3.5 rounded-2xl font-black text-white text-[14px] flex items-center justify-center gap-2 relative overflow-hidden transition-all duration-300"
+                style={{
+                  background: 'linear-gradient(135deg, #ef4444, #dc2626)',
+                  boxShadow: '0 8px 24px rgba(239, 68, 68, 0.4), inset 0 1px 0 rgba(255,255,255,0.2)',
+                  fontFamily: 'Cairo,sans-serif'
+                }}
+              >
+                <div className="absolute inset-0 bg-white/20 animate-pulse opacity-0 hover:opacity-100 transition-opacity"></div>
+                <LucideIcons.PhoneCall size={18} className="animate-pulse" />
+                {t("Call Father", "اتصال بوالده")}
+              </a>
+            )}
+            
+            {sd.motherPhone && (
+              <a
+                href={`tel:${sd.motherPhone}`}
+                className="w-full py-3.5 rounded-2xl font-black text-white text-[14px] flex items-center justify-center gap-2 relative overflow-hidden transition-all duration-300 hover:scale-[1.02]"
+                style={{
+                  background: 'linear-gradient(135deg, #a855f7, #9333ea)',
+                  boxShadow: '0 8px 24px rgba(168, 85, 247, 0.4), inset 0 1px 0 rgba(255,255,255,0.2)',
+                  fontFamily: 'Cairo,sans-serif'
+                }}
+              >
+                <LucideIcons.Phone size={18} />
+                {t("Call Mother", "اتصال بوالدته")}
+              </a>
+            )}
+
+            {sd.emergencyWhatsapp && (
+              <a
+                href={`https://wa.me/${sd.emergencyWhatsapp}?text=مرحباً، أرجو التواصل بخصوص حالة طارئة`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full py-3.5 rounded-2xl font-black text-white text-[14px] flex items-center justify-center gap-2 transition-all duration-300 hover:scale-[1.02]"
+                style={{
+                  background: '#25D366',
+                  boxShadow: '0 8px 24px rgba(37, 211, 102, 0.4)',
+                  fontFamily: 'Cairo,sans-serif'
+                }}
+              >
+                <LucideIcons.MessageCircle size={18} />
+                {t("Emergency WhatsApp", "واتساب عاجل")}
+              </a>
+            )}
+          </div>
+        </BlockReveal>
+
+        {(sd.bloodType || sd.allergies || sd.chronicDiseases || sd.medicalNotes) && (
+          <BlockReveal delay={0.3}>
+            <div className="px-6 mt-6">
+              <div 
+                className="rounded-3xl p-5 relative overflow-hidden"
+                style={{ 
+                  background: 'rgba(255,255,255,0.6)', 
+                  backdropFilter: 'blur(20px)',
+                  border: '1px solid rgba(239,68,68,0.2)',
+                  boxShadow: '0 8px 32px rgba(0,0,0,0.04)'
+                }}
+              >
+                <div className="flex items-center gap-3 mb-5 border-b border-red-500/10 pb-3">
+                  <div className="w-10 h-10 rounded-full flex items-center justify-center bg-red-50 text-red-500">
+                    <LucideIcons.HeartPulse size={20} />
+                  </div>
+                  <h3 className="font-black text-red-600 text-[16px]" style={{ fontFamily: 'Cairo,sans-serif' }}>
+                    {t("Medical Profile", "ملف طبي")}
+                  </h3>
+                </div>
+
+                <div className="space-y-4 font-medium text-[13px] text-[#475569]" style={{ fontFamily: 'Cairo,sans-serif' }}>
+                  {sd.bloodType && (
+                    <div className="flex justify-between items-center bg-white/50 p-3 rounded-xl border border-red-100">
+                      <span>{t("Blood Type", "فصيلة الدم")}</span>
+                      <span className="font-black text-red-600 px-3 py-1 bg-red-50 rounded-lg">{sd.bloodType}</span>
+                    </div>
+                  )}
+                  {sd.allergies && (
+                    <div>
+                      <span className="block text-red-400 text-[11px] mb-1 font-bold">{t("Allergies", "الحساسية")}</span>
+                      <p className="bg-white/50 p-3 rounded-xl border border-red-100">{sd.allergies}</p>
+                    </div>
+                  )}
+                  {sd.chronicDiseases && (
+                    <div>
+                      <span className="block text-red-400 text-[11px] mb-1 font-bold">{t("Chronic Diseases", "أمراض مزمنة")}</span>
+                      <p className="bg-white/50 p-3 rounded-xl border border-red-100">{sd.chronicDiseases}</p>
+                    </div>
+                  )}
+                  {sd.medicalNotes && (
+                    <div>
+                      <span className="block text-red-400 text-[11px] mb-1 font-bold">{t("Medical Notes", "ملاحظات طبية")}</span>
+                      <p className="bg-white/50 p-3 rounded-xl border border-red-100 leading-relaxed text-slate-600 italic">
+                        {sd.medicalNotes}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </BlockReveal>
+        )}
+
         {footerComponent}
 
         {/* ── WATERMARK ── */}
