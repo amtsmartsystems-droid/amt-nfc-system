@@ -165,12 +165,37 @@ export default function RusticCafeTheme({ cardId, siteData, siteColors, lang = "
   const address = sd.address || "";
   const hours   = sd.hours   || "";
   const links   = sd.links   || [];
+  const events  = sd.events  || [];
+
+  // ── vCard Download helper ──
+  const vcardPhone = sd.vcardNumber || sd.whatsappNumber || "";
+  const handleVCardDownload = () => {
+    const vcard = [
+      "BEGIN:VCARD",
+      "VERSION:3.0",
+      `FN:${sd.name || sd.nameAr || "Contact"}`,
+      sd.subtitle ? `TITLE:${sd.subtitle}` : "",
+      vcardPhone ? `TEL;TYPE=CELL:+${vcardPhone.replace(/[^0-9]/g, "")}` : "",
+      sd.email ? `EMAIL:${sd.email}` : "",
+      sd.address ? `ADR:;;${sd.address};;;;` : "",
+      "END:VCARD",
+    ]
+      .filter(Boolean)
+      .join("\r\n");
+    const blob = new Blob([vcard], { type: "text/vcard;charset=utf-8" });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement("a");
+    a.href     = url;
+    a.download = `${sd.name || "contact"}.vcf`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
 
   const profileImg = sd.images?.profile || sd.profileImage || "https://images.unsplash.com/photo-1554118811-1e0d58224f24?q=80&w=400&auto=format&fit=crop";
 
   const handleMenuClick = (e) => {
-    if (menuMode === 'pdf' && pdfMenuUrl) {
-      window.open(pdfMenuUrl, '_blank');
+    if (menuMode === "pdf" && pdfMenuUrl) {
+      window.open(pdfMenuUrl, "_blank");
     } else {
       setIsMenuModalOpen(true);
     }
@@ -178,19 +203,21 @@ export default function RusticCafeTheme({ cardId, siteData, siteColors, lang = "
 
   // ════ LAYOUT BLOCKS ════
   const defaultBlocks = [
-      { id: "header", type: "header" },
-      { id: "menu_button", type: "menu_button" },
-      { id: "info", type: "info" },
-      { id: "links", type: "links" }
+    { id: "header",      type: "header" },
+    { id: "vcard_btn",   type: "vcard_btn" },
+    { id: "menu_button", type: "menu_button" },
+    { id: "info",        type: "info" },
+    { id: "events",      type: "events" },
+    { id: "links",       type: "links" },
   ];
   let layoutBlocks = (siteData.layoutBlocks && siteData.layoutBlocks.length > 0) ? [...siteData.layoutBlocks] : [...defaultBlocks];
-  
+
   // Ensure core blocks exist
   const coreTypes = ["header", "menu_button", "info", "links"];
   coreTypes.forEach(type => {
-      if (!layoutBlocks.find(b => b.type === type)) {
-          layoutBlocks.push({ id: type, type });
-      }
+    if (!layoutBlocks.find(b => b.type === type)) {
+      layoutBlocks.push({ id: type, type });
+    }
   });
 
   const renderBlock = (block) => {
@@ -455,6 +482,102 @@ export default function RusticCafeTheme({ cardId, siteData, siteColors, lang = "
                   className="group-hover:scale-105"
                   draggable="false"
                 />
+              </div>
+            </div>
+          </BlockReveal>
+        );
+
+      case 'vcard_btn':
+        if (!sd.showVcardButton && !vcardPhone) return null;
+        return (
+          <BlockReveal delay={0}>
+            <div className="px-6 mt-6" style={{ cursor: isPreview ? "grab" : "default" }}>
+              <button
+                onClick={handleVCardDownload}
+                className="w-full py-4 rounded-2xl font-black text-white text-[15px] flex items-center justify-center gap-3 relative overflow-hidden group transition-all duration-400"
+                style={{
+                  background: `linear-gradient(135deg, ${accent}, #0e8a9e)`,
+                  boxShadow: `0 8px 28px ${accent}55, inset 0 1px 0 rgba(255,255,255,0.3)`,
+                  fontFamily: "Cairo,sans-serif",
+                  transition: "all 0.35s cubic-bezier(0.25,0.46,0.45,0.94)",
+                }}
+                onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = `0 14px 38px ${accent}77`; }}
+                onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = `0 8px 28px ${accent}55`; }}
+              >
+                <LucideIcons.UserPlus size={20} />
+                {t("Save Contact", "حفظ جهة الاتصال")}
+                {/* Shine sweep */}
+                <div className="absolute top-0 -left-[100%] w-1/2 h-full bg-gradient-to-r from-transparent via-white/30 to-transparent skew-x-[-20deg] group-hover:left-[200%] transition-all duration-900 ease-in-out" />
+              </button>
+            </div>
+          </BlockReveal>
+        );
+
+      case 'events':
+        if (!events || events.length === 0) return null;
+        return (
+          <BlockReveal delay={0}>
+            <div className="px-6 mt-10" style={{ cursor: isPreview ? "grab" : "default" }}>
+              {/* Section header */}
+              <div className="flex items-center gap-4 mb-6">
+                <span className="h-[2px] flex-1 rounded-full" style={{ background: `linear-gradient(90deg, transparent, ${secAccent}80)` }} />
+                <span className="font-bold tracking-[0.1em] text-[13px] flex items-center gap-2" style={{ color: secAccent, fontFamily: "Cairo,sans-serif" }}>
+                  <LucideIcons.CalendarDays size={16} />
+                  {t("Events", "الفعاليات")}
+                </span>
+                <span className="h-[2px] flex-1 rounded-full" style={{ background: `linear-gradient(90deg, ${secAccent}80, transparent)` }} />
+              </div>
+
+              <div className="flex flex-col gap-4">
+                {events.map((ev, idx) => (
+                  <div
+                    key={ev.id || idx}
+                    className="rounded-2xl p-4 relative overflow-hidden group transition-all duration-300"
+                    style={{
+                      background: "rgba(255,255,255,0.55)",
+                      backdropFilter: "blur(12px)",
+                      border: `1px solid ${accent}33`,
+                      boxShadow: "0 4px 16px rgba(0,0,0,0.04)",
+                    }}
+                    onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = `0 10px 30px ${accent}22`; }}
+                    onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "0 4px 16px rgba(0,0,0,0.04)"; }}
+                  >
+                    {/* accent stripe */}
+                    <div className="absolute top-0 right-0 w-1 h-full rounded-r-2xl" style={{ background: accent }} />
+
+                    {/* Date badge */}
+                    {(ev.date || ev.dateEn) && (
+                      <div className="flex items-center gap-2 mb-2">
+                        <LucideIcons.Calendar size={13} style={{ color: accent }} />
+                        <span className="text-[11px] font-bold" style={{ color: accent, fontFamily: "Cairo,sans-serif" }}>
+                          {t(ev.dateEn || ev.date, ev.date || ev.dateEn)}
+                        </span>
+                      </div>
+                    )}
+
+                    <h3 className="font-black text-[15px] mb-1 text-[#1E293B]" style={{ fontFamily: "Cairo,sans-serif" }}>
+                      {t(ev.titleEn || ev.title, ev.title || ev.titleEn)}
+                    </h3>
+
+                    {(ev.desc || ev.descEn) && (
+                      <p className="text-[13px] text-[#64748b] leading-relaxed" style={{ fontFamily: "Cairo,sans-serif" }}>
+                        {t(ev.descEn || ev.desc, ev.desc || ev.descEn)}
+                      </p>
+                    )}
+
+                    {ev.link && (
+                      <a
+                        href={ev.link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 mt-3 text-[12px] font-bold"
+                        style={{ color: accent, fontFamily: "Cairo,sans-serif" }}
+                      >
+                        {t("Learn More", "اعرف أكثر")} <LucideIcons.ArrowUpRight size={13} />
+                      </a>
+                    )}
+                  </div>
+                ))}
               </div>
             </div>
           </BlockReveal>

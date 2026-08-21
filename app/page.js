@@ -12,6 +12,7 @@ import MaroufCoffeeTheme from "../components/templates/MaroufCoffeeTheme";
 import RusticCafeTheme  from "../components/templates/RusticCafeTheme";
 import DoctorTheme      from "../components/templates/DoctorTheme";
 import AMTBusinessCard  from "../components/templates/AMTBusinessCard";
+import SchoolCardTheme  from "../components/templates/SchoolCardTheme";
 import ContactFormsModule from "../components/modules/ContactFormsModule";
 import QRCodeGenerator  from "../components/QRCodeGenerator";
 import { getIconForLink } from "../utils/icons";
@@ -86,6 +87,11 @@ const DEFAULT_THEMES = [
       id: 'medical_card',
       name: 'بطاقة طبيب',
       themes: COOL_VIP_THEMES
+  },
+  {
+      id: 'school_card',
+      name: 'بطاقة مدارس AMT',
+      themes: [{ id: 'school', label: 'school', icon: 'GraduationCap' }]
   }
 ];
 
@@ -818,6 +824,7 @@ function PageContent() {
       footerComponent: formsModule
     };
     if (theme === 'business_card') return <AMTBusinessCard {...props} />;
+    if (theme === 'school_card')   return <SchoolCardTheme  {...props} isPreview />;
     switch (theme) {
       case "cafe":   return <CafeTheme      {...props} />;
       case "cafe1":  return <CafeTheme1     {...props} />;
