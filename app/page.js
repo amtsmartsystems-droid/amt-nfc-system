@@ -1361,30 +1361,41 @@ function PageContent() {
                     <div className="pt-3 border-t border-red-500/10">
                       <h4 className="font-bold text-red-200 text-[12px] mb-3">الملف الطبي للطفل</h4>
                       <div className="space-y-4">
+                        <div className="grid grid-cols-2 gap-2 bg-black/20 p-2 rounded-xl">
+                          <div>
+                            <Label className="text-[10px] text-white/50 mb-1">عمر الطفل (عربي)</Label>
+                            <AdminInput value={siteData.childAgeAr ?? ""} onChange={v => up("childAgeAr", v)} placeholder="مثال: 8 سنوات" />
+                          </div>
+                          <div>
+                            <Label className="text-[10px] text-white/50 mb-1">عمر الطفل (English)</Label>
+                            <AdminInput value={siteData.childAgeEn ?? ""} onChange={v => up("childAgeEn", v)} placeholder="Ex: 8 Years" />
+                          </div>
+                        </div>
+
                         <div>
                           <Label>فصيلة الدم</Label>
-                          <AdminInput value={siteData.bloodType || ""} onChange={v => up("bloodType", v)} placeholder="مثال: O+" dir="ltr" />
+                          <AdminInput value={siteData.bloodType ?? ""} onChange={v => up("bloodType", v)} placeholder="مثال: O+" dir="ltr" />
                         </div>
                         
                         <div className="grid grid-cols-2 gap-2 bg-black/20 p-2 rounded-xl">
                           <div>
                             <Label className="text-[10px] text-white/50 mb-1">الحساسية (عربي)</Label>
-                            <AdminInput value={siteData.allergiesAr || siteData.allergies || ""} onChange={v => up("allergiesAr", v)} placeholder="مثال: حساسية الفول السوداني..." />
+                            <AdminInput value={siteData.allergiesAr ?? siteData.allergies ?? ""} onChange={v => up("allergiesAr", v)} placeholder="مثال: حساسية الفول السوداني..." />
                           </div>
                           <div>
                             <Label className="text-[10px] text-white/50 mb-1">الحساسية (English)</Label>
-                            <AdminInput value={siteData.allergiesEn || ""} onChange={v => up("allergiesEn", v)} placeholder="Ex: Peanuts allergy..." />
+                            <AdminInput value={siteData.allergiesEn ?? ""} onChange={v => up("allergiesEn", v)} placeholder="Ex: Peanuts allergy..." />
                           </div>
                         </div>
 
                         <div className="grid grid-cols-2 gap-2 bg-black/20 p-2 rounded-xl">
                           <div>
                             <Label className="text-[10px] text-white/50 mb-1">أمراض مزمنة (عربي)</Label>
-                            <AdminInput value={siteData.chronicDiseasesAr || siteData.chronicDiseases || ""} onChange={v => up("chronicDiseasesAr", v)} placeholder="مثال: ربو..." />
+                            <AdminInput value={siteData.chronicDiseasesAr ?? siteData.chronicDiseases ?? ""} onChange={v => up("chronicDiseasesAr", v)} placeholder="مثال: ربو..." />
                           </div>
                           <div>
                             <Label className="text-[10px] text-white/50 mb-1">أمراض مزمنة (English)</Label>
-                            <AdminInput value={siteData.chronicDiseasesEn || ""} onChange={v => up("chronicDiseasesEn", v)} placeholder="Ex: Asthma..." />
+                            <AdminInput value={siteData.chronicDiseasesEn ?? ""} onChange={v => up("chronicDiseasesEn", v)} placeholder="Ex: Asthma..." />
                           </div>
                         </div>
 
@@ -1392,7 +1403,7 @@ function PageContent() {
                           <div>
                             <Label className="text-[10px] text-white/50 mb-1">ملاحظات طبية (عربي)</Label>
                             <textarea
-                              value={siteData.medicalNotesAr || siteData.medicalNotes || ""}
+                              value={siteData.medicalNotesAr ?? siteData.medicalNotes ?? ""}
                               onChange={e => up("medicalNotesAr", e.target.value)}
                               className="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-white text-[12px] min-h-[60px]"
                               placeholder="ملاحظات هامة..."
@@ -1401,7 +1412,7 @@ function PageContent() {
                           <div>
                             <Label className="text-[10px] text-white/50 mb-1">ملاحظات طبية (English)</Label>
                             <textarea
-                              value={siteData.medicalNotesEn || ""}
+                              value={siteData.medicalNotesEn ?? ""}
                               onChange={e => up("medicalNotesEn", e.target.value)}
                               className="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-white text-[12px] min-h-[60px]"
                               placeholder="Important notes..."

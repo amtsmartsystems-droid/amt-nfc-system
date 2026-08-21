@@ -696,6 +696,12 @@ export default function RusticCafeTheme({ cardId, siteData, siteColors, lang = "
                 </div>
 
                 <div className="space-y-4 font-medium text-[13px] text-[#475569]" style={{ fontFamily: 'Cairo,sans-serif' }}>
+                  {(lang === 'en' ? sd.childAgeEn : sd.childAgeAr) && (
+                    <div className="flex justify-between items-center bg-white/50 p-3 rounded-xl border border-red-100">
+                      <span>{t("Child's Age", "عمر الطفل")}</span>
+                      <span className="font-black text-red-600 px-3 py-1 bg-red-50 rounded-lg">{lang === 'en' ? sd.childAgeEn : sd.childAgeAr}</span>
+                    </div>
+                  )}
                   {sd.bloodType && (
                     <div className="flex justify-between items-center bg-white/50 p-3 rounded-xl border border-red-100">
                       <span>{t("Blood Type", "فصيلة الدم")}</span>
