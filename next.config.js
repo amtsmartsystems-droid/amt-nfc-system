@@ -22,6 +22,21 @@ const nextConfig = {
                 destination: 'https://9vaqqf9s1c4ou0pk.public.blob.vercel-storage.com/:path*',
             },
         ];
+    },
+    async redirects() {
+        return [
+            {
+                source: '/:path*',
+                has: [
+                    {
+                        type: 'host',
+                        value: 'amt-nfc-system.vercel.app',
+                    },
+                ],
+                destination: 'https://amtsmartsystem.com/:path*',
+                permanent: true,
+            },
+        ];
     }
 };
 

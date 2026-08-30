@@ -16,7 +16,7 @@ import { motion, Reorder } from "framer-motion";
 
 const SOCIAL_KW = ["instagram","انستا","telegram","تيليغرام","whatsapp","واتس","tiktok","تيك","facebook","فيسبوك","twitter","تويتر","youtube","يوتيوب","vk","snapchat","سناب","linkedin"];
 
-export default function GastroBarTheme({ cardId, siteData, siteColors, lang = "en", isMenuEnabled, menuMode, isHouseSystemActive, menuCategories, addToCart, pdfMenuUrl, showMenuImages, isPreview, onUpdateLayoutBlocks, isWYSIWYG, onUpdateField, onImageUpload, onAddLink, onEditLink, onUpdateLink, onRemoveLink, footerComponent }) {
+export default function GastroBarTheme({ cardId, siteData, siteColors, lang = "en", isMenuEnabled, menuMode, isHouseSystemActive, menuCategories, addToCart, cart, setShowCart, pdfMenuUrl, showMenuImages, isPreview, onUpdateLayoutBlocks, isWYSIWYG, onUpdateField, onImageUpload, onAddLink, onEditLink, onUpdateLink, onRemoveLink, footerComponent }) {
   const accent  = siteColors?.primary    || "#F5C518";   // gastrobar yellow
   const bgColor = siteColors?.background || "#111111";   // near-black
   const isAr    = lang === "ar";
@@ -37,7 +37,7 @@ export default function GastroBarTheme({ cardId, siteData, siteColors, lang = "e
   const name     = t(sd.name    || "GASTRO BAR",          sd.nameAr);
   const tagline  = t(sd.subtitle|| "Drink & Food",         sd.subtitleAr);
   const about    = t(sd.about   || "A gastropub dedicated to craft beers, a huge selection of styles and exclusive varieties. A variety of snacks and main courses lets you have a bite to eat or enjoy dinner with company.", sd.aboutAr);
-  const address  = sd.address || "Main Street, City Center";
+  const address  = t(sd.addressEn || sd.address, sd.address) || "Main Street, City Center";
   const hours    = sd.hours   || "Mon–Fri 14:00–00:00, Sat–Sun 14:00–01:00";
   const phone    = sd.phoneUrl?.replace("tel:","") || "";
   const links    = sd.links   || [];
@@ -479,12 +479,29 @@ export default function GastroBarTheme({ cardId, siteData, siteColors, lang = "e
             <h2 className="text-white text-[18px] font-black uppercase tracking-wide" style={{ fontFamily:"Cairo,sans-serif" }}>
               {t("Our Menu", "قائمة الطعام")}
             </h2>
-            <button 
-              onClick={() => setIsMenuModalOpen(false)}
-              className="w-10 h-10 rounded-full flex items-center justify-center bg-white/10 hover:bg-white/20 transition-colors"
-            >
-              <LucideIcons.X size={20} color="#fff" />
-            </button>
+            <div className="flex items-center gap-2">
+              {isHouseSystemActive && cart && cart.length > 0 && (
+                <button
+                  onClick={() => {
+                    setIsMenuModalOpen(false);
+                    setTimeout(() => setShowCart && setShowCart(true), 150);
+                  }}
+                  className="h-10 px-4 rounded-full flex items-center justify-center transition-all duration-300 shadow-sm relative gap-2 font-bold text-[14px]"
+                  style={{
+                    background: accent,
+                    color: "#000",
+                  }}
+                >
+                  <div className="w-5 h-5 bg-black rounded-full flex items-center justify-center text-[12px]" style={{ color: accent }}>
+                    {cart.reduce((a, b) => a + b.qty, 0)}
+                  </div>
+                  <LucideIcons.ShoppingCart size={18} />
+                </button>
+              )}
+              <button onClick={() => setIsMenuModalOpen(false)} className="w-10 h-10 rounded-full flex items-center justify-center bg-white/5 hover:bg-white/10 text-white transition-colors">
+                <LucideIcons.X size={20} />
+              </button>
+            </div>
           </div>
 
           {/* Scrollable Content */}

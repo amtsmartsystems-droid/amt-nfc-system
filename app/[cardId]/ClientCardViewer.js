@@ -439,6 +439,8 @@ export default function ClientCardViewer({
         onUpdateLink,
         onRemoveLink,
         onEditLink,
+        cart,
+        setShowCart,
         addToCart: (item) => {
             setCart(prev => {
                 const existing = prev.find(i => i.id === item.id);
@@ -736,7 +738,7 @@ export default function ClientCardViewer({
                             {/* ════════ AMT Branding Footer ════════ */}
                             <div style={{ textAlign:'center', padding:'18px 16px 28px' }}>
                                 <a
-                                    href="https://amt-nfc-system.vercel.app/AMT"
+                                    href={`${typeof process !== 'undefined' && process.env.NEXT_PUBLIC_BASE_URL ? process.env.NEXT_PUBLIC_BASE_URL : 'https://amtsmartsystem.com'}/AMT`}
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="amt-brand-link dark-bg"
@@ -751,7 +753,7 @@ export default function ClientCardViewer({
 
             {/* ════════ CART TOAST ════════ */}
             {cartToast && (
-                <div style={{ position: 'fixed', top: 80, left: 0, right: 0, zIndex: 9999, display: 'flex', justifyContent: 'center', pointerEvents: 'none', animation: 'fadeInDown 0.3s ease-out' }}>
+                <div style={{ position: 'fixed', top: 80, left: 0, right: 0, zIndex: 999999, display: 'flex', justifyContent: 'center', pointerEvents: 'none', animation: 'fadeInDown 0.3s ease-out' }}>
                     <div style={{ background: '#10b981', color: '#fff', padding: '10px 20px', borderRadius: 999, fontSize: 13, fontWeight: 'bold', boxShadow: '0 4px 12px rgba(16,185,129,0.3)' }}>
                         ✅ {cartToast}
                     </div>
@@ -762,7 +764,7 @@ export default function ClientCardViewer({
             {card.isHouseSystemActive && cart.length > 0 && !showCart && !showCliqModal && (
                 <button
                     onClick={() => setShowCart(true)}
-                    style={{ position: 'fixed', bottom: 80, right: 20, zIndex: 9997, background: '#ea580c', color: '#fff', border: 'none', borderRadius: 999, padding: '12px 20px', display: 'flex', alignItems: 'center', gap: 10, fontWeight: 900, boxShadow: '0 8px 25px rgba(234,88,12,0.4)', animation: 'bounceIn 0.5s' }}
+                    style={{ position: 'fixed', bottom: 80, right: 20, zIndex: 999999, background: '#ea580c', color: '#fff', border: 'none', borderRadius: 999, padding: '12px 20px', display: 'flex', alignItems: 'center', gap: 10, fontWeight: 900, boxShadow: '0 8px 25px rgba(234,88,12,0.4)', animation: 'bounceIn 0.5s' }}
                 >
                     <div style={{ background: '#fff', color: '#ea580c', width: 24, height: 24, borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14 }}>
                         {cart.reduce((a, b) => a + b.qty, 0)}
@@ -774,7 +776,7 @@ export default function ClientCardViewer({
 
             {/* ════════ CART SHEET MODAL ════════ */}
             {showCart && (
-                <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 9999, background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'flex-end', justifyContent: 'center', fontFamily: 'Cairo, sans-serif' }} onClick={() => setShowCart(false)}>
+                <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 999999, background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'flex-end', justifyContent: 'center', fontFamily: 'Cairo, sans-serif' }} onClick={() => setShowCart(false)}>
                     <div style={{ background: '#111827', width: '100%', maxWidth: 448, borderTopLeftRadius: 32, borderTopRightRadius: 32, padding: '24px 20px 40px', borderTop: '2px solid #ea580c', boxShadow: '0 -10px 40px rgba(0,0,0,0.6)', animation: 'slideUp 0.3s' }} onClick={e => e.stopPropagation()}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20, direction: lang === 'ar' ? 'rtl' : 'ltr' }}>
                             <h3 style={{ margin: 0, color: '#f8fafc', fontSize: 20, fontWeight: 900 }}>🛒 {lang === 'ar' ? 'سلة الطلبات' : 'Your Cart'}</h3>

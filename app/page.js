@@ -507,7 +507,7 @@ function PageContent() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "فشل الحفظ");
-      const baseUrl = typeof process !== 'undefined' && process.env.NEXT_PUBLIC_BASE_URL ? process.env.NEXT_PUBLIC_BASE_URL : 'https://amt-nfc-system.vercel.app';
+      const baseUrl = typeof process !== 'undefined' && process.env.NEXT_PUBLIC_BASE_URL ? process.env.NEXT_PUBLIC_BASE_URL : 'https://amtsmartsystem.com';
       setPublishedUrl(`${baseUrl}/${targetCardId}`);
       showToast("✅ تم حفظ ونشر التعديلات بنجاح!");
     } catch (e) {
@@ -792,9 +792,8 @@ function PageContent() {
         ctx.clearRect(0, 0, width, height);
         ctx.drawImage(img, 0, 0, width, height);
 
-        // Use PNG for images with transparency, WebP otherwise
-        const isPng = file.type === 'image/png';
-        const dataUrl = isPng ? canvas.toDataURL('image/png') : canvas.toDataURL('image/webp', 0.92);
+        // Always use WebP as it supports transparency and compresses much better than PNG
+        const dataUrl = canvas.toDataURL('image/webp', 0.85);
         setSiteData(p => ({
           ...p,
           images: { ...(p.images || {}), [slot]: dataUrl }
@@ -1258,8 +1257,8 @@ function PageContent() {
                     {nfcTableNum && (
                       <div className="space-y-2">
                         <div className="flex items-center gap-2 p-2 bg-blue-500/10 rounded-lg border border-blue-500/20">
-                          <input type="text" readOnly value={`https://amt-nfc-system.vercel.app/api/scan?r=${targetCardId}&t=${nfcTableNum}`} className="w-full text-[10px] bg-black/40 text-blue-200 px-2 py-2 rounded border border-white/5 outline-none font-mono" dir="ltr" />
-                          <button onClick={() => {navigator.clipboard.writeText(`https://amt-nfc-system.vercel.app/api/scan?r=${targetCardId}&t=${nfcTableNum}`); showToast("✅ تم النسخ");}} className="px-3 py-2 bg-blue-600 text-white text-[11px] font-bold rounded transition-all"><LucideIcons.Copy size={13}/></button>
+                          <input type="text" readOnly value={`https://amtsmartsystem.com/api/scan?r=${targetCardId}&t=${nfcTableNum}`} className="w-full text-[10px] bg-black/40 text-blue-200 px-2 py-2 rounded border border-white/5 outline-none font-mono" dir="ltr" />
+                          <button onClick={() => {navigator.clipboard.writeText(`https://amtsmartsystem.com/api/scan?r=${targetCardId}&t=${nfcTableNum}`); showToast("✅ تم النسخ");}} className="px-3 py-2 bg-blue-600 text-white text-[11px] font-bold rounded transition-all"><LucideIcons.Copy size={13}/></button>
                         </div>
                         <button onClick={handleSaveCardMapping} className="w-full py-2.5 rounded-xl font-black text-[12px] bg-blue-600 text-white">💾 حفظ البطاقة</button>
                       </div>
@@ -1272,13 +1271,13 @@ function PageContent() {
                   <div className="p-5 bg-emerald-500/10 border border-emerald-500/30 rounded-2xl animate-in fade-in slide-in-from-top-2">
                     <h3 className="font-bold text-emerald-400 mb-4 flex items-center gap-2"><LucideIcons.Share2 size={18}/> مشاركة البطاقة</h3>
                     <div className="flex items-center gap-2 mb-6">
-                      <input type="text" readOnly value={publishedUrl || `https://amt-nfc-system.vercel.app/${targetCardId}`} className="w-full text-[12px] bg-black/40 text-slate-300 px-3 py-3 rounded-xl border border-emerald-500/20 outline-none font-mono" dir="ltr" />
-                      <button onClick={()=>{navigator.clipboard.writeText(publishedUrl || `https://amt-nfc-system.vercel.app/${targetCardId}`); showToast("✅ تم نسخ الرابط");}} className="p-3 bg-emerald-500 hover:bg-emerald-400 text-white rounded-xl transition-all"><LucideIcons.Copy size={16} /></button>
-                      <a href={publishedUrl || `https://amt-nfc-system.vercel.app/${targetCardId}`} target="_blank" rel="noreferrer" className="p-3 bg-white/10 hover:bg-white/20 text-white rounded-xl transition-all"><LucideIcons.ExternalLink size={16} /></a>
+                      <input type="text" readOnly value={publishedUrl || `https://amtsmartsystem.com/${targetCardId}`} className="w-full text-[12px] bg-black/40 text-slate-300 px-3 py-3 rounded-xl border border-emerald-500/20 outline-none font-mono" dir="ltr" />
+                      <button onClick={()=>{navigator.clipboard.writeText(publishedUrl || `https://amtsmartsystem.com/${targetCardId}`); showToast("✅ تم نسخ الرابط");}} className="p-3 bg-emerald-500 hover:bg-emerald-400 text-white rounded-xl transition-all"><LucideIcons.Copy size={16} /></button>
+                      <a href={publishedUrl || `https://amtsmartsystem.com/${targetCardId}`} target="_blank" rel="noreferrer" className="p-3 bg-white/10 hover:bg-white/20 text-white rounded-xl transition-all"><LucideIcons.ExternalLink size={16} /></a>
                     </div>
                     <div className="pt-4 border-t border-emerald-500/20">
                       <p className="text-[11px] text-emerald-400/80 font-bold mb-4">رمز الاستجابة السريعة (QR Code):</p>
-                      <QRCodeGenerator baseUrl={publishedUrl || `https://amt-nfc-system.vercel.app/${targetCardId}`} label="QR Code العام" downloadName={`${targetCardId}_QR.png`} />
+                      <QRCodeGenerator baseUrl={publishedUrl || `https://amtsmartsystem.com/${targetCardId}`} label="QR Code العام" downloadName={`${targetCardId}_QR.png`} />
                     </div>
                   </div>
                 ) : (
@@ -2435,7 +2434,10 @@ function PageContent() {
                   <div><Label>الشعار (AR)</Label><AdminInput value={siteData.subtitleAr||""} onChange={v=>up("subtitleAr",v)} placeholder="..." /></div>
                 </div>
                 <div><Label>ساعات العمل</Label><AdminInput value={siteData.hours||""} onChange={v=>up("hours",v)} placeholder="10AM–11PM" /></div>
-                <div><Label>العنوان</Label><AdminInput value={siteData.address||""} onChange={v=>up("address",v)} placeholder="Main St..." /></div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div><Label>العنوان (EN)</Label><AdminInput value={siteData.addressEn||""} onChange={v=>up("addressEn",v)} placeholder="Main St..." dir="ltr" /></div>
+                  <div><Label>العنوان (AR)</Label><AdminInput value={siteData.address||""} onChange={v=>up("address",v)} placeholder="المنطقة الصناعية..." dir="rtl" /></div>
+                </div>
 
                 {/* Wi-Fi Section */}
                 <div className="rounded-2xl p-4 space-y-3" style={{ background:"rgba(52,211,153,0.06)", border:"1px solid rgba(52,211,153,0.20)" }}>

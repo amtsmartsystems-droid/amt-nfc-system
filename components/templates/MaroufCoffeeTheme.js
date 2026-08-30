@@ -178,7 +178,7 @@ function parseVideoUrl(url) {
   return null;
 }
 
-export default function MaroufCoffeeTheme({ cardId, siteData, siteColors, lang = "en", isMenuEnabled, menuMode, isHouseSystemActive, menuCategories, addToCart, pdfMenuUrl, offersUrl, showMenuImages, isPreview, onUpdateLayoutBlocks, isWYSIWYG, onUpdateField, onImageUpload, onAddLink, onUpdateLink, onRemoveLink, onEditLink, footerComponent }) {
+export default function MaroufCoffeeTheme({ cardId, siteData, siteColors, lang = "en", isMenuEnabled, menuMode, isHouseSystemActive, menuCategories, addToCart, cart, setShowCart, pdfMenuUrl, offersUrl, showMenuImages, isPreview, onUpdateLayoutBlocks, isWYSIWYG, onUpdateField, onImageUpload, onAddLink, onUpdateLink, onRemoveLink, onEditLink, footerComponent }) {
   
   const accent = siteColors?.primary || "#B99146";
   const bgDark = siteColors?.background || "#050505";
@@ -259,7 +259,7 @@ export default function MaroufCoffeeTheme({ cardId, siteData, siteColors, lang =
   const defaultAbout = '';
   const about   = t(sd.about, sd.aboutAr) || defaultAbout;
 
-  const address = sd.address || "";
+  const address = t(sd.addressEn || sd.address, sd.address) || "";
   const hours   = sd.hours   || "";
   const links   = sd.links   || [];
 
@@ -1127,19 +1127,39 @@ export default function MaroufCoffeeTheme({ cardId, siteData, siteColors, lang =
                 <LucideIcons.BookOpen size={20} style={{ filter: "drop-shadow(0 0 8px rgba(var(--primary-rgb),0.5))" }} />
                 {t("Our Menu", "قائمة الطعام")}
               </h2>
-              <button
-                onClick={() => setIsMenuModalOpen(false)}
-                className="w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300"
-                style={{
-                  background: "rgba(var(--primary-rgb),0.08)",
-                  border: "1px solid rgba(var(--primary-rgb),0.25)",
-                  color: accent,
-                }}
-                onMouseEnter={e => { e.currentTarget.style.background = accent; e.currentTarget.style.color = "#000"; }}
-                onMouseLeave={e => { e.currentTarget.style.background = "rgba(var(--primary-rgb),0.08)"; e.currentTarget.style.color = accent; }}
-              >
-                <LucideIcons.X size={20} />
-              </button>
+              <div className="flex items-center gap-2">
+                {isHouseSystemActive && cart && cart.length > 0 && (
+                  <button
+                    onClick={() => {
+                      setIsMenuModalOpen(false);
+                      setTimeout(() => setShowCart && setShowCart(true), 150);
+                    }}
+                    className="h-10 px-4 rounded-full flex items-center justify-center transition-all duration-300 shadow-sm relative gap-2 font-bold text-[14px]"
+                    style={{
+                      background: accent,
+                      color: "#000",
+                    }}
+                  >
+                    <div className="w-5 h-5 bg-black rounded-full flex items-center justify-center text-[12px]" style={{ color: accent }}>
+                      {cart.reduce((a, b) => a + b.qty, 0)}
+                    </div>
+                    <LucideIcons.ShoppingCart size={18} />
+                  </button>
+                )}
+                <button
+                  onClick={() => setIsMenuModalOpen(false)}
+                  className="w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300"
+                  style={{
+                    background: "rgba(var(--primary-rgb),0.08)",
+                    border: "1px solid rgba(var(--primary-rgb),0.25)",
+                    color: accent,
+                  }}
+                  onMouseEnter={e => { e.currentTarget.style.background = accent; e.currentTarget.style.color = "#000"; }}
+                  onMouseLeave={e => { e.currentTarget.style.background = "rgba(var(--primary-rgb),0.08)"; e.currentTarget.style.color = accent; }}
+                >
+                  <LucideIcons.X size={20} />
+                </button>
+              </div>
             </div>
 
             {/* Scrollable Menu */}

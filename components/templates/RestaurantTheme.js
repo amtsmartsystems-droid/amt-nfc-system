@@ -32,7 +32,7 @@ export default function RestaurantTheme({ cardId, siteData, siteColors, lang = "
   const name    = t(sd.name || "", sd.nameAr || "");
   const sub     = t(sd.subtitle || "", sd.subtitleAr || "");
   const about   = t(sd.about || "", sd.aboutAr || "");
-  const address = sd.address || "";
+  const address = t(sd.addressEn || sd.address, sd.address) || "";
   const hours   = sd.hours || "";
   const links   = sd.links   || [];
 

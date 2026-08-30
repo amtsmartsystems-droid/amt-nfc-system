@@ -142,7 +142,7 @@ function GlowLinkCard({ link, accent, secondaryAccent, cardId, t, handleMenuClic
   );
 }
 
-export default function RusticCafeTheme({ cardId, siteData, siteColors, lang = "en", isMenuEnabled, menuMode, isHouseSystemActive, menuCategories, addToCart, pdfMenuUrl, showMenuImages, isPreview, onUpdateLayoutBlocks, isWYSIWYG, onUpdateField, onImageUpload, onAddLink, onEditLink, onUpdateLink, onRemoveLink, footerComponent }) {
+export default function RusticCafeTheme({ cardId, siteData, siteColors, lang = "en", isMenuEnabled, menuMode, isHouseSystemActive, menuCategories, addToCart, cart, setShowCart, pdfMenuUrl, showMenuImages, isPreview, onUpdateLayoutBlocks, isWYSIWYG, onUpdateField, onImageUpload, onAddLink, onEditLink, onUpdateLink, onRemoveLink, footerComponent }) {
   const accent     = siteColors?.primary || "#359BB0"; // Eshq Cyan
   const bgEarthy   = siteColors?.background || "#F6EFE6"; // Eshq Beige
   const secAccent  = accent; // Unify secondary accent to be the same as primary accent
@@ -162,7 +162,7 @@ export default function RusticCafeTheme({ cardId, siteData, siteColors, lang = "
   const tagline = t(sd.subtitle, sd.subtitleAr);
   const about   = t(sd.about, sd.aboutAr);
 
-  const address = sd.address || "";
+  const address   = t(sd.addressEn || sd.address, sd.address) || "";
   const hours   = sd.hours   || "";
   const links   = sd.links   || [];
   const events  = sd.events  || [];
@@ -177,7 +177,7 @@ export default function RusticCafeTheme({ cardId, siteData, siteColors, lang = "
       sd.subtitle ? `TITLE:${sd.subtitle}` : "",
       vcardPhone ? `TEL;TYPE=CELL:+${vcardPhone.replace(/[^0-9]/g, "")}` : "",
       sd.email ? `EMAIL:${sd.email}` : "",
-      sd.address ? `ADR:;;${sd.address};;;;` : "",
+      address ? `ADR:;;${address};;;;` : "",
       "END:VCARD",
     ]
       .filter(Boolean)
@@ -778,19 +778,39 @@ export default function RusticCafeTheme({ cardId, siteData, siteColors, lang = "
                 <LucideIcons.BookOpen size={20} style={{ color: accent }} />
                 {t("Our Menu", "قائمة الطعام")}
               </h2>
-              <button
-                onClick={() => setIsMenuModalOpen(false)}
-                className="w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300"
-                style={{
-                  background: `${accent}1A`,
-                  border: `1px solid ${accent}33`,
-                  color: accent,
-                }}
-                onMouseEnter={e => { e.currentTarget.style.background = accent; e.currentTarget.style.color = "#FFF"; }}
-                onMouseLeave={e => { e.currentTarget.style.background = `${accent}1A`; e.currentTarget.style.color = accent; }}
-              >
-                <LucideIcons.X size={20} />
-              </button>
+              <div className="flex items-center gap-2">
+                {isHouseSystemActive && cart && cart.length > 0 && (
+                  <button
+                    onClick={() => {
+                      setIsMenuModalOpen(false);
+                      setTimeout(() => setShowCart && setShowCart(true), 150);
+                    }}
+                    className="h-10 px-4 rounded-full flex items-center justify-center transition-all duration-300 shadow-sm relative gap-2 font-bold text-[14px]"
+                    style={{
+                      background: accent,
+                      color: "#FFF",
+                    }}
+                  >
+                    <div className="w-5 h-5 bg-white rounded-full flex items-center justify-center text-[12px]" style={{ color: accent }}>
+                      {cart.reduce((a, b) => a + b.qty, 0)}
+                    </div>
+                    <LucideIcons.ShoppingCart size={18} />
+                  </button>
+                )}
+                <button
+                  onClick={() => setIsMenuModalOpen(false)}
+                  className="w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300"
+                  style={{
+                    background: `${accent}1A`,
+                    border: `1px solid ${accent}33`,
+                    color: accent,
+                  }}
+                  onMouseEnter={e => { e.currentTarget.style.background = accent; e.currentTarget.style.color = "#FFF"; }}
+                  onMouseLeave={e => { e.currentTarget.style.background = `${accent}1A`; e.currentTarget.style.color = accent; }}
+                >
+                  <LucideIcons.X size={20} />
+                </button>
+              </div>
             </div>
 
             {/* Scrollable Menu */}

@@ -32,7 +32,7 @@ export default function CafeTheme({ cardId, siteData, siteColors, lang = "en", i
   const sub   = t(sd.subtitle|| "Good coffee, better moments", sd.subtitleAr);
   const about = t(sd.about   || "We believe in slow mornings and perfectly crafted cups. Every bean sourced with love, every cup served with care.", sd.aboutAr);
   const hours = sd.hours   || "7:00 AM — 10:00 PM";
-  const address = sd.address || "42 Coffee Lane, Brooklyn";
+  const address = t(sd.addressEn || sd.address, sd.address) || "42 Coffee Lane, Brooklyn";
   const links = sd.links || [];
   
   const imgs = sd.images || {};
