@@ -32,7 +32,7 @@ export default function RestaurantTheme({ cardId, siteData, siteColors, lang = "
   const name    = t(sd.name || "", sd.nameAr || "");
   const sub     = t(sd.subtitle || "", sd.subtitleAr || "");
   const about   = t(sd.about || "", sd.aboutAr || "");
-  const address = t(sd.addressEn || sd.address, sd.address) || "";
+  const address = isAr ? (sd.address || "") : (sd.addressEn || sd.address || "") || "";
   const hours   = sd.hours || "";
   const links   = sd.links   || [];
 
@@ -121,7 +121,7 @@ export default function RestaurantTheme({ cardId, siteData, siteColors, lang = "
                       <div className="relative z-10 px-6 pb-12 pt-16 pointer-events-none">
                         <EditableText
                           value={name}
-                          onChange={(v) => onUpdateField && onUpdateField('name', v)}
+                          onChange={(v) => onUpdateField && onUpdateField(isAr ? 'nameAr' : 'name', v)}
                           isWYSIWYG={isWYSIWYG}
                           tagName="h1"
                           className="text-[50px] font-black text-white leading-none tracking-tight mb-3 drop-shadow-lg uppercase pointer-events-none" 
@@ -129,7 +129,7 @@ export default function RestaurantTheme({ cardId, siteData, siteColors, lang = "
                         />
                         <EditableText
                           value={sub}
-                          onChange={(v) => onUpdateField && onUpdateField('subtitle', v)}
+                          onChange={(v) => onUpdateField && onUpdateField(isAr ? 'subtitleAr' : 'subtitle', v)}
                           isWYSIWYG={isWYSIWYG}
                           tagName="p"
                           className="text-white/80 text-[14px] leading-relaxed max-w-[270px] drop-shadow-md pointer-events-none"
@@ -175,7 +175,7 @@ export default function RestaurantTheme({ cardId, siteData, siteColors, lang = "
                       <STitle>
                         <EditableText
                           value={name}
-                          onChange={(v) => onUpdateField && onUpdateField('name', v)}
+                          onChange={(v) => onUpdateField && onUpdateField(isAr ? 'nameAr' : 'name', v)}
                           isWYSIWYG={isWYSIWYG}
                         />
                       </STitle>
@@ -183,7 +183,7 @@ export default function RestaurantTheme({ cardId, siteData, siteColors, lang = "
                         <Body>
                           <EditableText
                             value={about}
-                            onChange={(v) => onUpdateField && onUpdateField('about', v)}
+                            onChange={(v) => onUpdateField && onUpdateField(isAr ? 'aboutAr' : 'about', v)}
                             isWYSIWYG={isWYSIWYG}
                           />
                         </Body>
@@ -196,7 +196,7 @@ export default function RestaurantTheme({ cardId, siteData, siteColors, lang = "
                                <LucideIcons.MapPin size={18} className="text-[#555] mt-0.5" />
                                <EditableText
                                   value={address}
-                                  onChange={(v) => onUpdateField && onUpdateField('address', v)}
+                                  onChange={(v) => onUpdateField && onUpdateField(isAr ? 'address' : 'addressEn', v)}
                                   isWYSIWYG={isWYSIWYG}
                                   className="text-[14px] text-[#444] font-medium leading-relaxed font-[Cairo]"
                                />

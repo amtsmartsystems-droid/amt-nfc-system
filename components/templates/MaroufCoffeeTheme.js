@@ -259,7 +259,7 @@ export default function MaroufCoffeeTheme({ cardId, siteData, siteColors, lang =
   const defaultAbout = '';
   const about   = t(sd.about, sd.aboutAr) || defaultAbout;
 
-  const address = t(sd.addressEn || sd.address, sd.address) || "";
+  const address = isAr ? (sd.address || "") : (sd.addressEn || sd.address || "") || "";
   const hours   = sd.hours   || "";
   const links   = sd.links   || [];
 
@@ -371,7 +371,7 @@ export default function MaroufCoffeeTheme({ cardId, siteData, siteColors, lang =
             <BlockReveal delay={0.08}>
               <EditableText
                 value={name}
-                onChange={(v) => onUpdateField && onUpdateField('name', v)}
+                onChange={(v) => onUpdateField && onUpdateField(isAr ? 'nameAr' : 'name', v)}
                 isWYSIWYG={isWYSIWYG}
                 tagName="h1"
                 className="text-[34px] font-black mb-3 tracking-wide uppercase text-white"
@@ -393,7 +393,7 @@ export default function MaroufCoffeeTheme({ cardId, siteData, siteColors, lang =
                 >
                   <EditableText
                     value={tagline}
-                    onChange={(v) => onUpdateField && onUpdateField('subtitle', v)}
+                    onChange={(v) => onUpdateField && onUpdateField(isAr ? 'subtitleAr' : 'subtitle', v)}
                     isWYSIWYG={isWYSIWYG}
                     tagName="p"
                     className="font-bold tracking-widest text-[12px] uppercase"
@@ -407,7 +407,7 @@ export default function MaroufCoffeeTheme({ cardId, siteData, siteColors, lang =
               {(about || isPreview) && (
                 <EditableText
                   value={about}
-                  onChange={(v) => onUpdateField && onUpdateField('about', v)}
+                  onChange={(v) => onUpdateField && onUpdateField(isAr ? 'aboutAr' : 'about', v)}
                   isWYSIWYG={isWYSIWYG}
                   tagName="p"
                   className="text-[16px] leading-relaxed max-w-[88%] mx-auto text-gray-400 font-light pointer-events-none"
@@ -489,7 +489,7 @@ export default function MaroufCoffeeTheme({ cardId, siteData, siteColors, lang =
                     </div>
                     <EditableText
                       value={address}
-                      onChange={(v) => onUpdateField && onUpdateField('address', v)}
+                      onChange={(v) => onUpdateField && onUpdateField(isAr ? 'address' : 'addressEn', v)}
                       isWYSIWYG={isWYSIWYG}
                       className="flex-1 pt-2.5 text-[14.5px] leading-relaxed text-gray-300 font-medium" 
                       style={{ fontFamily: "Cairo,sans-serif" }}

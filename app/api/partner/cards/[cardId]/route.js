@@ -115,6 +115,7 @@ export async function PATCH(req, { params }) {
         if (typeof body.about === 'string')             sd.about                = body.about.slice(0, 500);
         if (typeof body.aboutAr === 'string')           sd.aboutAr              = body.aboutAr.slice(0, 500);
         if (typeof body.address === 'string')           sd.address              = body.address.slice(0, 200);
+        if (typeof body.addressEn === 'string')         sd.addressEn            = body.addressEn.slice(0, 200);
         if (typeof body.hours === 'string')             sd.hours                = body.hours.slice(0, 100);
 
         // Links: validate each entry

@@ -162,7 +162,7 @@ export default function RusticCafeTheme({ cardId, siteData, siteColors, lang = "
   const tagline = t(sd.subtitle, sd.subtitleAr);
   const about   = t(sd.about, sd.aboutAr);
 
-  const address   = t(sd.addressEn || sd.address, sd.address) || "";
+  const address   = isAr ? (sd.address || "") : (sd.addressEn || sd.address || "");
   const hours   = sd.hours   || "";
   const links   = sd.links   || [];
   const events  = sd.events  || [];
@@ -258,7 +258,7 @@ export default function RusticCafeTheme({ cardId, siteData, siteColors, lang = "
             <BlockReveal delay={0.08}>
               <EditableText
                 value={name}
-                onChange={(v) => onUpdateField && onUpdateField('name', v)}
+                onChange={(v) => onUpdateField && onUpdateField(isAr ? 'nameAr' : 'name', v)}
                 isWYSIWYG={isWYSIWYG}
                 tagName="h1"
                 className="text-[36px] font-black mb-3 tracking-wide text-[#1E293B]"
@@ -280,7 +280,7 @@ export default function RusticCafeTheme({ cardId, siteData, siteColors, lang = "
                 >
                   <EditableText
                     value={tagline}
-                    onChange={(v) => onUpdateField && onUpdateField('subtitle', v)}
+                    onChange={(v) => onUpdateField && onUpdateField(isAr ? 'subtitleAr' : 'subtitle', v)}
                     isWYSIWYG={isWYSIWYG}
                     tagName="p"
                     className="font-bold tracking-wider text-[13px]"
@@ -294,7 +294,7 @@ export default function RusticCafeTheme({ cardId, siteData, siteColors, lang = "
               {about && (
                 <EditableText
                   value={about}
-                  onChange={(v) => onUpdateField && onUpdateField('about', v)}
+                  onChange={(v) => onUpdateField && onUpdateField(isAr ? 'aboutAr' : 'about', v)}
                   isWYSIWYG={isWYSIWYG}
                   tagName="p"
                   className="text-[16px] leading-relaxed max-w-[90%] mx-auto text-[#475569] font-medium pointer-events-none"
@@ -372,7 +372,7 @@ export default function RusticCafeTheme({ cardId, siteData, siteColors, lang = "
                     </div>
                     <EditableText
                       value={address}
-                      onChange={(v) => onUpdateField && onUpdateField('address', v)}
+                      onChange={(v) => onUpdateField && onUpdateField(isAr ? 'address' : 'addressEn', v)}
                       isWYSIWYG={isWYSIWYG}
                       className="flex-1 text-[14.5px] leading-relaxed font-bold" 
                       style={{ color: accent, fontFamily: "Cairo,sans-serif" }}

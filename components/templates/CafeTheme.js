@@ -32,7 +32,7 @@ export default function CafeTheme({ cardId, siteData, siteColors, lang = "en", i
   const sub   = t(sd.subtitle|| "Good coffee, better moments", sd.subtitleAr);
   const about = t(sd.about   || "We believe in slow mornings and perfectly crafted cups. Every bean sourced with love, every cup served with care.", sd.aboutAr);
   const hours = sd.hours   || "7:00 AM — 10:00 PM";
-  const address = t(sd.addressEn || sd.address, sd.address) || "42 Coffee Lane, Brooklyn";
+  const address = isAr ? (sd.address || "") : (sd.addressEn || sd.address || "") || "42 Coffee Lane, Brooklyn";
   const links = sd.links || [];
   
   const imgs = sd.images || {};
@@ -123,7 +123,7 @@ export default function CafeTheme({ cardId, siteData, siteColors, lang = "en", i
                       </div>
                       <EditableText
                           value={name}
-                          onChange={(v) => onUpdateField && onUpdateField('name', v)}
+                          onChange={(v) => onUpdateField && onUpdateField(isAr ? 'nameAr' : 'name', v)}
                           isWYSIWYG={isWYSIWYG}
                           tagName="h1"
                           className="text-[36px] font-black leading-none tracking-tight mb-2 pointer-events-none" 
@@ -131,7 +131,7 @@ export default function CafeTheme({ cardId, siteData, siteColors, lang = "en", i
                       />
                       <EditableText
                           value={sub}
-                          onChange={(v) => onUpdateField && onUpdateField('subtitle', v)}
+                          onChange={(v) => onUpdateField && onUpdateField(isAr ? 'subtitleAr' : 'subtitle', v)}
                           isWYSIWYG={isWYSIWYG}
                           tagName="p"
                           className="text-[14px] leading-relaxed opacity-60 pointer-events-none" 
@@ -188,7 +188,7 @@ export default function CafeTheme({ cardId, siteData, siteColors, lang = "en", i
                       {about && (
                           <EditableText
                               value={about}
-                              onChange={(v) => onUpdateField && onUpdateField('about', v)}
+                              onChange={(v) => onUpdateField && onUpdateField(isAr ? 'aboutAr' : 'about', v)}
                               isWYSIWYG={isWYSIWYG}
                               tagName="p"
                               className="text-[14px] leading-[1.85] text-center mb-8 pointer-events-none" 
@@ -200,7 +200,7 @@ export default function CafeTheme({ cardId, siteData, siteColors, lang = "en", i
                             <LucideIcons.MapPin size={18} style={{ color: primary }} className="flex-shrink-0" />
                             <EditableText
                                 value={address}
-                                onChange={(v) => onUpdateField && onUpdateField('address', v)}
+                                onChange={(v) => onUpdateField && onUpdateField(isAr ? 'address' : 'addressEn', v)}
                                 isWYSIWYG={isWYSIWYG}
                                 tagName="p"
                                 className="text-[13.5px] font-medium" 

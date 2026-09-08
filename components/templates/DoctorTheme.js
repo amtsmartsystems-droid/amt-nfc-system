@@ -141,14 +141,14 @@ export default function DoctorTheme({
 
           <div className="mt-4 text-center w-full">
             <h1 className="text-2xl font-black text-[#1E293B] mb-2">
-              <EditableText value={name} onChange={(v) => onUpdateField("name", v)} isEditing={isWYSIWYG} fallback="اسم العيادة / الطبيب" />
+              <EditableText value={name} onChange={(v) => onUpdateField && onUpdateField(isAr ? "nameAr" : "name", v)} isEditing={isWYSIWYG} fallback="اسم العيادة / الطبيب" />
             </h1>
             <p className="text-[15px] font-medium text-[var(--primary-color)] mb-4">
-              <EditableText value={sub} onChange={(v) => onUpdateField("subtitle", v)} isEditing={isWYSIWYG} fallback="التخصص الطبي" />
+              <EditableText value={sub} onChange={(v) => onUpdateField && onUpdateField(isAr ? "subtitleAr" : "subtitle", v)} isEditing={isWYSIWYG} fallback="التخصص الطبي" />
             </p>
             {about && (
               <p className="text-[14px] text-gray-500 leading-relaxed max-w-[90%] mx-auto mb-6">
-                <EditableText value={about} onChange={(v) => onUpdateField("about", v)} isEditing={isWYSIWYG} fallback="وصف قصير عن الطبيب أو العيادة" />
+                <EditableText value={about} onChange={(v) => onUpdateField && onUpdateField(isAr ? "aboutAr" : "about", v)} isEditing={isWYSIWYG} fallback="وصف قصير عن الطبيب أو العيادة" />
               </p>
             )}
           </div>

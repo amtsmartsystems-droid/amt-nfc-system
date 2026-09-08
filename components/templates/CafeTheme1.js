@@ -164,7 +164,7 @@ export default function CafeTheme1({ cardId, siteData, siteColors, lang = "en", 
                           >
                              <EditableText
                                    value={name}
-                                   onChange={(v) => onUpdateField && onUpdateField('name', v)}
+                                   onChange={(v) => onUpdateField && onUpdateField(isAr ? 'nameAr' : 'name', v)}
                                    isWYSIWYG={isWYSIWYG}
                                    tagName="span"
                                    className="text-white font-black text-center leading-tight uppercase relative z-10"
@@ -176,7 +176,7 @@ export default function CafeTheme1({ cardId, siteData, siteColors, lang = "en", 
                       <section className="px-6 pt-5 pb-6 text-center pointer-events-none">
                         <EditableText
                           value={name}
-                          onChange={(v) => onUpdateField && onUpdateField('name', v)}
+                          onChange={(v) => onUpdateField && onUpdateField(isAr ? 'nameAr' : 'name', v)}
                           isWYSIWYG={isWYSIWYG}
                           tagName="h1"
                           className="font-black text-white text-[22px] mb-1 tracking-wide" 
@@ -184,7 +184,7 @@ export default function CafeTheme1({ cardId, siteData, siteColors, lang = "en", 
                         />
                         <EditableText
                           value={subtitle}
-                          onChange={(v) => onUpdateField && onUpdateField('subtitle', v)}
+                          onChange={(v) => onUpdateField && onUpdateField(isAr ? 'subtitleAr' : 'subtitle', v)}
                           isWYSIWYG={isWYSIWYG}
                           tagName="p"
                           className="text-[13.5px] font-medium" 

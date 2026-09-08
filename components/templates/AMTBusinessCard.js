@@ -48,7 +48,7 @@ export default function AMTBusinessCard({ cardId, siteData = {}, siteColors, lan
                         </div>
                         <EditableText
                             value={siteData.name || "AMT Tech Solutions"}
-                            onChange={(v) => onUpdateField && onUpdateField('name', v)}
+                            onChange={(v) => onUpdateField && onUpdateField(isAr ? 'nameAr' : 'name', v)}
                             isWYSIWYG={isWYSIWYG}
                             tagName="h1"
                             className="font-black text-white mb-3"
@@ -56,7 +56,7 @@ export default function AMTBusinessCard({ cardId, siteData = {}, siteColors, lan
                         />
                         <EditableText
                             value={siteData.subtitle || "نؤتمت مطعمك ونحوّل طاولاتك إلى نقاط بيع ذكية 🚀"}
-                            onChange={(v) => onUpdateField && onUpdateField('subtitle', v)}
+                            onChange={(v) => onUpdateField && onUpdateField(isAr ? 'subtitleAr' : 'subtitle', v)}
                             isWYSIWYG={isWYSIWYG}
                             tagName="p"
                             className="text-[14px] leading-[1.8] max-w-[280px] mx-auto"

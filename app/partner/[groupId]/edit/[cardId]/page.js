@@ -40,8 +40,13 @@ export default function PartnerEditCardPage({ params }) {
 
     // Editable fields
     const [name, setName]         = useState('');
+    const [nameAr, setNameAr]     = useState('');
     const [subtitle, setSubtitle] = useState('');
+    const [subtitleAr, setSubtitleAr] = useState('');
+    const [about, setAbout]       = useState('');
+    const [aboutAr, setAboutAr]   = useState('');
     const [address, setAddress]   = useState('');
+    const [addressEn, setAddressEn] = useState('');
     const [hours, setHours]       = useState('');
     const [links, setLinks]       = useState([]);
     const [faqs, setFaqs]         = useState([]);
@@ -97,8 +102,13 @@ export default function PartnerEditCardPage({ params }) {
                 const c = d.card;
                 setCard(c);
                 setName(c.siteData?.name || c.businessName || '');
+                setNameAr(c.siteData?.nameAr || '');
                 setSubtitle(c.siteData?.subtitle || '');
+                setSubtitleAr(c.siteData?.subtitleAr || '');
+                setAbout(c.siteData?.about || '');
+                setAboutAr(c.siteData?.aboutAr || '');
                 setAddress(c.siteData?.address || '');
+                setAddressEn(c.siteData?.addressEn || '');
                 setHours(c.siteData?.hours || '');
                 setLinks((c.links || []).map(l => ({ ...l, _key: String(l.id || Math.random()) })));
                 setProfileImg(c.siteData?.images?.profile || '');
@@ -125,7 +135,7 @@ export default function PartnerEditCardPage({ params }) {
                     businessName: name,
                     template: template,
                     siteColors: { primary: primaryColor, background: backgroundColor },
-                    name, subtitle, address, hours,
+                    name, nameAr, subtitle, subtitleAr, address, addressEn, about, aboutAr, hours,
                     siteData: {
                         faqs, googleReviewUrl, whatsappNumber
                     },
@@ -213,9 +223,10 @@ export default function PartnerEditCardPage({ params }) {
         businessName: name,
         siteData: {
             ...(card.siteData || {}),
-            name,
-            subtitle,
-            address,
+            name, nameAr,
+            subtitle, subtitleAr,
+            address, addressEn,
+            about, aboutAr,
             hours,
             images: {
                 ...(card.siteData?.images || {}),
@@ -231,8 +242,13 @@ export default function PartnerEditCardPage({ params }) {
     // WYSIWYG Handlers
     const handleUpdateField = (field, value) => {
         if (field === 'name') setName(value);
+        if (field === 'nameAr') setNameAr(value);
         if (field === 'subtitle') setSubtitle(value);
+        if (field === 'subtitleAr') setSubtitleAr(value);
         if (field === 'address') setAddress(value);
+        if (field === 'addressEn') setAddressEn(value);
+        if (field === 'about') setAbout(value);
+        if (field === 'aboutAr') setAboutAr(value);
         if (field === 'hours') setHours(value);
     };
 

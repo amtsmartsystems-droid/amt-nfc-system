@@ -37,7 +37,7 @@ export default function GastroBarTheme({ cardId, siteData, siteColors, lang = "e
   const name     = t(sd.name    || "GASTRO BAR",          sd.nameAr);
   const tagline  = t(sd.subtitle|| "Drink & Food",         sd.subtitleAr);
   const about    = t(sd.about   || "A gastropub dedicated to craft beers, a huge selection of styles and exclusive varieties. A variety of snacks and main courses lets you have a bite to eat or enjoy dinner with company.", sd.aboutAr);
-  const address  = t(sd.addressEn || sd.address, sd.address) || "Main Street, City Center";
+  const address  = isAr ? (sd.address || "Main Street, City Center") : (sd.addressEn || sd.address || "Main Street, City Center");
   const hours    = sd.hours   || "Mon–Fri 14:00–00:00, Sat–Sun 14:00–01:00";
   const phone    = sd.phoneUrl?.replace("tel:","") || "";
   const links    = sd.links   || [];
@@ -205,7 +205,7 @@ export default function GastroBarTheme({ cardId, siteData, siteColors, lang = "e
                               <LucideIcons.UtensilsCrossed size={18} style={{ color: "#ffffff", filter: "drop-shadow(0px 1px 2px rgba(0,0,0,0.5))" }} />
                               <EditableText 
                                   value={name} 
-                                  onChange={(v) => onUpdateField && onUpdateField('name', v)} 
+                                  onChange={(v) => onUpdateField && onUpdateField(isAr ? 'nameAr' : 'name', v)} 
                                   isWYSIWYG={isWYSIWYG}
                                   className="font-black text-white text-[15px] uppercase tracking-[0.2em]" 
                                   style={{ textShadow: "0 1px 3px rgba(0,0,0,0.8)" }} 
@@ -213,7 +213,7 @@ export default function GastroBarTheme({ cardId, siteData, siteColors, lang = "e
                             </div>
                             <EditableText 
                                 value={tagline} 
-                                onChange={(v) => onUpdateField && onUpdateField('subtitle', v)} 
+                                onChange={(v) => onUpdateField && onUpdateField(isAr ? 'subtitleAr' : 'subtitle', v)} 
                                 isWYSIWYG={isWYSIWYG}
                                 tagName="p"
                                 className="text-[10px] uppercase tracking-[0.25em] mt-0.5 text-white" 
